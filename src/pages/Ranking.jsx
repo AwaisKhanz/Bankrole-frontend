@@ -130,11 +130,11 @@ const Ranking = () => {
       valueGetter: (value, row) => row?.userId?.username || "N/A",
     },
     {
-      field: "progression",
-      headerName: "Progression",
+      field: "profitPercentage",
+      headerName: "Profit %",
       flex: 0.5,
       minWidth: 150,
-      valueGetter: (value, row) => row?.stats?.progression || "0",
+      valueGetter: (value, row) => row?.stats?.profitPercentage || "0",
       renderCell: (params) => {
         const progressionValue = parseFloat(params.value);
         return (
