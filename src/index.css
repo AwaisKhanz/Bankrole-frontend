@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* src/styles/toast.css */
+.toast-custom {
+  background-color: #1e1e2f !important; /* Custom background color */
+  color: #ffffff !important; /* Custom text color */
+  border-radius: 8px !important; /* Rounded corners */
+  font-family: "Arial", sans-serif !important;
+  font-size: 16px !important;
+  padding: 10px !important;
+}
+
+.toast-success {
+  border-left: 5px solid #28a745 !important; /* Green border for success */
+}
+
+.toast-error {
+  border-left: 5px solid #dc3545 !important; /* Red border for error */
+}
+
+.toast-info {
+  border-left: 5px solid #17a2b8 !important; /* Blue border for info */
+}
+
+.toast-warning {
+  border-left: 5px solid #ffc107 !important; /* Yellow border for warning */
+}
+
+.react-calendar {
+  width: 100% !important;
+  background-color: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.react-calendar__navigation {
+  background-color: #0f172a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.react-calendar__navigation button {
+  color: white;
+  font-weight: bold;
+  background: none;
+  border: none;
+}
+
+.react-calendar__tile {
+  background: none;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+}
+
+.react-calendar__tile:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.react-calendar__tile--now {
+  background-color: rgba(22, 73, 255, 0.2) !important;
+  border-radius: 4px;
+}
+
+.react-calendar .profit-day {
+  background-color: rgba(76, 175, 80, 0.2); /* Light green background */
+  border-radius: 8px;
+  color: white;
+}
+
+.react-calendar .loss-day {
+  background-color: rgba(244, 67, 54, 0.2); /* Light red background */
+  border-radius: 8px;
+  color: #ff5252;
+}
+
+.react-calendar .profit-day:hover,
+.react-calendar .loss-day:hover,
+.react-calendar .neutral-day:hover {
+  filter: brightness(1.2); /* Add a hover effect */
+  cursor: default; /* Disable pointer cursor */
+}
+
+.react-calendar__navigation button:hover {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.2
+  ) !important; /* Light translucent background */
+  color: white !important; /* Change text color on hover */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.react-calendar__navigation button {
+  color: white;
+  font-weight: bold;
+  background: none;
+  border: none;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.react-calendar__navigation button:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Hover effect */
+}
+
+.react-calendar__navigation button:active {
+  background-color: rgba(76, 175, 80, 0.3); /* Active state */
+  color: white !important;
+  transform: scale(0.95);
+}
+
+.react-calendar__navigation button:focus {
+  outline: none; /* Remove default focus styles */
+  background-color: rgba(76, 175, 80, 0.3); /* Same as active */
+  color: white !important;
+}
+
+.react-calendar__navigation button:focus:not(:focus-visible) {
+  background: none; /* Reset background for keyboard navigation */
+}
+
+.react-calendar__navigation button:blur {
+  background: none; /* Reset the background when focus is lost */
+}
+
+.react-calendar__tile.neutral-day:hover,
+.react-calendar__tile.neutral-day:focus,
+.react-calendar__tile.neutral-day:active {
+  background-color: #ffffff !important; /* White background on hover, focus, or active */
+  color: #000000 !important; /* Black text color */
+  cursor: pointer; /* Pointer cursor to indicate interactivity */
+}
+
+.react-calendar__tile.neutral-day:focus {
+  outline: none; /* Remove default focus outline */
+}
