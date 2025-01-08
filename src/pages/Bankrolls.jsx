@@ -10,16 +10,17 @@ const Bankrolls = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
 
+  const fetchBankrolls = async () => {
+    try {
+      const { data } = await api.get("/bankrolls");
+      setBankrolls(data); // Set fetched bankrolls
+    } catch (error) {
+      toast.error("Failed to fetch bankrolls.");
+    }
+  };
+
   // Fetch Bankrolls from API
   useEffect(() => {
-    const fetchBankrolls = async () => {
-      try {
-        const { data } = await api.get("/bankrolls");
-        setBankrolls(data); // Set fetched bankrolls
-      } catch (error) {
-        toast.error("Failed to fetch bankrolls.");
-      }
-    };
     fetchBankrolls();
   }, []);
 
@@ -56,6 +57,16 @@ const Bankrolls = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/bankrolls/${id}`);
+      toast.success("Bankroll deleted successfully.");
+      fetchBankrolls();
+    } catch (error) {
+      toast.error("Failed to delete bankroll.");
+    }
+  };
+
   return (
     <Box sx={{}}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -75,7 +86,11 @@ const Bankrolls = () => {
       <Grid container spacing={3}>
         {bankrolls.map((bankroll) => (
           <Grid item xs={12} sm={6} lg={4} key={bankroll._id}>
-            <BankrollCard bankroll={bankroll} onEdit={handleEditBankroll} />
+            <BankrollCard
+              bankroll={bankroll}
+              onEdit={handleEditBankroll}
+              onDelete={handleDelete}
+            />
           </Grid>
         ))}
       </Grid>

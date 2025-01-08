@@ -22,14 +22,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 const betSchema = z.object({
   date: z.date({ required_error: "Date is required" }),
-  sport: z.enum(["Football", "Cricket", "Basketball", "Tennis"], {
-    required_error: "Sport is required",
-  }),
+  sport: z.enum(
+    [
+      "Football",
+      "Tennis",
+      "Basketball",
+      "Volleyball",
+      "American Football",
+      "Ice Hockey",
+      "Other Sport",
+    ],
+    {
+      required_error: "Sport is required",
+    }
+  ),
   label: z.string().min(1, "Label is required"),
-  odds: z
-    .number()
-    .min(1, "Odds must be at least 1")
-    .max(10, "Odds must be less than or equal to 10"),
+  odds: z.number().min(1, "Odds must be at least 1"),
   stake: z.number().min(0.01, "Stake must be greater than 0"),
   status: z.enum(["Pending", "Won", "Loss"], {
     required_error: "Status is required",
@@ -121,10 +129,11 @@ const BetModal = ({
             render={({ field }) => (
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DesktopDateTimePicker
-                  className="w-full secondary !mb-[0.5rem]"
+                  className="w-full  !mb-[0.5rem] !mt-2"
                   {...field}
                   label="Date & Time"
-                  inputFormat="dd/MM/yyyy hh:mm a"
+                  format="dd/MM/yyyy"
+                  // views={["year", "month", "date"]}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -132,6 +141,14 @@ const BetModal = ({
                       margin="normal"
                       error={!!errors.date}
                       helperText={errors.date?.message}
+                      sx={{
+                        "& .MuiInputBase-root": {
+                          padding: "0.8rem 1rem",
+                        },
+                        "& .MuiInputLabel-root": {
+                          top: "-4px",
+                        },
+                      }}
                     />
                   )}
                 />
@@ -152,13 +169,19 @@ const BetModal = ({
               control={control}
               render={({ field }) => (
                 <Select {...field} label="Sport">
-                  {["Football", "Cricket", "Basketball", "Tennis"].map(
-                    (sport) => (
-                      <MenuItem key={sport} value={sport}>
-                        {sport}
-                      </MenuItem>
-                    )
-                  )}
+                  {[
+                    "Football",
+                    "Tennis",
+                    "Basketball",
+                    "Volleyball",
+                    "American Football",
+                    "Ice Hockey",
+                    "Other Sport",
+                  ].map((sport) => (
+                    <MenuItem key={sport} value={sport}>
+                      {sport}
+                    </MenuItem>
+                  ))}
                 </Select>
               )}
             />

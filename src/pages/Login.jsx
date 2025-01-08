@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { TextField, Button, Typography, Box, useTheme } from "@mui/material";
 import { z } from "zod";
@@ -18,6 +18,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -28,7 +29,9 @@ const Login = () => {
   const { loginAction } = useAuth();
 
   const onSubmit = (data) => {
+    setLoading(true);
     loginAction(data);
+    setLoading(false);
   };
 
   const theme = useTheme();
@@ -111,6 +114,7 @@ const Login = () => {
             variant="contained"
             color="secondary"
             fullWidth
+            disabled={loading}
             sx={{
               marginTop: "1rem",
               padding: "0.75rem",
@@ -118,7 +122,7 @@ const Login = () => {
               fontSize: "1rem",
             }}
           >
-            Login
+            {loading ? "Loading" : "Login"}
           </Button>
         </form>
 

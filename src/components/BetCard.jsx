@@ -13,7 +13,7 @@ const getVerificationAlert = (bet) => {
         severity="warning"
         sx={{ backgroundColor: "#FFEB3B", color: "#000", mb: 2 }}
       >
-        This bet is pending verification. Please update your verification code.
+        This bet is pending verification.
       </Alert>
     );
   }
@@ -23,7 +23,7 @@ const getVerificationAlert = (bet) => {
         severity="error"
         sx={{ backgroundColor: "#FFCDD2", color: "#000", mb: 2 }}
       >
-        This bet's verification has been rejected. Please correct your
+        This bet verification has been rejected. Please correct your
         verification code.
       </Alert>
     );

@@ -102,34 +102,40 @@ const UserDetailsModal = ({ open, onClose, user }) => {
         <Typography variant="h6" fontWeight="bold" gutterBottom>
           Bets
         </Typography>
-        {user?.bettings.length > 0 ? (
+        {user?.bettings.filter((bet) => bet.verificationStatus === "Pending")
+          .length > 0 ? (
           <Grid container spacing={2}>
-            {user.bettings.map((bet) => (
-              <Grid item xs={12} sm={6} key={bet._id}>
-                <Card
-                  sx={{
-                    boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
-                    backgroundColor: "#edf1ff", // Updated background color
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {bet.sport}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Stake:</strong> {bet.stake}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Date:</strong>{" "}
-                      {new Date(bet.date).toLocaleDateString()}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {user?.bettings
+              ?.filter((bet) => bet.verificationStatus === "Pending")
+              ?.map((bet) => (
+                <Grid item xs={12} sm={6} key={bet._id}>
+                  <Card
+                    sx={{
+                      boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {bet.sport}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Status:</strong> {bet.verificationStatus}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Date:</strong>{" "}
+                        {new Date(bet.date).toLocaleDateString()}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Verification Code:</strong>{" "}
+                        {bet.verificationCode}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
           </Grid>
         ) : (
-          <Typography>No bets available.</Typography>
+          <Typography>No pending bets available.</Typography>
         )}
       </DialogContent>
     </Dialog>

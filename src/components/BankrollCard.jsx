@@ -18,13 +18,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
   const navigate = useNavigate();
 
   const handleDelete = async () => {
-    try {
-      await api.delete(`/bankrolls/${bankroll._id}`);
-      toast.success("Bankroll deleted successfully.");
-      if (onDelete) onDelete(bankroll._id);
-    } catch (error) {
-      toast.error("Failed to delete bankroll.");
-    }
+    if (onDelete) onDelete(bankroll._id);
   };
 
   return (
