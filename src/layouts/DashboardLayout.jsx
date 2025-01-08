@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import DrawerMenu from "./DrawerMenu";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import {
   Box,
   AppBar,
@@ -90,15 +90,17 @@ const DashboardLayout = () => {
           {/* Profile Menu */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {user?.subscription?.status === "active" && (
-              <Chip
-                label="Pro"
-                sx={{
-                  background: "#FFD700",
-                  color: "#000",
-                  fontWeight: "bold",
-                  marginRight: "0.5rem",
-                }}
-              />
+              <Link to={"/payment"}>
+                <Chip
+                  label="Pro"
+                  sx={{
+                    background: "#FFD700",
+                    color: "#000",
+                    fontWeight: "bold",
+                    marginRight: "0.5rem",
+                  }}
+                />
+              </Link>
             )}
             <IconButton edge="end" color="inherit" onClick={openProfileMenu}>
               <AccountCircleIcon />
@@ -116,6 +118,8 @@ const DashboardLayout = () => {
               </MenuItem>
               <MenuItem>
                 <Typography
+                  component={Link}
+                  to={"/payment"}
                   variant="body2"
                   sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
                 >
