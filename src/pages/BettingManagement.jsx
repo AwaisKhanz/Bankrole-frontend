@@ -4,12 +4,15 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import { toast } from "react-toastify";
+import BetDetailsModal from "../components/BetDetailsModal";
 
 const BettingManagement = () => {
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [selectedBet, setSelectedBet] = useState(null);
+  const [betDetailsOpen, setBetDetailsOpen] = useState(false);
 
   useEffect(() => {
     if (
@@ -94,13 +97,12 @@ const BettingManagement = () => {
     }));
   };
 
-  const handleApprove = async (id, verificationCode) => {
+  const handleApprove = async (id) => {
     try {
-      const { data } = await api.put(`/bets/admin/approve/${id}`, {
-        verificationCode,
-      });
+      const { data } = await api.put(`/bets/admin/approve/${id}`);
       toast.success(data.message);
-      fetchBets(); // Refresh bets list
+      setBetDetailsOpen(false);
+      fetchBets();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to approve bet.");
     }
@@ -110,10 +112,16 @@ const BettingManagement = () => {
     try {
       const { data } = await api.put(`/bets/admin/reject/${id}`);
       toast.success(data.message);
-      fetchBets(); // Refresh bets list
+      fetchBets();
+      setBetDetailsOpen(false);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to reject bet.");
     }
+  };
+
+  const handleBetRowClick = (bet) => {
+    setSelectedBet(bet);
+    setBetDetailsOpen(true);
   };
 
   const columns = [
@@ -138,12 +146,6 @@ const BettingManagement = () => {
       minWidth: 150,
     },
     { field: "stake", headerName: "Stake", flex: 0.5, minWidth: 100 },
-    {
-      field: "verificationCode",
-      headerName: "Verification Code",
-      flex: 0.5,
-      minWidth: 150,
-    },
     {
       field: "status",
       headerName: "Status",
@@ -203,9 +205,7 @@ const BettingManagement = () => {
           <Button
             variant="contained"
             color="secondary"
-            onClick={() =>
-              handleApprove(params.row._id, params.row.verificationCode)
-            }
+            onClick={() => handleApprove(params.row._id)}
           >
             Approve
           </Button>
@@ -276,8 +276,16 @@ const BettingManagement = () => {
           })}
           onPaginationModelChange={handlePaginationModelChange}
           disableSelectionOnClick
+          onRowClick={(params) => handleBetRowClick(params.row)}
         />
       </Box>
+      <BetDetailsModal
+        open={betDetailsOpen}
+        onClose={() => setBetDetailsOpen(false)}
+        bet={selectedBet}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
     </Box>
   );
 };

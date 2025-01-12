@@ -125,10 +125,6 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                         <strong>Date:</strong>{" "}
                         {new Date(bet.date).toLocaleDateString()}
                       </Typography>
-                      <Typography variant="body2">
-                        <strong>Verification Code:</strong>{" "}
-                        {bet.verificationCode}
-                      </Typography>
                     </CardContent>
                   </Card>
                 </Grid>

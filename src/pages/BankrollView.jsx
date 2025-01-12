@@ -163,6 +163,7 @@ const BankrollView = () => {
   const [bets, setBets] = useState([]);
   const [betModalOpen, setBetModalOpen] = useState(false);
   const [betToEdit, setBetToEdit] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchBankroll();
@@ -228,12 +229,15 @@ const BankrollView = () => {
   }, [bets, graphFilters]);
 
   const fetchBankroll = async () => {
+    setLoading(true);
     try {
       const response = await api.get(`/bankrolls/${id}`);
       setBankroll(response.data);
       setBets(response.data?.bets);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -248,10 +252,30 @@ const BankrollView = () => {
   };
 
   const handleBetSubmit = async (betData) => {
+    const formData = new FormData();
+
+    // Append all fields to FormData
+    formData.append("date", betData.date.toISOString());
+    formData.append("sport", betData.sport);
+    formData.append("label", betData.label);
+    formData.append("odds", betData.odds);
+    formData.append("stake", betData.stake);
+    formData.append("status", betData.status);
+    formData.append("bankrollId", bankroll._id);
+
+    // ✅ Append the uploaded image
+    if (betData.verificationImage) {
+      formData.append("verificationImage", betData.verificationImage);
+    }
+
     try {
       if (betToEdit) {
         // Update existing bet
-        const response = await api.put(`/bets/${betToEdit._id}`, betData);
+        const response = await api.put(`/bets/${betToEdit._id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         setBets((prevBets) =>
           prevBets.map((bet) =>
@@ -260,10 +284,12 @@ const BankrollView = () => {
         );
       } else {
         // Add new bet
-        const response = await api.post("/bets", {
-          ...betData,
-          bankrollId: bankroll._id,
+        const response = await api.post("/bets", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
+
         setBets((prevBets) => [...prevBets, response.data.bet]);
       }
       fetchBankroll();
@@ -442,69 +468,70 @@ const BankrollView = () => {
           marginBottom: "2rem",
         }}
       >
-        {[
-          {
-            label: "BETS",
-            value: `${bets?.length}`,
-            color: bets?.length > 0 ? "white" : "#FF5252",
-          },
-          {
-            label: "PROFIT",
-            value: `${bankroll?.stats?.totalProfit}${bankroll?.currency?.symbol}`,
-            color: bankroll?.stats?.totalProfit >= 0 ? "white" : "#FF5252",
-          },
-          {
-            label: "ROI",
-            value: `${bankroll?.stats?.roi}%`,
-            color: bankroll?.stats?.roi >= 0 ? "white" : "#FF5252",
-          },
-          {
-            label: "PROGRESSION",
-            value: `${bankroll?.stats?.progression}%`,
-            color: bankroll?.stats?.progression >= 0 ? "white" : "#FF5252",
-          },
-        ].map((stat, index) => (
-          <Box
-            key={index}
-            sx={{
-              flex: 1,
-              backgroundColor: "#334155",
-              borderRadius: "12px",
-              padding: "1.5rem",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              position: "relative",
-              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            {/* Stat Value */}
-            <Typography
-              variant="h6"
-              fontWeight="bold"
+        {!loading &&
+          [
+            {
+              label: "BETS",
+              value: `${bets?.length}`,
+              color: "white",
+            },
+            {
+              label: "PROFIT",
+              value: `${bankroll?.stats?.totalProfit}${bankroll?.currency?.symbol}`,
+              color: bankroll?.stats?.totalProfit >= 0 ? "white" : "#FF5252",
+            },
+            {
+              label: "ROI",
+              value: `${bankroll?.stats?.roi}%`,
+              color: bankroll?.stats?.roi >= 0 ? "white" : "#FF5252",
+            },
+            {
+              label: "PROGRESSION",
+              value: `${bankroll?.stats?.progression}%`,
+              color: bankroll?.stats?.progression >= 0 ? "white" : "#FF5252",
+            },
+          ].map((stat, index) => (
+            <Box
+              key={index}
               sx={{
-                color: stat.color,
-                fontSize: "1.5rem",
-                marginBottom: "0.5rem",
+                flex: 1,
+                backgroundColor: "#334155",
+                borderRadius: "12px",
+                padding: "1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative",
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
               }}
             >
-              {stat.value}
-            </Typography>
+              {/* Stat Value */}
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                sx={{
+                  color: stat.color,
+                  fontSize: "1.5rem",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                {stat.value}
+              </Typography>
 
-            {/* Stat Label */}
-            <Typography
-              variant="caption"
-              sx={{
-                color: "rgba(255, 255, 255, 0.7)",
-                textTransform: "uppercase",
-                fontSize: "0.9rem",
-              }}
-            >
-              {stat.label}
-            </Typography>
-          </Box>
-        ))}
+              {/* Stat Label */}
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.7)",
+                  textTransform: "uppercase",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {stat.label}
+              </Typography>
+            </Box>
+          ))}
       </Box>
 
       {/* Bets Section */}
@@ -518,154 +545,161 @@ const BankrollView = () => {
       >
         Bets
       </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          background: "#1e293b",
-          padding: "1rem",
-          borderRadius: "12px",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-        }}
-      >
-        {groupedBets.map((yearData) => (
-          <Accordion
-            key={yearData.year}
-            sx={{
-              backgroundColor: "#334155",
-              color: "#ffffff",
-              marginBottom: "1rem",
-              borderRadius: "8px",
-              boxShadow: "none",
-              "&.Mui-expanded": {
-                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
-                border:
-                  yearData.totalProfit >= 0
-                    ? "2px solid #4CAF50"
-                    : "2px solid #FF5252",
-              },
-            }}
-            defaultExpanded={
-              yearData.year.toString() === currentYear.toString()
-            }
-          >
-            <AccordionSummary
+      {groupedBets.length > 0 ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            background: "#1e293b",
+            padding: "1rem",
+            borderRadius: "12px",
+            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          {groupedBets?.map((yearData) => (
+            <Accordion
+              key={yearData.year}
               sx={{
-                "&.Mui-expanded": {},
+                backgroundColor: "#334155",
+                color: "#ffffff",
+                marginBottom: "1rem",
+                borderRadius: "8px",
+                boxShadow: "none",
+                "&.Mui-expanded": {
+                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+                  border:
+                    yearData.totalProfit >= 0
+                      ? "2px solid #4CAF50"
+                      : "2px solid #FF5252",
+                },
               }}
+              defaultExpanded={
+                yearData.year.toString() === currentYear.toString()
+              }
             >
-              <Box
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                  alignItems: "center",
-                  fontWeight: "bold",
+              <AccordionSummary
+                sx={{
+                  "&.Mui-expanded": {},
                 }}
               >
-                <Typography
-                  sx={{
-                    fontSize: { xs: "18px", md: "24px" },
-                    fontWeight: "bold",
-                  }}
-                >
-                  {yearData.year}
-                </Typography>
-                {/* Profit or Loss on the right */}
                 <Box
-                  sx={{
-                    backgroundColor:
-                      yearData.totalProfit >= 0 ? "#4CAF50" : "#FF5252",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "8px",
-                    color: "#ffffff",
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    alignItems: "center",
                     fontWeight: "bold",
                   }}
                 >
-                  <Typography sx={{ marginRight: "0.5rem" }}>
-                    {bankroll.currency.symbol}
-                    {yearData.totalProfit}
-                  </Typography>
-                </Box>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              {yearData.months.map((monthData) => (
-                <Accordion
-                  key={monthData.month}
-                  sx={{
-                    backgroundColor: "#192232",
-                    color: "#ffffff",
-                    marginBottom: "0.5rem",
-                    borderRadius: "8px",
-                    boxShadow: "none",
-                    "&.Mui-expanded": {
-                      boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.3)",
-                    },
-                  }}
-                  defaultExpanded={
-                    yearData.year.toString() === currentYear.toString() &&
-                    monthData.month === currentMonth
-                  }
-                >
-                  <AccordionSummary
+                  <Typography
                     sx={{
-                      "&.Mui-expanded": {},
+                      fontSize: { xs: "18px", md: "24px" },
+                      fontWeight: "bold",
                     }}
                   >
-                    <Box
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        width: "100%",
-                        alignItems: "center",
-                        fontWeight: "bold",
+                    {yearData.year}
+                  </Typography>
+                  {/* Profit or Loss on the right */}
+                  <Box
+                    sx={{
+                      backgroundColor:
+                        yearData.totalProfit >= 0 ? "#4CAF50" : "#FF5252",
+                      padding: "0.5rem 1rem",
+                      borderRadius: "8px",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <Typography sx={{ marginRight: "0.5rem" }}>
+                      {bankroll.currency.symbol}
+                      {yearData.totalProfit}
+                    </Typography>
+                  </Box>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                {yearData.months.map((monthData) => (
+                  <Accordion
+                    key={monthData.month}
+                    sx={{
+                      backgroundColor: "#192232",
+                      color: "#ffffff",
+                      marginBottom: "0.5rem",
+                      borderRadius: "8px",
+                      boxShadow: "none",
+                      "&.Mui-expanded": {
+                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.3)",
+                      },
+                    }}
+                    defaultExpanded={
+                      yearData.year.toString() === currentYear.toString() &&
+                      monthData.month === currentMonth
+                    }
+                  >
+                    <AccordionSummary
+                      sx={{
+                        "&.Mui-expanded": {},
                       }}
                     >
-                      <Typography
-                        sx={{
-                          fontSize: { xs: "16px", md: "20px" },
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {monthData.month}
-                      </Typography>
-                      {/* Profit or Loss on the right */}
                       <Box
-                        sx={{
-                          backgroundColor:
-                            monthData.totalProfit >= 0 ? "#4CAF50" : "#FF5252",
-                          padding: "0.4rem 0.8rem",
-                          borderRadius: "8px",
-                          color: "#ffffff",
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          width: "100%",
+                          alignItems: "center",
                           fontWeight: "bold",
                         }}
                       >
-                        <Typography sx={{ marginRight: "0.5rem" }}>
-                          {bankroll.currency.symbol}
-                          {monthData.totalProfit}
+                        <Typography
+                          sx={{
+                            fontSize: { xs: "16px", md: "20px" },
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {monthData.month}
                         </Typography>
+                        {/* Profit or Loss on the right */}
+                        <Box
+                          sx={{
+                            backgroundColor:
+                              monthData.totalProfit >= 0
+                                ? "#4CAF50"
+                                : "#FF5252",
+                            padding: "0.4rem 0.8rem",
+                            borderRadius: "8px",
+                            color: "#ffffff",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          <Typography sx={{ marginRight: "0.5rem" }}>
+                            {bankroll.currency.symbol}
+                            {monthData.totalProfit}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  </AccordionSummary>
+                    </AccordionSummary>
 
-                  <AccordionDetails>
-                    {monthData.bets.map((bet) => (
-                      <BetCard
-                        key={bet.id}
-                        bet={bet}
-                        onEdit={handleEditBet}
-                        onDelete={handleDeleteBet}
-                      />
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </AccordionDetails>
-          </Accordion>
-        ))}
-      </Box>
+                    <AccordionDetails>
+                      {monthData.bets.map((bet) => (
+                        <BetCard
+                          key={bet.id}
+                          bet={bet}
+                          onEdit={handleEditBet}
+                          onDelete={handleDeleteBet}
+                        />
+                      ))}
+                    </AccordionDetails>
+                  </Accordion>
+                ))}
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </Box>
+      ) : (
+        "No bets"
+      )}
+
       <BetModal
         open={betModalOpen}
         initialStackSymbol={bankroll?.currency.symbol}

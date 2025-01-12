@@ -18,6 +18,8 @@ import PaymentPage from "./pages/PaymentPage";
 import Loading from "./components/Loading";
 import BankrollView from "./pages/BankrollView";
 import RiskCalculator from "./pages/RiskCalculator";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -35,6 +37,8 @@ const App = () => {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Protected routes with Sidebar */}
         <Route

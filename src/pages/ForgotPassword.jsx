@@ -3,38 +3,39 @@ import { useForm } from "react-hook-form";
 import { TextField, Button, Typography, Box, useTheme } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import api from "../services/api";
+import { toast } from "react-toastify";
 
-const loginSchema = z.object({
+const forgotPasswordSchema = z.object({
   email: z
     .string()
     .email("Invalid email address")
     .nonempty("Email is required"),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .nonempty("Password is required"),
 });
 
-const Login = () => {
+const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(forgotPasswordSchema),
   });
-  const { loginAction } = useAuth();
-
-  const onSubmit = (data) => {
-    setLoading(true);
-    loginAction(data);
-    setLoading(false);
-  };
-
   const theme = useTheme();
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      await api.post("/auth/forgot-password", data);
+      toast.success("Password reset link sent to your email.");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error sending reset link.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -62,12 +63,13 @@ const Login = () => {
       >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
-            src="logo_black.png"
+            src="/logo_black.png"
             style={{
               width: "200px",
               height: "60px",
               objectFit: "cover",
             }}
+            alt="Logo"
           />
         </Box>
         <Typography
@@ -76,22 +78,17 @@ const Login = () => {
           textAlign="center"
           gutterBottom
         >
-          Login
+          Forgot Password
         </Typography>
         <Typography
           variant="body2"
           textAlign="center"
-          gutterBottom
           sx={{ marginBottom: "1rem" }}
         >
-          Login to manage your bankroll and track your bets.
+          Enter your email to receive a password reset link.
         </Typography>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
-          style={{ marginTop: "2rem" }}
-        >
+        <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: "2rem" }}>
           <TextField
             {...register("email")}
             label="Email"
@@ -100,23 +97,6 @@ const Login = () => {
             error={!!errors.email}
             helperText={errors.email?.message}
           />
-          <TextField
-            {...register("password")}
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
-          <Typography variant="body2" className=" flex justify-end">
-            <Link
-              to="/forgot-password"
-              className="hover:text-blue-600 hover:underline"
-            >
-              Forgot your password?
-            </Link>
-          </Typography>
           <Button
             type="submit"
             variant="contained"
@@ -130,21 +110,15 @@ const Login = () => {
               fontSize: "1rem",
             }}
           >
-            {loading ? "Loading" : "Login"}
+            {loading ? "Sending..." : "Send Reset Link"}
           </Button>
         </form>
 
-        {/* Add Link to Sign Up */}
-        <Box
-          sx={{
-            marginTop: "1rem",
-            textAlign: "center",
-          }}
-        >
+        <Box sx={{ marginTop: "1rem", textAlign: "center" }}>
           <Typography variant="body2">
-            Don’t have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:underline">
-              Sign up
+            Remembered your password?{" "}
+            <Link to="/login" className="text-blue-600 hover:underline">
+              Login
             </Link>
           </Typography>
         </Box>
@@ -153,4 +127,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

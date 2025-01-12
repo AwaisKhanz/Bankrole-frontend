@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,6 +12,8 @@ import {
   MenuItem,
   Typography,
   useTheme,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers/DesktopDateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -42,7 +44,13 @@ const betSchema = z.object({
   status: z.enum(["Pending", "Won", "Loss"], {
     required_error: "Status is required",
   }),
-  verificationCode: z.string().min(1, "Verification Code is required"),
+  verificationImage: z
+    .any()
+    .refine(
+      (file) => file === null || file instanceof File,
+      "Verification image must be a file"
+    )
+    .optional(),
 });
 
 const initialValues = {
@@ -51,7 +59,7 @@ const initialValues = {
   label: "",
   odds: "",
   stake: "",
-  verificationCode: "",
+  verificationImage: null,
   status: "Pending",
 };
 
@@ -68,26 +76,59 @@ const BetModal = ({
     formState: { errors },
     reset,
     register,
+    setValue,
+    clearErrors,
+    setError,
   } = useForm({
     resolver: zodResolver(betSchema),
     defaultValues: initialValues,
   });
   const theme = useTheme();
+  const [previewImage, setPreviewImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialData && Object.entries(initialData).length) {
       const transformedData = {
         ...initialData,
         date: initialData.date ? new Date(initialData.date) : null,
+        verificationImage: null,
       };
+
       reset(transformedData);
+
+      if (initialData.verificationImageUrl) {
+        setPreviewImage(initialData.verificationImageUrl);
+      }
     } else {
       reset(initialValues);
+      setPreviewImage(null);
     }
   }, [initialData, reset]);
 
-  const handleFormSubmit = (data) => {
-    onSubmit(data);
+  const handleFormSubmit = async (data) => {
+    if (!data.verificationImage) {
+      setError("verificationImage", {
+        message: "Verification image is required",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      await onSubmit(data);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setValue("verificationImage", file);
+      setPreviewImage(URL.createObjectURL(file));
+      clearErrors("verificationImage");
+    }
   };
 
   return (
@@ -133,7 +174,7 @@ const BetModal = ({
                   {...field}
                   label="Date & Time"
                   format="dd/MM/yyyy"
-                  // views={["year", "month", "date"]}
+                  views={["year", "month", "date", "day"]}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -246,15 +287,41 @@ const BetModal = ({
             )}
           />
 
-          {/* Verification Code Input */}
-          <TextField
-            {...register("verificationCode")}
-            label="Verification Code"
+          {/* ✅ Verification Image Upload */}
+          <Button
+            variant="contained"
+            component="label"
             fullWidth
-            margin="normal"
-            error={!!errors.verificationCode}
-            helperText={errors.verificationCode?.message}
-          />
+            sx={{ mt: 2 }}
+          >
+            Upload Verification Image
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </Button>
+          {previewImage && (
+            <Box mt={2}>
+              <img
+                src={previewImage}
+                alt="Verification Preview"
+                style={{
+                  width: "100%",
+                  borderRadius: "8px",
+                  height: "150px",
+                  objectFit: "cover",
+                }}
+              />
+            </Box>
+          )}
+
+          {errors?.verificationImage && (
+            <Box className=" text-red-500">
+              {errors.verificationImage?.message}
+            </Box>
+          )}
 
           {/* Status Input */}
           <FormControl
@@ -301,8 +368,12 @@ const BetModal = ({
           form="bet-form"
           variant="contained"
           color="primary"
+          disabled={loading}
+          startIcon={
+            loading ? <CircularProgress size={20} color="inherit" /> : null
+          }
         >
-          {initialData ? "Update" : "Add"}
+          {loading ? "Processing..." : initialData ? "Update" : "Add"}
         </Button>
       </DialogActions>
     </Dialog>
