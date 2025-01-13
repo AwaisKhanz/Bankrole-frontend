@@ -13,6 +13,7 @@ import {
 import { Line } from "react-chartjs-2";
 import BetCard from "../components/BetCard";
 import BetModal from "../components/BetModal";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import api from "../services/api";
 
 import {
@@ -337,6 +338,17 @@ const BankrollView = () => {
           }}
         >
           {bankroll?.name}
+          {bankroll?.stats.isVerified && (
+            <VerifiedIcon
+              sx={{
+                color: "#4CAF50",
+                fontSize: { xs: "1.2rem", md: "1.5rem" },
+                marginLeft: "6px",
+                marginBottom: "6px",
+              }}
+              titleAccess="Verified Bankroll"
+            />
+          )}
         </Typography>
         <Button
           variant="contained"

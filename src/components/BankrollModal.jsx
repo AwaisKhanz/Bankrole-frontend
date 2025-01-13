@@ -12,8 +12,9 @@ import {
   useTheme,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
+import ConfirmationModal from "./ConfirmationModal";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -40,7 +41,7 @@ const bankrollSchema = z.object({
 const initialValues = {
   name: "",
   startingCapital: "",
-  visibility: "Private",
+  visibility: "Public",
   currency: "",
 };
 
@@ -57,11 +58,19 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
     defaultValues: initialValues,
   });
   const theme = useTheme();
+
+  // ✅ Add state for confirmation modal
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingVisibilityChange, setPendingVisibilityChange] = useState(null);
+  const [initialVisibility, setInitialVisibility] = useState("Private");
+
   useEffect(() => {
     if (initialData && Object.entries(initialData).length) {
       reset(initialData);
+      setInitialVisibility(initialData.visibility); // ✅ Track initial visibility
     } else {
       reset(initialValues);
+      setInitialVisibility("Private");
     }
   }, [initialData, reset]);
 
@@ -71,6 +80,34 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
     onSubmit(data);
     reset(); // Reset form after submit
     onClose();
+  };
+
+  // ✅ Handle visibility change with confirmation
+  const handleVisibilityChange = (e, newValue) => {
+    if (
+      initialData &&
+      newValue !== null &&
+      newValue === "Public" &&
+      initialVisibility === "Private"
+    ) {
+      setPendingVisibilityChange(newValue); // Save intended change
+      setConfirmOpen(true); // Show confirmation modal
+    } else {
+      setValue("visibility", newValue);
+    }
+  };
+
+  // ✅ Confirm visibility change
+  const handleConfirmVisibilityChange = () => {
+    setValue("visibility", pendingVisibilityChange);
+    setConfirmOpen(false);
+    setPendingVisibilityChange(null);
+  };
+
+  // ✅ Cancel visibility change
+  const handleCancelVisibilityChange = () => {
+    setConfirmOpen(false);
+    setPendingVisibilityChange(null);
   };
 
   return (
@@ -101,7 +138,6 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
       >
         {initialData ? "Update Bankroll" : "Add Bankroll"}
       </DialogTitle>
-
       <DialogContent sx={{ padding: "0px", mb: "1rem" }}>
         <form id="bankroll-form" onSubmit={handleSubmit(handleFormSubmit)}>
           <TextField
@@ -121,7 +157,6 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
             error={!!errors.startingCapital}
             helperText={errors.startingCapital?.message}
           />
-
           <Typography
             variant="body2"
             fontWeight="bold"
@@ -133,20 +168,16 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
           <ToggleButtonGroup
             value={visibility}
             exclusive
-            onChange={(e, newValue) => {
-              if (newValue !== null) {
-                setValue("visibility", newValue);
-              }
-            }}
+            onChange={handleVisibilityChange}
             sx={{
               display: "flex",
               justifyContent: "space-between",
               width: "100%",
-              marginBottom: "1.5rem", // Increase spacing
-              border: "1px solid #4A5568", // Adjust border color for dark mode
+              marginBottom: "1.5rem",
+              border: "1px solid #4A5568",
               borderRadius: "8px",
-              padding: "0.75rem", // Add padding
-              backgroundColor: "#2D3748", // Dark background color
+              padding: "0.75rem",
+              backgroundColor: "#2D3748",
             }}
           >
             <ToggleButton
@@ -154,12 +185,12 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               sx={{
                 flex: 1,
                 textTransform: "none",
-                border: "1px solid #4A5568", // Match border with group
+                border: "1px solid #4A5568",
                 borderRadius: "8px",
                 backgroundColor:
-                  visibility === "Public" ? "#1649FF" : "transparent", // Highlighted or transparent
-                color: visibility === "Public" ? "#FFFFFF" : "#A0AEC0", // Active or inactive text color
-                "&:hover": { backgroundColor: "#3B4A5B" }, // Subtle hover effect
+                  visibility === "Public" ? "#1649FF" : "transparent",
+                color: visibility === "Public" ? "#FFFFFF" : "#A0AEC0",
+                "&:hover": { backgroundColor: "#3B4A5B" },
               }}
             >
               <VisibilityIcon sx={{ marginRight: "8px" }} />
@@ -170,12 +201,12 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               sx={{
                 flex: 1,
                 textTransform: "none",
-                border: "1px solid #4A5568", // Match border with group
+                border: "1px solid #4A5568",
                 borderRadius: "8px",
                 backgroundColor:
-                  visibility === "Private" ? "#1649FF" : "transparent", // Highlighted or transparent
-                color: visibility === "Private" ? "#FFFFFF" : "#A0AEC0", // Active or inactive text color
-                "&:hover": { backgroundColor: "#3B4A5B" }, // Subtle hover effect
+                  visibility === "Private" ? "#1649FF" : "transparent",
+                color: visibility === "Private" ? "#FFFFFF" : "#A0AEC0",
+                "&:hover": { backgroundColor: "#3B4A5B" },
               }}
             >
               <LockIcon sx={{ marginRight: "8px" }} />
@@ -192,7 +223,6 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               {errors.visibility.message}
             </Typography>
           )}
-
           <FormControl fullWidth margin="normal" error={!!errors.currency}>
             <InputLabel>Currency</InputLabel>
             <Select
@@ -228,7 +258,7 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
           borderTop: "1px solid #E0E0E0",
         }}
       >
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color="secondary" variant="contained">
           Cancel
         </Button>
         <Button
@@ -240,6 +270,14 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
           {initialData ? "Update" : "Add"}
         </Button>
       </DialogActions>
+
+      <ConfirmationModal
+        open={confirmOpen}
+        title="Change Visibility to Public?"
+        message="Changing this bankroll to public will delete all existing bets. Are you sure you want to proceed?"
+        onConfirm={handleConfirmVisibilityChange}
+        onCancel={handleCancelVisibilityChange}
+      />
     </Dialog>
   );
 };

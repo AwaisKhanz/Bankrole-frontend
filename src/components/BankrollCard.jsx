@@ -5,12 +5,12 @@ import {
   Typography,
   Box,
   IconButton,
+  Chip,
   useTheme,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import VerifiedIcon from "@mui/icons-material/Verified";
 import DeleteIcon from "@mui/icons-material/Delete";
-import api from "../services/api"; // Replace with your actual API service
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
@@ -43,6 +43,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
           boxShadow: "none",
           bgcolor: theme.palette.secondary.main,
           color: "white",
+          position: "relative",
         }}
       >
         <CardContent>
@@ -54,10 +55,36 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
               alignItems: "center",
             }}
           >
-            <Typography variant="h6" fontWeight="bold">
-              {bankroll.name}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="h6" fontWeight="bold">
+                {bankroll.name}
+              </Typography>
+              {/* ✅ Blue Verified Tick */}
+              {bankroll.stats.isVerified && (
+                <VerifiedIcon
+                  sx={{
+                    color: "#4CAF50",
+                    fontSize: "1.2rem",
+                    marginLeft: "6px",
+                  }}
+                  titleAccess="Verified Bankroll"
+                />
+              )}
+            </Box>
+
             <Box>
+              <Chip
+                label={bankroll.visibility}
+                sx={{
+                  backgroundColor:
+                    bankroll.visibility === "Public" ? "#4CAF50" : "#1649FF",
+                  color: "#fff",
+                  fontSize: "0.75rem",
+                  fontWeight: "bold",
+                  marginRight: "8px",
+                  textTransform: "uppercase",
+                }}
+              />
               <IconButton
                 size="small"
                 onClick={(e) => {

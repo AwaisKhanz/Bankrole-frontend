@@ -123,11 +123,11 @@ const Ranking = () => {
       valueGetter: (value, row) => row?.name || "N/A",
     },
     {
-      field: "username",
-      headerName: "Username",
+      field: "_id",
+      headerName: "Id",
       flex: 1,
       minWidth: 200,
-      valueGetter: (value, row) => row?.userId?.username || "N/A",
+      valueGetter: (value, row) => row?.userId?._id || "N/A",
     },
     {
       field: "profitPercentage",

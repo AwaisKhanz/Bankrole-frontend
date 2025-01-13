@@ -4,11 +4,14 @@ import BankrollModal from "../components/BankrollModal";
 import BankrollCard from "../components/BankrollCard";
 import api from "../services/api"; // Axios instance
 import { toast } from "react-toastify";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const Bankrolls = () => {
   const [bankrolls, setBankrolls] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const fetchBankrolls = async () => {
     try {
@@ -57,13 +60,21 @@ const Bankrolls = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
     try {
-      await api.delete(`/bankrolls/${id}`);
+      await api.delete(`/bankrolls/${deleteId}`);
       toast.success("Bankroll deleted successfully.");
       fetchBankrolls();
     } catch (error) {
       toast.error("Failed to delete bankroll.");
+    } finally {
+      setConfirmOpen(false);
+      setDeleteId(null);
     }
   };
 
@@ -100,6 +111,15 @@ const Bankrolls = () => {
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
         initialData={editData}
+      />
+
+      {/* Reusable Confirmation Modal */}
+      <ConfirmationModal
+        open={confirmOpen}
+        title="Delete Bankroll"
+        message="Are you sure you want to delete this bankroll? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmOpen(false)}
       />
     </Box>
   );

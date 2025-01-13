@@ -38,7 +38,7 @@ const betSchema = z.object({
       required_error: "Sport is required",
     }
   ),
-  label: z.string().min(1, "Label is required"),
+  label: z.string().min(1, "Bet label is required"),
   odds: z.number().min(1, "Odds must be at least 1"),
   stake: z.number().min(0.01, "Stake must be greater than 0"),
   status: z.enum(["Pending", "Won", "Loss"], {
@@ -54,11 +54,7 @@ const betSchema = z.object({
 });
 
 const initialValues = {
-  date: null,
-  sport: "",
-  label: "",
-  odds: "",
-  stake: "",
+  date: new Date(),
   verificationImage: null,
   status: "Pending",
 };
@@ -107,12 +103,13 @@ const BetModal = ({
   }, [initialData, reset]);
 
   const handleFormSubmit = async (data) => {
-    if (!data.verificationImage) {
-      setError("verificationImage", {
-        message: "Verification image is required",
-      });
-      return;
-    }
+    if (!initialData)
+      if (!data.verificationImage) {
+        setError("verificationImage", {
+          message: "Verification image is required",
+        });
+        return;
+      }
     setLoading(true);
     try {
       await onSubmit(data);
@@ -130,6 +127,7 @@ const BetModal = ({
       clearErrors("verificationImage");
     }
   };
+  console.log(errors);
 
   return (
     <Dialog
@@ -172,7 +170,7 @@ const BetModal = ({
                 <DesktopDateTimePicker
                   className="w-full  !mb-[0.5rem] !mt-2"
                   {...field}
-                  label="Date & Time"
+                  label="Date"
                   format="dd/MM/yyyy"
                   views={["year", "month", "date", "day"]}
                   renderInput={(params) => (
@@ -196,6 +194,9 @@ const BetModal = ({
               </LocalizationProvider>
             )}
           />
+          {errors?.date && (
+            <Box className=" text-red-500">{errors.date.message}</Box>
+          )}
 
           {/* Sport Input */}
           <FormControl
@@ -360,7 +361,7 @@ const BetModal = ({
           borderTop: "1px solid rgba(255, 255, 255, 0.2)",
         }}
       >
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color="secondary" variant="contained">
           Cancel
         </Button>
         <Button
