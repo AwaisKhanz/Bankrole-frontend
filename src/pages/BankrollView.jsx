@@ -9,6 +9,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Chip,
 } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import BetCard from "../components/BetCard";
@@ -173,7 +174,7 @@ const BankrollView = () => {
   const [graphFilters, setGraphFilters] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
-    includeStartingCapital: false,
+    includeStartingCapital: true,
   });
 
   const [graphData, setGraphData] = useState(null);
@@ -257,6 +258,7 @@ const BankrollView = () => {
 
   const handleBetSubmit = async (betData) => {
     const formData = new FormData();
+    console.log(betData);
 
     // Append all fields to FormData
     formData.append("date", betData.date.toISOString());
@@ -350,6 +352,18 @@ const BankrollView = () => {
               titleAccess="Verified Bankroll"
             />
           )}
+          <Chip
+            label={bankroll?.visibility}
+            sx={{
+              backgroundColor:
+                bankroll?.visibility === "Public" ? "#4CAF50" : "#1649FF",
+              color: "#fff",
+              fontSize: "0.75rem",
+              fontWeight: "bold",
+              marginLeft: "8px",
+              textTransform: "uppercase",
+            }}
+          />
         </Typography>
         <Button
           variant="contained"
@@ -736,6 +750,7 @@ const BankrollView = () => {
                     <AccordionDetails>
                       {monthData.bets.map((bet) => (
                         <BetCard
+                          bankroll={bankroll}
                           key={bet.id}
                           bet={bet}
                           onEdit={handleEditBet}
@@ -756,7 +771,7 @@ const BankrollView = () => {
       {betModalOpen && (
         <BetModal
           open={betModalOpen}
-          initialStackSymbol={bankroll?.currency.symbol}
+          bankroll={bankroll}
           onClose={() => setBetModalOpen(false)}
           onSubmit={handleBetSubmit}
           initialData={betToEdit}

@@ -31,7 +31,7 @@ const getVerificationAlert = (bet) => {
   return null;
 };
 
-const BetCard = ({ bet, onEdit, onDelete }) => {
+const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
   const [expanded, setExpanded] = useState(false);
 
   const handleExpand = () => {
@@ -50,7 +50,7 @@ const BetCard = ({ bet, onEdit, onDelete }) => {
       }}
     >
       {/* Verification Alert */}
-      {getVerificationAlert(bet)}
+      {bankroll?.visibility !== "Private" && getVerificationAlert(bet)}
 
       {/* Header Section */}
       <Box

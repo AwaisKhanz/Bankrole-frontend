@@ -119,14 +119,14 @@ const Ranking = () => {
       field: "name",
       headerName: "Bankroll Name",
       flex: 1,
-      minWidth: 200,
+      minWidth: 150,
       valueGetter: (value, row) => row?.name || "N/A",
     },
     {
       field: "_id",
       headerName: "Id",
       flex: 1,
-      minWidth: 200,
+      minWidth: 250,
       valueGetter: (value, row) => row?.userId?._id || "N/A",
     },
     {

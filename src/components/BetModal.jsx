@@ -44,13 +44,7 @@ const betSchema = z.object({
   status: z.enum(["Pending", "Won", "Loss"], {
     required_error: "Status is required",
   }),
-  verificationImage: z
-    .any()
-    .refine(
-      (file) => file === null || file instanceof File,
-      "Verification image must be a file"
-    )
-    .optional(),
+  verificationImage: z.any().optional(),
 });
 
 const initialValues = {
@@ -59,13 +53,7 @@ const initialValues = {
   status: "Pending",
 };
 
-const BetModal = ({
-  open,
-  onClose,
-  onSubmit,
-  initialData,
-  initialStackSymbol,
-}) => {
+const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
   const {
     control,
     handleSubmit,
@@ -103,7 +91,7 @@ const BetModal = ({
   }, [initialData, reset]);
 
   const handleFormSubmit = async (data) => {
-    if (!initialData)
+    if (!initialData && bankroll?.visibility !== "Private")
       if (!data.verificationImage) {
         setError("verificationImage", {
           message: "Verification image is required",
@@ -296,7 +284,7 @@ const BetModal = ({
                 {...field}
                 value={field.value || ""}
                 onChange={(e) => field.onChange(Number(e.target.value) || "")}
-                label={`Stake (${initialStackSymbol || "$"})`}
+                label={`Stake (${bankroll?.currency.symbol || "$"})`}
                 type="number"
                 fullWidth
                 margin="normal"
@@ -310,39 +298,43 @@ const BetModal = ({
           />
 
           {/* ✅ Verification Image Upload */}
-          <Button
-            variant="contained"
-            component="label"
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Upload Verification Image
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </Button>
-          {previewImage && (
-            <Box mt={2}>
-              <img
-                src={previewImage}
-                alt="Verification Preview"
-                style={{
-                  width: "100%",
-                  borderRadius: "8px",
-                  height: "150px",
-                  objectFit: "cover",
-                }}
-              />
-            </Box>
-          )}
-
-          {errors?.verificationImage && (
-            <Box className=" text-red-500">
-              {errors.verificationImage?.message}
-            </Box>
+          {bankroll?.visibility !== "Private" && (
+            <>
+              {" "}
+              <Button
+                variant="contained"
+                component="label"
+                fullWidth
+                sx={{ mt: 2 }}
+              >
+                Upload Verification Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </Button>
+              {previewImage && (
+                <Box mt={2}>
+                  <img
+                    src={previewImage}
+                    alt="Verification Preview"
+                    style={{
+                      width: "100%",
+                      borderRadius: "8px",
+                      height: "150px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              )}
+              {errors?.verificationImage && (
+                <Box className=" text-red-500">
+                  {errors.verificationImage?.message}
+                </Box>
+              )}
+            </>
           )}
 
           {/* Status Input */}

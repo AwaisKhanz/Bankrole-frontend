@@ -120,6 +120,7 @@ const UserManagement = () => {
   };
 
   const columns = [
+    { field: "_id", headerName: "ID", flex: 1, minWidth: 250 },
     { field: "username", headerName: "Username", flex: 1, minWidth: 150 },
     { field: "email", headerName: "Email", flex: 1, minWidth: 200 },
     {
