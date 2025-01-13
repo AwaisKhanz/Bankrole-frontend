@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import BetDetailsModal from "../components/BetDetailsModal";
+import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 
 const BettingManagement = () => {
   const [bets, setBets] = useState([]);
@@ -13,6 +14,8 @@ const BettingManagement = () => {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [selectedBet, setSelectedBet] = useState(null);
   const [betDetailsOpen, setBetDetailsOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
+  console.log(statusFilter);
 
   useEffect(() => {
     if (
@@ -44,6 +47,7 @@ const BettingManagement = () => {
           search: searchParams.get("search") || "",
           page: pagination.page + 1,
           limit: pagination.pageSize,
+          verificationStatus: statusFilter,
         },
       });
       setBets(data.bets);
@@ -61,7 +65,7 @@ const BettingManagement = () => {
 
   useEffect(() => {
     fetchBets();
-  }, [searchParams]);
+  }, [searchParams, statusFilter]);
 
   const debounce = (func, delay) => {
     let timer;
@@ -230,7 +234,8 @@ const BettingManagement = () => {
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
+          alignItems: { xs: "", md: "center" },
+          flexDirection: { xs: "column", md: "row" },
           gap: "0.5rem",
           marginBottom: "1rem",
         }}
@@ -243,10 +248,47 @@ const BettingManagement = () => {
             setSearch(e.target.value);
             handleSearch(e.target.value);
           }}
-          sx={{
-            flex: 1,
-          }}
+          sx={{ flex: 1 }}
         />
+        {/** ✅ Verification Status Filter */}
+        <FormControl
+          sx={{
+            minWidth: 200,
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "rgba(255, 255, 255, 0.7)",
+              },
+              "&:hover fieldset": {
+                borderColor: "#FFFFFF",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#FFFFFF",
+                borderWidth: "2px",
+              },
+            },
+            "& .MuiInputLabel-root": {
+              color: "rgba(255, 255, 255, 0.7)",
+              "&.Mui-focused": {
+                color: "#FFFFFF",
+              },
+            },
+          }}
+        >
+          <InputLabel>Verification Status</InputLabel>
+          <Select
+            value={statusFilter}
+            label="Verification Status"
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+            }}
+            defaultValue=""
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Pending">Pending</MenuItem>
+            <MenuItem value="Accepted">Accepted</MenuItem>
+            <MenuItem value="Rejected">Rejected</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
       <Box

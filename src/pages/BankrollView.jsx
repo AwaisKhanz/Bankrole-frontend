@@ -173,7 +173,9 @@ const BankrollView = () => {
   const [graphFilters, setGraphFilters] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
+    includeStartingCapital: false,
   });
+
   const [graphData, setGraphData] = useState(null);
 
   const handleFilterChange = (key, value) => {
@@ -181,23 +183,24 @@ const BankrollView = () => {
   };
 
   const calculateGraphData = (bets) => {
-    let currentCapital = bankroll?.startingCapital || 0;
+    let currentCapital = graphFilters.includeStartingCapital
+      ? bankroll?.startingCapital || 0
+      : 0;
 
-    // Filter verified bets and those within the selected month and year
     const filteredBets = bets
       .filter((bet) => bet.isVerified)
       .filter((bet) => {
         const betDate = new Date(bet.date);
         return (
-          betDate.getFullYear() === graphFilters.year &&
-          betDate.getMonth() + 1 === graphFilters.month
+          graphFilters.includeStartingCapital ||
+          (betDate.getFullYear() === graphFilters.year &&
+            betDate.getMonth() + 1 === graphFilters.month)
         );
       });
 
-    // Calculate graph points using profit from the backend
     const graphPoints = filteredBets.reduce(
       (acc, bet) => {
-        currentCapital += parseFloat(bet.profit); // Use `profit` directly
+        currentCapital += parseFloat(bet.profit);
         acc.push(currentCapital);
         return acc;
       },
@@ -206,7 +209,7 @@ const BankrollView = () => {
 
     setGraphData({
       labels: [
-        "Start",
+        graphFilters.includeStartingCapital ? "Start" : "Filtered Start",
         ...filteredBets.map((bet) => new Date(bet.date).toLocaleDateString()),
       ],
       datasets: [
@@ -271,7 +274,6 @@ const BankrollView = () => {
 
     try {
       if (betToEdit) {
-        // Update existing bet
         const response = await api.put(`/bets/${betToEdit._id}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -284,7 +286,6 @@ const BankrollView = () => {
           )
         );
       } else {
-        // Add new bet
         const response = await api.post("/bets", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -448,6 +449,46 @@ const BankrollView = () => {
                 ))}
               </Select>
             </FormControl>
+            <Button
+              variant={
+                graphFilters.includeStartingCapital ? "contained" : "outlined"
+              }
+              onClick={() =>
+                handleFilterChange(
+                  "includeStartingCapital",
+                  !graphFilters.includeStartingCapital
+                )
+              }
+              sx={{
+                textTransform: "none",
+                padding: "1px 16px",
+                fontSize: "0.875rem",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                backgroundColor: graphFilters.includeStartingCapital
+                  ? "#1649FF"
+                  : "transparent",
+                color: graphFilters.includeStartingCapital
+                  ? "#FFFFFF"
+                  : "#1649FF",
+                border: graphFilters.includeStartingCapital
+                  ? "none"
+                  : "2px solid #1649FF",
+                boxShadow: graphFilters.includeStartingCapital
+                  ? "0px 4px 12px rgba(22, 73, 255, 0.4)"
+                  : "none",
+                "&:hover": {
+                  backgroundColor: graphFilters.includeStartingCapital
+                    ? "#123FCC"
+                    : "rgba(22, 73, 255, 0.1)",
+                  boxShadow: "0px 6px 16px rgba(22, 73, 255, 0.4)",
+                },
+              }}
+            >
+              {graphFilters.includeStartingCapital
+                ? "From Start"
+                : "From Filtered Date"}
+            </Button>
           </Box>
           <Box
             sx={{
@@ -712,13 +753,15 @@ const BankrollView = () => {
         "No bets"
       )}
 
-      <BetModal
-        open={betModalOpen}
-        initialStackSymbol={bankroll?.currency.symbol}
-        onClose={() => setBetModalOpen(false)}
-        onSubmit={handleBetSubmit}
-        initialData={betToEdit}
-      />
+      {betModalOpen && (
+        <BetModal
+          open={betModalOpen}
+          initialStackSymbol={bankroll?.currency.symbol}
+          onClose={() => setBetModalOpen(false)}
+          onSubmit={handleBetSubmit}
+          initialData={betToEdit}
+        />
+      )}
     </Box>
   );
 };

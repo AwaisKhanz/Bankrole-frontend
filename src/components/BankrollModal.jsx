@@ -223,7 +223,32 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               {errors.visibility.message}
             </Typography>
           )}
-          <FormControl fullWidth margin="normal" error={!!errors.currency}>
+          <FormControl
+            sx={{
+              minWidth: 200,
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.7)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#FFFFFF",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#FFFFFF",
+                  borderWidth: "2px",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+                "&.Mui-focused": {
+                  color: "#FFFFFF",
+                },
+              },
+            }}
+            fullWidth
+            margin="normal"
+            error={!!errors.currency}
+          >
             <InputLabel>Currency</InputLabel>
             <Select
               value={watch("currency")?.code || ""}

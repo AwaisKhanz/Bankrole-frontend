@@ -203,7 +203,28 @@ const BetModal = ({
             fullWidth
             margin="normal"
             error={!!errors.sport}
-            sx={{ marginBottom: "1rem" }}
+            sx={{
+              marginBottom: "1rem",
+              minWidth: 200,
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.7)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#FFFFFF",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#FFFFFF",
+                  borderWidth: "2px",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+                "&.Mui-focused": {
+                  color: "#FFFFFF",
+                },
+              },
+            }}
           >
             <InputLabel>Sport</InputLabel>
             <Controller
@@ -329,7 +350,28 @@ const BetModal = ({
             fullWidth
             margin="normal"
             error={!!errors.status}
-            sx={{ marginBottom: "1rem" }}
+            sx={{
+              marginBottom: "1rem",
+              minWidth: 200,
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.7)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#FFFFFF",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#FFFFFF",
+                  borderWidth: "2px",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+                "&.Mui-focused": {
+                  color: "#FFFFFF",
+                },
+              },
+            }}
           >
             <InputLabel>Status</InputLabel>
             <Controller

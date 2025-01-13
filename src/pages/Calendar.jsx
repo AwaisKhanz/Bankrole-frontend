@@ -16,7 +16,10 @@ const CalendarPage = () => {
 
       const dailyProfits = bankrolls.reduce((acc, bankroll) => {
         bankroll.bets.forEach((bet) => {
-          const date = new Date(bet.date).toISOString().split("T")[0];
+          const date = new Date(bet.date);
+          const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`; // ✅ Corrected here
           let profit = 0;
 
           if (bet.status === "Won") {
@@ -25,9 +28,12 @@ const CalendarPage = () => {
             profit = -bet.stake;
           }
 
-          if (!acc[date])
-            acc[date] = { profit: 0, symbol: bankroll.currency.symbol };
-          acc[date].profit += profit;
+          if (!acc[formattedDate])
+            acc[formattedDate] = {
+              profit: 0,
+              symbol: bankroll.currency.symbol,
+            };
+          acc[formattedDate].profit += profit;
         });
         return acc;
       }, {});
@@ -43,7 +49,10 @@ const CalendarPage = () => {
   }, []);
 
   const getDailyProfit = (date) => {
-    const formattedDate = date.toISOString().split("T")[0];
+    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+
     return dailyData[formattedDate] || { profit: 0, symbol: "" };
   };
 
