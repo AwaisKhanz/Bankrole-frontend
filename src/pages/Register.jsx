@@ -65,6 +65,7 @@ const Register = ({ mode }) => {
         padding: "1rem",
         background: theme.palette.primary.main,
         position: "relative",
+        color: mode === "dark" ? "white" : "black",
       }}
     >
       {/* Form Container */}

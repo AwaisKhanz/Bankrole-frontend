@@ -46,6 +46,7 @@ const Login = ({ mode }) => {
         minHeight: "100vh",
         padding: "1rem",
         background: theme.palette.primary.main,
+        color: mode === "dark" ? "white" : "black",
       }}
     >
       <Box
