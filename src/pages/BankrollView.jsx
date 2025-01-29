@@ -10,6 +10,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
+  useTheme,
 } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import BetCard from "../components/BetCard";
@@ -39,66 +40,6 @@ ChartJS.register(
   Legend,
   Filler
 );
-
-const graphOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: true,
-      position: "top",
-      labels: {
-        color: "#ffffff",
-        font: {
-          size: 14,
-          family: "Arial, sans-serif",
-        },
-      },
-    },
-    tooltip: {
-      enabled: true,
-      backgroundColor: "rgba(255, 255, 255, 0.9)", // Light background
-      titleColor: "#000000",
-      titleFont: {
-        weight: "bold",
-      },
-      bodyColor: "#000000", // Black body text
-      borderColor: "#4CAF50", // Green border
-      borderWidth: 1,
-      padding: 10,
-      callbacks: {
-        title: (tooltipItems) => {
-          // Show the date as the title
-          return tooltipItems[0].label;
-        },
-        label: (tooltipItem) => {
-          // Show the capital amount
-          const value = tooltipItem.raw; // Get the data value
-          return `Capital: ${value}$`;
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      ticks: {
-        color: "#ffffff",
-      },
-      grid: {
-        color: "rgba(255, 255, 255, 0.1)",
-      },
-    },
-    y: {
-      ticks: {
-        color: "#ffffff",
-      },
-      grid: {
-        color: "rgba(255, 255, 255, 0.1)",
-      },
-    },
-  },
-  spanGaps: false,
-};
 
 const groupBetsByYearAndMonth = (bets) => {
   const grouped = {};
@@ -159,14 +100,14 @@ const groupBetsByYearAndMonth = (bets) => {
   return sortedYears;
 };
 
-const BankrollView = () => {
+const BankrollView = ({ mode }) => {
   const { id } = useParams();
   const [bankroll, setBankroll] = useState(null);
   const [bets, setBets] = useState([]);
   const [betModalOpen, setBetModalOpen] = useState(false);
   const [betToEdit, setBetToEdit] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const theme = useTheme();
   useEffect(() => {
     fetchBankroll();
   }, [id]);
@@ -181,6 +122,66 @@ const BankrollView = () => {
 
   const handleFilterChange = (key, value) => {
     setGraphFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const graphOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+        labels: {
+          color: mode === "dark" ? "white" : "black",
+          font: {
+            size: 14,
+            family: "Arial, sans-serif",
+          },
+        },
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: mode === "dark" ? "white" : "black",
+        titleColor: "#000000",
+        titleFont: {
+          weight: "bold",
+        },
+        bodyColor: "#000000", // Black body text
+        borderColor: "#4CAF50", // Green border
+        borderWidth: 1,
+        padding: 10,
+        callbacks: {
+          title: (tooltipItems) => {
+            // Show the date as the title
+            return tooltipItems[0].label;
+          },
+          label: (tooltipItem) => {
+            // Show the capital amount
+            const value = tooltipItem.raw; // Get the data value
+            return `Capital: ${value}$`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: mode === "dark" ? "white" : "black",
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.1)",
+        },
+      },
+      y: {
+        ticks: {
+          color: mode === "dark" ? "white" : "black",
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.1)",
+        },
+      },
+    },
+    spanGaps: false,
   };
 
   const calculateGraphData = (bets) => {
@@ -258,7 +259,6 @@ const BankrollView = () => {
 
   const handleBetSubmit = async (betData) => {
     const formData = new FormData();
-    console.log(betData);
 
     // Append all fields to FormData
     formData.append("date", betData.date.toISOString());
@@ -321,8 +321,7 @@ const BankrollView = () => {
     <Box
       sx={{
         padding: "2rem",
-        background: "linear-gradient(to bottom, #192232, #1e293b)",
-        color: "#fff",
+        background: theme.palette.primary.main,
       }}
     >
       <Box
@@ -463,7 +462,7 @@ const BankrollView = () => {
                 ))}
               </Select>
             </FormControl>
-            <Button
+            {/* <Button
               variant={
                 graphFilters.includeStartingCapital ? "contained" : "outlined"
               }
@@ -502,7 +501,7 @@ const BankrollView = () => {
               {graphFilters.includeStartingCapital
                 ? "From Start"
                 : "From Filtered Date"}
-            </Button>
+            </Button> */}
           </Box>
           <Box
             sx={{
@@ -540,29 +539,44 @@ const BankrollView = () => {
             {
               label: "BETS",
               value: `${bets?.length}`,
-              color: "white",
+              color: mode === "dark" ? "white" : "black",
             },
             {
               label: "PROFIT",
               value: `${bankroll?.stats?.totalProfit}${bankroll?.currency?.symbol}`,
-              color: bankroll?.stats?.totalProfit >= 0 ? "white" : "#FF5252",
+              color:
+                bankroll?.stats?.totalProfit >= 0
+                  ? mode === "dark"
+                    ? "white"
+                    : "black"
+                  : "#FF5252",
             },
             {
               label: "ROI",
               value: `${bankroll?.stats?.roi}%`,
-              color: bankroll?.stats?.roi >= 0 ? "white" : "#FF5252",
+              color:
+                bankroll?.stats?.roi >= 0
+                  ? mode === "dark"
+                    ? "white"
+                    : "black"
+                  : "#FF5252",
             },
             {
               label: "PROGRESSION",
               value: `${bankroll?.stats?.progression}%`,
-              color: bankroll?.stats?.progression >= 0 ? "white" : "#FF5252",
+              color:
+                bankroll?.stats?.progression >= 0
+                  ? mode === "dark"
+                    ? "white"
+                    : "black"
+                  : "#FF5252",
             },
           ].map((stat, index) => (
             <Box
               key={index}
               sx={{
                 flex: 1,
-                backgroundColor: "#334155",
+                bgcolor: theme.palette.secondary.main,
                 borderRadius: "12px",
                 padding: "1.5rem",
                 display: "flex",
@@ -570,7 +584,10 @@ const BankrollView = () => {
                 justifyContent: "center",
                 alignItems: "center",
                 position: "relative",
-                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+                boxShadow:
+                  mode === "dark"
+                    ? "0px 4px 12px #192232"
+                    : "0px 4px 12px rgba(0,0,0,0.2)",
               }}
             >
               {/* Stat Value */}
@@ -590,7 +607,7 @@ const BankrollView = () => {
               <Typography
                 variant="caption"
                 sx={{
-                  color: "rgba(255, 255, 255, 0.7)",
+                  color: mode === "dark" ? "white" : "black",
                   textTransform: "uppercase",
                   fontSize: "0.9rem",
                 }}
@@ -618,7 +635,7 @@ const BankrollView = () => {
             display: "flex",
             flexDirection: "column",
             gap: "1rem",
-            background: "#1e293b",
+            background: theme.palette.tertiary.main,
             padding: "1rem",
             borderRadius: "12px",
             boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
@@ -628,17 +645,12 @@ const BankrollView = () => {
             <Accordion
               key={yearData.year}
               sx={{
-                backgroundColor: "#334155",
-                color: "#ffffff",
+                background: theme.palette.secondary.main,
                 marginBottom: "1rem",
                 borderRadius: "8px",
                 boxShadow: "none",
                 "&.Mui-expanded": {
                   boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
-                  border:
-                    yearData.totalProfit >= 0
-                      ? "2px solid #4CAF50"
-                      : "2px solid #FF5252",
                 },
               }}
               defaultExpanded={
@@ -674,7 +686,7 @@ const BankrollView = () => {
                         yearData.totalProfit >= 0 ? "#4CAF50" : "#FF5252",
                       padding: "0.5rem 1rem",
                       borderRadius: "8px",
-                      color: "#ffffff",
+                      // color: "#ffffff",
                       fontWeight: "bold",
                     }}
                   >
@@ -690,8 +702,7 @@ const BankrollView = () => {
                   <Accordion
                     key={monthData.month}
                     sx={{
-                      backgroundColor: "#192232",
-                      color: "#ffffff",
+                      background: theme.palette.primary.main,
                       marginBottom: "0.5rem",
                       borderRadius: "8px",
                       boxShadow: "none",
@@ -750,6 +761,7 @@ const BankrollView = () => {
                     <AccordionDetails>
                       {monthData.bets.map((bet) => (
                         <BetCard
+                          mode={mode}
                           bankroll={bankroll}
                           key={bet.id}
                           bet={bet}
@@ -775,6 +787,7 @@ const BankrollView = () => {
           onClose={() => setBetModalOpen(false)}
           onSubmit={handleBetSubmit}
           initialData={betToEdit}
+          mode={mode}
         />
       )}
     </Box>

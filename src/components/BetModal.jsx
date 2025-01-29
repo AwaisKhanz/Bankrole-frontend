@@ -53,7 +53,7 @@ const initialValues = {
   status: "Pending",
 };
 
-const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
+const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
   const {
     control,
     handleSubmit,
@@ -129,14 +129,12 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
           boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.2)",
           background: theme.palette.tertiary.main,
           padding: "1rem",
-          color: "white",
         },
       }}
     >
       <DialogTitle
         sx={{
-          background: theme.palette.secondary.main,
-          color: "#FFFFFF",
+          background: theme.palette.primary.main,
           padding: "1.5rem",
           textAlign: "center",
           fontSize: "1.5rem",
@@ -168,14 +166,6 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
                       margin="normal"
                       error={!!errors.date}
                       helperText={errors.date?.message}
-                      sx={{
-                        "& .MuiInputBase-root": {
-                          padding: "0.8rem 1rem",
-                        },
-                        "& .MuiInputLabel-root": {
-                          top: "-4px",
-                        },
-                      }}
                     />
                   )}
                 />
@@ -187,33 +177,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
           )}
 
           {/* Sport Input */}
-          <FormControl
-            fullWidth
-            margin="normal"
-            error={!!errors.sport}
-            sx={{
-              marginBottom: "1rem",
-              minWidth: 200,
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.7)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#FFFFFF",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#FFFFFF",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255, 255, 255, 0.7)",
-                "&.Mui-focused": {
-                  color: "#FFFFFF",
-                },
-              },
-            }}
-          >
+          <FormControl fullWidth margin="normal" error={!!errors.sport}>
             <InputLabel>Sport</InputLabel>
             <Controller
               name="sport"
@@ -338,33 +302,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
           )}
 
           {/* Status Input */}
-          <FormControl
-            fullWidth
-            margin="normal"
-            error={!!errors.status}
-            sx={{
-              marginBottom: "1rem",
-              minWidth: 200,
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.7)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#FFFFFF",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#FFFFFF",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255, 255, 255, 0.7)",
-                "&.Mui-focused": {
-                  color: "#FFFFFF",
-                },
-              },
-            }}
-          >
+          <FormControl fullWidth margin="normal" error={!!errors.status}>
             <InputLabel>Status</InputLabel>
             <Controller
               name="status"
@@ -395,14 +333,14 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData }) => {
           borderTop: "1px solid rgba(255, 255, 255, 0.2)",
         }}
       >
-        <Button onClick={onClose} color="secondary" variant="contained">
+        <Button onClick={onClose} variant="contained" color="primary">
           Cancel
         </Button>
         <Button
+          color="secondary"
+          variant="contained"
           type="submit"
           form="bet-form"
-          variant="contained"
-          color="primary"
           disabled={loading}
           startIcon={
             loading ? <CircularProgress size={20} color="inherit" /> : null

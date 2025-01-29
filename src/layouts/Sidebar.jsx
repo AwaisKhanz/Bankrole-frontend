@@ -13,7 +13,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { getMenuItems } from "../utils/menuItems";
 
-const Sidebar = () => {
+const Sidebar = ({ mode }) => {
   const { user } = useAuth();
   const location = useLocation();
   const theme = useTheme();
@@ -29,7 +29,7 @@ const Sidebar = () => {
         width: "240px",
         height: "100vh",
         background: theme.palette.primary.main,
-        color: "#FFFFFF",
+        color: mode === "dark" ? "white" : "black",
         display: { xs: "none", md: "block" },
         position: "fixed",
       }}
@@ -41,7 +41,13 @@ const Sidebar = () => {
           borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#FFFFFF" }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            color: mode === "dark" ? "white" : "black",
+          }}
+        >
           Welcome, {user?.username || "Guest"}
         </Typography>
         {user?.subscription?.status === "active" ? (
@@ -79,8 +85,15 @@ const Sidebar = () => {
               backgroundColor:
                 location.pathname === item.path ? "#123cb6" : "inherit",
               fontWeight: location.pathname === item.path ? "bold" : "normal",
+              color:
+                location.pathname === item.path
+                  ? mode === "dark"
+                    ? "white"
+                    : "white"
+                  : "",
               "&:hover": {
                 backgroundColor: "rgba(18, 60, 182, 0.8)",
+                color: mode === "dark" ? "white" : "white",
               },
             }}
           >
@@ -99,7 +112,12 @@ const Sidebar = () => {
             width: "100%",
           }}
         >
-          <Typography variant="body2" color="#FFFFFF">
+          <Typography
+            variant="body2"
+            sx={{
+              color: mode === "dark" ? "white" : "black",
+            }}
+          >
             Upgrade to access all features.
           </Typography>
           <Button

@@ -6,7 +6,7 @@ import api from "../services/api"; // Axios instance
 import { toast } from "react-toastify";
 import ConfirmationModal from "../components/ConfirmationModal";
 
-const Bankrolls = () => {
+const Bankrolls = ({ mode }) => {
   const [bankrolls, setBankrolls] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -101,6 +101,7 @@ const Bankrolls = () => {
               bankroll={bankroll}
               onEdit={handleEditBankroll}
               onDelete={handleDelete}
+              mode={mode}
             />
           </Grid>
         ))}
@@ -116,6 +117,7 @@ const Bankrolls = () => {
       {/* Reusable Confirmation Modal */}
       <ConfirmationModal
         open={confirmOpen}
+        mode={mode}
         title="Delete Bankroll"
         message="Are you sure you want to delete this bankroll? This action cannot be undone."
         onConfirm={confirmDelete}

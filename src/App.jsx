@@ -20,32 +20,44 @@ import BankrollView from "./pages/BankrollView";
 import RiskCalculator from "./pages/RiskCalculator";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import { Box, useTheme } from "@mui/material";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const App = () => {
+const App = ({ toggleTheme, mode }) => {
   const { loading } = useAuth();
+  const theme = useTheme();
 
   if (loading) {
     return <Loading message="Authenticating..." />;
   }
 
   return (
-    <>
+    <Box
+      sx={{
+        background: theme.palette.primary.main,
+      }}
+    >
       <ToastContainer />
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/login" element={<Login mode={mode} />} />
+        <Route path="/register" element={<Register mode={mode} />} />
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword mode={mode} />}
+        />
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPassword mode={mode} />}
+        />
 
         {/* Protected routes with Sidebar */}
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <DashboardLayout />
+              <DashboardLayout toggleTheme={toggleTheme} mode={mode} />
             </ProtectedRoute>
           }
         >
@@ -53,7 +65,7 @@ const App = () => {
             path="bankroll/:id"
             element={
               <SubscriptionGuard>
-                <BankrollView />
+                <BankrollView mode={mode} />
               </SubscriptionGuard>
             }
           />
@@ -62,7 +74,7 @@ const App = () => {
             index
             element={
               <SubscriptionGuard>
-                <Bankrolls />
+                <Bankrolls mode={mode} />
               </SubscriptionGuard>
             }
           />
@@ -70,19 +82,22 @@ const App = () => {
             path="calendar"
             element={
               <SubscriptionGuard>
-                <CalendarPage />
+                <CalendarPage mode={mode} />
               </SubscriptionGuard>
             }
           />
-          <Route path="ranking" element={<Ranking />} />
-          <Route path="/risk-calculator" element={<RiskCalculator />} />
+          <Route path="ranking" element={<Ranking mode={mode} />} />
+          <Route
+            path="/risk-calculator"
+            element={<RiskCalculator mode={mode} />}
+          />
 
           {/* Admin Routes */}
           <Route
             path="user-management"
             element={
               <AdminMiddleware>
-                <UserManagement />
+                <UserManagement mode={mode} />
               </AdminMiddleware>
             }
           />
@@ -90,7 +105,7 @@ const App = () => {
             path="betting-management"
             element={
               <AdminMiddleware>
-                <BettingManagement />
+                <BettingManagement mode={mode} />
               </AdminMiddleware>
             }
           />
@@ -99,12 +114,12 @@ const App = () => {
           path="/payment"
           element={
             <Elements stripe={stripePromise}>
-              <PaymentPage />
+              <PaymentPage mode={mode} />
             </Elements>
           }
         />
       </Routes>
-    </>
+    </Box>
   );
 };
 

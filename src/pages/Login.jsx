@@ -17,7 +17,7 @@ const loginSchema = z.object({
     .nonempty("Password is required"),
 });
 
-const Login = () => {
+const Login = ({ mode }) => {
   const [loading, setLoading] = useState(false);
   const {
     register,
@@ -46,7 +46,6 @@ const Login = () => {
         minHeight: "100vh",
         padding: "1rem",
         background: theme.palette.primary.main,
-        color: "white",
       }}
     >
       <Box
@@ -62,7 +61,7 @@ const Login = () => {
       >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
-            src="logo_black.png"
+            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
             style={{
               width: "200px",
               height: "60px",

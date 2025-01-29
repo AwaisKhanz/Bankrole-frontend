@@ -29,7 +29,7 @@ const registerSchema = z
     message: "Passwords do not match",
   });
 
-const Register = () => {
+const Register = ({ mode }) => {
   const {
     register,
     handleSubmit,
@@ -65,7 +65,6 @@ const Register = () => {
         padding: "1rem",
         background: theme.palette.primary.main,
         position: "relative",
-        color: "white",
       }}
     >
       {/* Form Container */}
@@ -82,7 +81,7 @@ const Register = () => {
       >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
-            src="logo_black.png"
+            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
             style={{
               width: "200px",
               height: "60px",

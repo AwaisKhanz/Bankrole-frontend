@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, Collapse, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Collapse,
+  IconButton,
+  useTheme,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -11,7 +18,7 @@ const getVerificationAlert = (bet) => {
     return (
       <Alert
         severity="warning"
-        sx={{ backgroundColor: "#FFEB3B", color: "#000", mb: 2 }}
+        sx={{ backgroundColor: "#FFEB3B", color: "#000" }}
       >
         This bet is pending verification.
       </Alert>
@@ -21,7 +28,7 @@ const getVerificationAlert = (bet) => {
     return (
       <Alert
         severity="error"
-        sx={{ backgroundColor: "#FFCDD2", color: "#000", mb: 2 }}
+        sx={{ backgroundColor: "#FFCDD2", color: "#000" }}
       >
         This bet verification has been rejected. Please correct your
         verification code.
@@ -31,8 +38,9 @@ const getVerificationAlert = (bet) => {
   return null;
 };
 
-const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
+const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
   const [expanded, setExpanded] = useState(false);
+  const theme = useTheme();
 
   const handleExpand = () => {
     setExpanded(!expanded);
@@ -42,11 +50,10 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
     <Box
       sx={{
         marginBottom: "1rem",
-        backgroundColor: "#334155",
+        background: theme.palette.secondary.main,
         borderRadius: "8px",
         overflow: "hidden",
         boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-        color: "#fff",
       }}
     >
       {/* Verification Alert */}
@@ -63,9 +70,6 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
           padding: "1rem",
           cursor: "pointer",
           transition: "background-color 0.3s ease",
-          "&:hover": {
-            backgroundColor: "#2e3b4e",
-          },
         }}
       >
         {/* Status Badge */}
@@ -80,7 +84,6 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
                 : bet.status === "Loss"
                 ? "#FF5252"
                 : "#B0BEC5",
-            color: "#FFFFFF",
             padding: "0rem 0.3rem",
             borderTopLeftRadius: "8px",
             borderBottomLeftRadius: "8px",
@@ -95,19 +98,11 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
         </Box>
         {/* Left Section */}
         <Box sx={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-          <IconButton
-            sx={{
-              color: "#ffffff",
-            }}
-            onClick={handleExpand}
-          >
+          <IconButton onClick={handleExpand}>
             {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
           <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Typography
-              variant="body2"
-              sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-            >
+            <Typography variant="body2">
               {new Date(bet.date).toLocaleString()}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
@@ -131,34 +126,18 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
         >
           {/* Odds */}
           <Box textAlign="center">
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "#ffffff" }}
-            >
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               {bet.odds}
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-            >
-              Odds
-            </Typography>
+            <Typography variant="caption">Odds</Typography>
           </Box>
 
           {/* Stake */}
           <Box textAlign="center">
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", color: "#ffffff" }}
-            >
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               {bet.stake}€
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-            >
-              Stake
-            </Typography>
+            <Typography variant="caption">Stake</Typography>
           </Box>
 
           {/* Gain */}
@@ -172,12 +151,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
             >
               {bet.gain}€
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-            >
-              Gain
-            </Typography>
+            <Typography variant="caption">Gain</Typography>
           </Box>
 
           {/* Profit */}
@@ -191,12 +165,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
             >
               {bet.profit}€
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-            >
-              Profit
-            </Typography>
+            <Typography variant="caption">Profit</Typography>
           </Box>
         </Box>
       </Box>
@@ -206,8 +175,11 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll }) => {
         <Box
           sx={{
             padding: "1rem",
-            backgroundColor: "#2e3b4e",
-            borderTop: "1px solid rgba(255, 255, 255, 0.2)",
+            background: theme.palette.secondary.main,
+            borderTop:
+              mode === "dark"
+                ? "1px solid rgba(255, 255, 255, 0.2)"
+                : `1px solid ${theme.palette.primary.main}`,
           }}
         >
           {/* Show additional data in details for small screens */}

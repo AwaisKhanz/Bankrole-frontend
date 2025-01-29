@@ -14,7 +14,7 @@ const forgotPasswordSchema = z.object({
     .nonempty("Email is required"),
 });
 
-const ForgotPassword = () => {
+const ForgotPassword = ({ mode }) => {
   const [loading, setLoading] = useState(false);
   const {
     register,
@@ -47,7 +47,6 @@ const ForgotPassword = () => {
         minHeight: "100vh",
         padding: "1rem",
         background: theme.palette.primary.main,
-        color: "white",
       }}
     >
       <Box
@@ -63,7 +62,7 @@ const ForgotPassword = () => {
       >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
-            src="/logo_black.png"
+            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
             style={{
               width: "200px",
               height: "60px",

@@ -18,7 +18,7 @@ const ConfirmationModal = ({ open, title, message, onConfirm, onCancel }) => {
         </Typography>
       </DialogContent>
       <DialogActions sx={{ padding: "20px" }}>
-        <Button onClick={onCancel} color="secondary" variant="contained">
+        <Button onClick={onCancel} color="primary" variant="contained">
           Cancel
         </Button>
         <Button onClick={onConfirm} color="error" variant="contained">

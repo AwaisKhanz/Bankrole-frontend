@@ -4,7 +4,7 @@ import "react-calendar/dist/Calendar.css";
 import { Box, Typography, useTheme } from "@mui/material";
 import api from "../services/api";
 
-const CalendarPage = () => {
+const CalendarPage = ({ mode }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dailyData, setDailyData] = useState({});
   const theme = useTheme();
@@ -19,7 +19,7 @@ const CalendarPage = () => {
           const date = new Date(bet.date);
           const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
             .toString()
-            .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`; // ✅ Corrected here
+            .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
           let profit = 0;
 
           if (bet.status === "Won") {
@@ -60,8 +60,8 @@ const CalendarPage = () => {
     <Box
       sx={{
         padding: "2rem",
-        background: theme.palette.primary.main,
-        color: "white",
+        background: mode === "dark" ? "#1e293b" : "#ffffff",
+        color: mode === "dark" ? "#ffffff" : "#000000",
       }}
     >
       <Typography
@@ -103,7 +103,9 @@ const CalendarPage = () => {
                       ? "#4CAF50"
                       : getDailyProfit(date).profit < 0
                       ? "#FF5252"
-                      : "#FFFFFF",
+                      : mode === "dark"
+                      ? "#ffffff"
+                      : "#000000",
                 }}
               >
                 {getDailyProfit(date).profit !== 0 &&
@@ -119,6 +121,7 @@ const CalendarPage = () => {
             if (profit < 0) return "loss-day";
             return "neutral-day";
           }}
+          className={`react-calendar ${mode === "dark" ? "dark" : "light"}`} // Apply dynamic class
         />
       </Box>
     </Box>

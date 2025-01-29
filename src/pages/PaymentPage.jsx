@@ -18,7 +18,7 @@ import { useAuth } from "../context/AuthContext";
 import PaymentSuccessModal from "../components/PaymentSuccessModal";
 import { useNavigate } from "react-router-dom";
 
-const SubscriptionCard = ({ title, description, children }) => {
+const SubscriptionCard = ({ title, description, children, mode }) => {
   const theme = useTheme();
   return (
     <Card
@@ -29,13 +29,12 @@ const SubscriptionCard = ({ title, description, children }) => {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         background: theme.palette.secondary.main,
         padding: { sm: "0.5", lg: "1.5rem" },
-        color: "white",
       }}
     >
       <CardContent>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <img
-            src="/logo_black.png"
+            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
             alt="Logo"
             style={{
               width: "50%",
@@ -78,7 +77,7 @@ const LoadingScreen = () => (
   </Box>
 );
 
-const PaymentPage = () => {
+const PaymentPage = ({ mode }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { user, fetchUserProfile, loading: isAuthentication } = useAuth();
@@ -178,6 +177,7 @@ const PaymentPage = () => {
         }}
       >
         <SubscriptionCard
+          mode={mode}
           title="You are a Pro User!"
           description={`Your subscription is active until ${new Date(
             user.subscription.currentPeriodEnd

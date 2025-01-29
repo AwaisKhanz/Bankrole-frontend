@@ -45,7 +45,7 @@ const initialValues = {
   currency: "",
 };
 
-const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
+const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
   const {
     register,
     handleSubmit,
@@ -120,16 +120,16 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
         sx: {
           borderRadius: "16px",
           boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.2)",
-          background: theme.palette.tertiary.main,
+          background: theme.palette.primary.main,
           padding: "1rem",
-          color: "white",
+          color: theme.palette.text.primary,
         },
       }}
     >
       <DialogTitle
         sx={{
           background: theme.palette.secondary.main,
-          color: "#FFFFFF",
+          color: theme.palette.primary.contrastText,
           padding: "1.5rem",
           textAlign: "center",
           fontSize: "1.5rem",
@@ -161,7 +161,7 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
             variant="body2"
             fontWeight="bold"
             gutterBottom
-            sx={{ marginTop: "1rem" }}
+            sx={{ marginTop: "1rem", color: theme.palette.text.primary }}
           >
             Status
           </Typography>
@@ -174,10 +174,10 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               justifyContent: "space-between",
               width: "100%",
               marginBottom: "1.5rem",
-              border: "1px solid #4A5568",
+              border: `1px solid ${theme.palette.divider}`,
               borderRadius: "8px",
               padding: "0.75rem",
-              backgroundColor: "#2D3748",
+              backgroundColor: theme.palette.primary.main,
             }}
           >
             <ToggleButton
@@ -185,12 +185,17 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               sx={{
                 flex: 1,
                 textTransform: "none",
-                border: "1px solid #4A5568",
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: "8px",
                 backgroundColor:
-                  visibility === "Public" ? "#1649FF" : "transparent",
-                color: visibility === "Public" ? "#FFFFFF" : "#A0AEC0",
-                "&:hover": { backgroundColor: "#3B4A5B" },
+                  visibility === "Public"
+                    ? theme.palette.primary.main
+                    : "transparent",
+                color:
+                  visibility === "Public"
+                    ? theme.palette.primary.contrastText
+                    : theme.palette.text.secondary,
+                "&:hover": { backgroundColor: theme.palette.action.hover },
               }}
             >
               <VisibilityIcon sx={{ marginRight: "8px" }} />
@@ -201,12 +206,17 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
               sx={{
                 flex: 1,
                 textTransform: "none",
-                border: "1px solid #4A5568",
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: "8px",
                 backgroundColor:
-                  visibility === "Private" ? "#1649FF" : "transparent",
-                color: visibility === "Private" ? "#FFFFFF" : "#A0AEC0",
-                "&:hover": { backgroundColor: "#3B4A5B" },
+                  visibility === "Private"
+                    ? theme.palette.primary.main
+                    : "transparent",
+                color:
+                  visibility === "Private"
+                    ? theme.palette.primary.contrastText
+                    : theme.palette.text.secondary,
+                "&:hover": { backgroundColor: theme.palette.action.hover },
               }}
             >
               <LockIcon sx={{ marginRight: "8px" }} />
@@ -226,24 +236,6 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
           <FormControl
             sx={{
               minWidth: 200,
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.7)",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#FFFFFF",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#FFFFFF",
-                  borderWidth: "2px",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "rgba(255, 255, 255, 0.7)",
-                "&.Mui-focused": {
-                  color: "#FFFFFF",
-                },
-              },
             }}
             fullWidth
             margin="normal"
@@ -280,17 +272,17 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData }) => {
           display: "flex",
           justifyContent: "end",
           paddingTop: "1rem",
-          borderTop: "1px solid #E0E0E0",
+          borderTop: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Button onClick={onClose} color="secondary" variant="contained">
+        <Button onClick={onClose} variant="contained" color="primary">
           Cancel
         </Button>
         <Button
+          color="secondary"
+          variant="contained"
           type="submit"
           form="bankroll-form"
-          variant="contained"
-          color="primary"
         >
           {initialData ? "Update" : "Add"}
         </Button>

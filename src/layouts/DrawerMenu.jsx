@@ -13,7 +13,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { getMenuItems } from "../utils/menuItems";
 
-const DrawerMenu = ({ isOpen, toggleDrawer }) => {
+const DrawerMenu = ({ isOpen, toggleDrawer, mode }) => {
   const { user } = useAuth();
   const location = useLocation();
   const theme = useTheme();
@@ -31,7 +31,7 @@ const DrawerMenu = ({ isOpen, toggleDrawer }) => {
         "& .MuiDrawer-paper": {
           width: "240px",
           background: theme.palette.primary.main,
-          color: "#FFFFFF",
+          color: mode === "dark" ? "white" : "black",
           boxSizing: "border-box",
         },
       }}
@@ -46,7 +46,7 @@ const DrawerMenu = ({ isOpen, toggleDrawer }) => {
       >
         <List>
           <img
-            src="/logo_black.png"
+            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
             alt="Logo"
             style={{
               width: "100%",
@@ -66,8 +66,15 @@ const DrawerMenu = ({ isOpen, toggleDrawer }) => {
                 backgroundColor:
                   location.pathname === item.path ? "#123cb6" : "inherit",
                 fontWeight: location.pathname === item.path ? "bold" : "normal",
+                color:
+                  location.pathname === item.path
+                    ? mode === "dark"
+                      ? "white"
+                      : "white"
+                    : "",
                 "&:hover": {
                   backgroundColor: "rgba(18, 60, 182, 0.8)",
+                  color: mode === "dark" ? "white" : "white",
                 },
               }}
               onClick={toggleDrawer}
@@ -84,7 +91,12 @@ const DrawerMenu = ({ isOpen, toggleDrawer }) => {
               textAlign: "center",
             }}
           >
-            <Typography variant="body2" color="#FFFFFF">
+            <Typography
+              variant="body2"
+              sx={{
+                color: mode === "dark" ? "white" : "black",
+              }}
+            >
               Upgrade to access all features.
             </Typography>
             <Button

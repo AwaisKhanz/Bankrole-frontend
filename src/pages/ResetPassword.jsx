@@ -17,7 +17,7 @@ const resetPasswordSchema = z
     message: "Passwords do not match",
   });
 
-const ResetPassword = () => {
+const ResetPassword = ({ mode }) => {
   const { token } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,6 @@ const ResetPassword = () => {
         minHeight: "100vh",
         padding: "1rem",
         background: theme.palette.primary.main,
-        color: "white",
       }}
     >
       <Box
@@ -71,7 +70,7 @@ const ResetPassword = () => {
       >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <img
-            src="/logo_black.png"
+            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
             style={{
               width: "200px",
               height: "60px",

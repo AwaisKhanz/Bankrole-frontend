@@ -13,7 +13,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 
-const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
+const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -27,13 +27,20 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
       sx={{
         borderRadius: "8px",
         overflow: "hidden",
-        boxShadow: "0px 4px 12px #192232",
+        boxShadow:
+          mode === "dark"
+            ? "0px 4px 12px #192232"
+            : "0px 4px 12px rgba(0,0,0,0.2)",
+
         transform: "scale(1)",
         transition: "transform 0.3s ease",
         cursor: "pointer",
         "&:hover": {
           transform: "scale(1.02)",
-          boxShadow: "0px 6px 16px #192232",
+          boxShadow:
+            mode === "dark"
+              ? "0px 6px 16px #192232"
+              : "0px 6px 16px rgba(0,0,0,0.2)",
         },
       }}
     >
@@ -42,7 +49,6 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
           borderRadius: "12px",
           boxShadow: "none",
           bgcolor: theme.palette.secondary.main,
-          color: "white",
           position: "relative",
         }}
       >
@@ -91,7 +97,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
                   e.stopPropagation(); // Prevent triggering the card click
                   onEdit(bankroll);
                 }}
-                sx={{ color: "#FFFFFF", marginRight: "8px" }}
+                sx={{ marginRight: "8px" }}
               >
                 <EditIcon />
               </IconButton>
@@ -123,7 +129,12 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
               <Typography
                 variant="h5"
                 sx={{
-                  color: bankroll?.stats.roi >= 0 ? "white" : "#FF5252",
+                  color:
+                    bankroll?.stats.roi >= 0
+                      ? mode === "dark"
+                        ? "white"
+                        : "black"
+                      : "#FF5252",
                   fontWeight: "bold",
                 }}
               >
@@ -132,7 +143,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
               <Typography
                 variant="caption"
                 sx={{
-                  color: "rgba(255, 255, 255, 0.7)",
+                  color: mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "black",
                   textTransform: "uppercase",
                   marginTop: "4px",
                   display: "block",
@@ -153,7 +164,12 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
               <Typography
                 variant="h5"
                 sx={{
-                  color: bankroll?.stats.progression >= 0 ? "white" : "#FF5252",
+                  color:
+                    bankroll?.stats.progression >= 0
+                      ? mode === "dark"
+                        ? "white"
+                        : "black"
+                      : "#FF5252",
                   fontWeight: "bold",
                 }}
               >
@@ -162,7 +178,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
               <Typography
                 variant="caption"
                 sx={{
-                  color: "rgba(255, 255, 255, 0.7)",
+                  color: mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "black",
                   textTransform: "uppercase",
                   marginTop: "4px",
                   display: "block",
@@ -178,7 +194,8 @@ const BankrollCard = ({ bankroll, onEdit, onDelete }) => {
             sx={{
               marginTop: "1rem",
               textAlign: "center",
-              backgroundColor: "#1e293b",
+              bgcolor: theme.palette.primary.main,
+              color: mode === "dark" ? "white" : "black",
               padding: "8px",
               borderRadius: "4px",
             }}

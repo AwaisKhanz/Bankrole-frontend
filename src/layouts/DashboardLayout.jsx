@@ -17,8 +17,10 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuth } from "../context/AuthContext";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 
-const DashboardLayout = () => {
+const DashboardLayout = ({ toggleTheme, mode }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const { user, logOut } = useAuth();
@@ -42,12 +44,18 @@ const DashboardLayout = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", color: "white" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        color: mode === "dark" ? "white" : "black",
+      }}
+    >
       {/* Sidebar for Desktop */}
-      <Sidebar />
+      <Sidebar mode={mode} />
 
       {/* Drawer for Mobile */}
-      <DrawerMenu isOpen={drawerOpen} toggleDrawer={toggleDrawer} />
+      <DrawerMenu isOpen={drawerOpen} toggleDrawer={toggleDrawer} mode={mode} />
 
       {/* Navbar */}
       <AppBar
@@ -56,7 +64,8 @@ const DashboardLayout = () => {
           width: { md: "calc(100% - 240px)" },
           ml: { md: "240px" },
           height: "64px",
-          background: "#192232",
+          background: theme.palette.primary.main,
+          boxShadow: "none",
         }}
       >
         <Toolbar
@@ -77,7 +86,7 @@ const DashboardLayout = () => {
               <MenuIcon />
             </IconButton>
             <img
-              src="/logo_black.png"
+              src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
               alt="Logo"
               style={{
                 width: "150px",
@@ -102,6 +111,14 @@ const DashboardLayout = () => {
                 />
               </Link>
             )}
+            {/* Theme Toggle */}
+            <IconButton onClick={toggleTheme} sx={{ marginRight: "1rem" }}>
+              {mode === "dark" ? (
+                <Brightness7Icon sx={{ color: "yellow" }} />
+              ) : (
+                <Brightness4Icon sx={{ color: "#333" }} />
+              )}
+            </IconButton>
             <IconButton edge="end" color="inherit" onClick={openProfileMenu}>
               <AccountCircleIcon />
             </IconButton>

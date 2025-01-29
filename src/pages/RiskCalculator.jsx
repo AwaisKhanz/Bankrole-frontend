@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Stack } from "@mui/material";
 
-const RiskCalculator = () => {
+const RiskCalculator = ({ mode }) => {
   const [bankroll, setBankroll] = useState("");
   const [percentage, setPercentage] = useState("");
   const [result, setResult] = useState("");
@@ -34,16 +34,24 @@ const RiskCalculator = () => {
     setResult("");
   };
 
+  // Define colors based on the mode
+  const backgroundColor = mode === "dark" ? "#1e293b" : "#ffffff";
+  const textColor = mode === "dark" ? "#ffffff" : "#000000";
+  const boxShadow =
+    mode === "dark"
+      ? "0px 4px 12px rgba(0, 0, 0, 0.2)"
+      : "0px 4px 12px rgba(0, 0, 0, 0.1)";
+
   return (
     <Box
       sx={{
         maxWidth: "500px",
         margin: "50px auto",
         padding: "30px",
-        backgroundColor: "#1e293b",
+        backgroundColor: backgroundColor,
         borderRadius: "12px",
-        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-        color: "#ffffff",
+        boxShadow: boxShadow,
+        color: textColor,
       }}
     >
       <Typography
@@ -51,7 +59,7 @@ const RiskCalculator = () => {
         fontWeight="bold"
         textAlign="center"
         mb={3}
-        color="#ffffff"
+        color={textColor}
       >
         Risk Calculator
       </Typography>
@@ -89,6 +97,17 @@ const RiskCalculator = () => {
           color="error"
           fullWidth
           onClick={clearFields}
+          sx={{
+            borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
+            color: mode === "dark" ? "#FF5252" : "#FF5252",
+            "&:hover": {
+              borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
+              backgroundColor:
+                mode === "dark"
+                  ? "rgba(255, 82, 82, 0.1)"
+                  : "rgba(255, 82, 82, 0.1)",
+            },
+          }}
         >
           Clear
         </Button>
