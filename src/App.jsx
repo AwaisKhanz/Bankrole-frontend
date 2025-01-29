@@ -29,7 +29,7 @@ const App = ({ toggleTheme, mode }) => {
   const theme = useTheme();
 
   if (loading) {
-    return <Loading message="Authenticating..." />;
+    return <Loading message="Authenticating..." mode={mode} />;
   }
 
   return (

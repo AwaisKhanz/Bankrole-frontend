@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
 
-const Loading = ({ message = "Loading...", size = 40 }) => {
+const Loading = ({ message = "Loading...", size = 40, mode }) => {
   const theme = useTheme();
   return (
     <Box
@@ -25,7 +25,7 @@ const Loading = ({ message = "Loading...", size = 40 }) => {
       />
       <Typography
         variant="body1"
-        color="white"
+        color={mode === "dark" ? "white" : "black"}
         sx={{ fontWeight: 600, fontSize: "32px" }}
       >
         {message}
