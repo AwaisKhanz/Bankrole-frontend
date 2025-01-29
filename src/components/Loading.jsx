@@ -18,7 +18,10 @@ const Loading = ({ message = "Loading...", size = 40 }) => {
     >
       <CircularProgress
         size={size}
-        sx={{ marginBottom: "1rem", color: "white" }}
+        sx={{
+          marginBottom: "1rem",
+          color: mode === "dark" ? "white" : "black",
+        }}
       />
       <Typography
         variant="body1"
