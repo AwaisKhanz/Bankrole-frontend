@@ -5,7 +5,7 @@ const theme = (mode) =>
     palette: {
       mode,
       primary: {
-        main: mode === "dark" ? "#192232" : "#f0f0f0",
+        main: mode === "dark" ? "#192232" : "#ffffff",
         contrastText: mode === "dark" ? "#ffffff" : "#000000",
       },
       secondary: {

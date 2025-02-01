@@ -66,6 +66,7 @@ const DashboardLayout = ({ toggleTheme, mode }) => {
           height: "64px",
           background: theme.palette.primary.main,
           boxShadow: "none",
+          borderBottom: mode !== "dark" && "1px solid #e0e0e0",
         }}
       >
         <Toolbar

@@ -26,21 +26,14 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
       onClick={() => navigate(`/bankroll/${bankroll._id}`)}
       sx={{
         borderRadius: "8px",
+
         overflow: "hidden",
-        boxShadow:
-          mode === "dark"
-            ? "0px 4px 12px #192232"
-            : "0px 4px 12px rgba(0,0,0,0.2)",
 
         transform: "scale(1)",
         transition: "transform 0.3s ease",
         cursor: "pointer",
         "&:hover": {
           transform: "scale(1.02)",
-          boxShadow:
-            mode === "dark"
-              ? "0px 6px 16px #192232"
-              : "0px 6px 16px rgba(0,0,0,0.2)",
         },
       }}
     >
@@ -48,7 +41,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
         sx={{
           borderRadius: "12px",
           boxShadow: "none",
-          bgcolor: theme.palette.secondary.main,
+          bgcolor: mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
           position: "relative",
         }}
       >
@@ -118,7 +111,10 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
             sx={{
               marginTop: "1rem",
               paddingTop: "1rem", // Add padding above the top border
-              borderTop: "1px solid rgba(255, 255, 255, 0.2)", // Top border
+              borderTop:
+                mode === "dark"
+                  ? "1px solid rgba(255, 255, 255, 0.2)" // Dark mode border
+                  : "1px solid rgba(0, 0, 0, 0.1)", // Light mode border
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -156,7 +152,10 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
               sx={{
                 width: "1px",
                 height: "50px",
-                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                backgroundColor:
+                  mode === "dark"
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : `${theme.palette.grey[300]}`,
                 alignSelf: "stretch",
               }}
             ></Box>

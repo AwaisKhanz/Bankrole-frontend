@@ -32,6 +32,7 @@ const Sidebar = ({ mode }) => {
         color: mode === "dark" ? "white" : "black",
         display: { xs: "none", md: "block" },
         position: "fixed",
+        borderRight: mode !== "dark" && "1px solid #e0e0e0",
       }}
     >
       <Box
@@ -97,7 +98,10 @@ const Sidebar = ({ mode }) => {
               },
             }}
           >
-            <ListItemText primary={item.name} />
+            <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              {item.icon} {/* Display the icon */}
+              <ListItemText primary={item.name} />
+            </Box>
           </ListItem>
         ))}
       </List>

@@ -51,7 +51,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
       sx={{
         marginBottom: "1rem",
         background: theme.palette.secondary.main,
-        borderRadius: "8px",
+        borderRadius: "12px",
         overflow: "hidden",
         boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
       }}
@@ -67,7 +67,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "1rem",
+          padding: "0.5rem 1rem",
           cursor: "pointer",
           transition: "background-color 0.3s ease",
         }}
@@ -89,9 +89,10 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             borderBottomLeftRadius: "8px",
             writingMode: "vertical-rl",
             textAlign: "center",
-            fontWeight: "bold",
+            fontWeight: "500",
             fontSize: "0.9rem",
             height: "100%",
+            color: "white",
           }}
         >
           {bet.status}
@@ -105,7 +106,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             <Typography variant="body2">
               {new Date(bet.date).toLocaleString()}
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h6" sx={{ fontWeight: "500" }}>
               {bet.label}
             </Typography>
           </Box>
@@ -120,24 +121,33 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             },
             alignItems: "center",
             justifyContent: "space-around",
-            gap: "30px",
+            gap: "40px",
             mr: "50px",
           }}
         >
           {/* Odds */}
           <Box textAlign="center">
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            <Typography
+              sx={{ fontWeight: "500", fontSize: { xs: "18px", md: "20px" } }}
+            >
               {bet.odds}
             </Typography>
-            <Typography variant="caption">Odds</Typography>
+            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              Odds
+            </Typography>
           </Box>
 
           {/* Stake */}
           <Box textAlign="center">
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "500", fontSize: { xs: "18px", md: "20px" } }}
+            >
               {bet.stake}€
             </Typography>
-            <Typography variant="caption">Stake</Typography>
+            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              Stake
+            </Typography>
           </Box>
 
           {/* Gain */}
@@ -145,13 +155,16 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             <Typography
               variant="h6"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "500",
                 color: bet.gain >= 0 ? "#4CAF50" : "#FF5252",
+                fontSize: { xs: "18px", md: "20px" },
               }}
             >
               {bet.gain}€
             </Typography>
-            <Typography variant="caption">Gain</Typography>
+            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              Gain
+            </Typography>
           </Box>
 
           {/* Profit */}
@@ -159,13 +172,16 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             <Typography
               variant="h6"
               sx={{
-                fontWeight: "bold",
+                fontWeight: "500",
                 color: bet.profit >= 0 ? "#4CAF50" : "#FF5252",
+                fontSize: { xs: "18px", md: "20px" },
               }}
             >
               {bet.profit}€
             </Typography>
-            <Typography variant="caption">Profit</Typography>
+            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              Profit
+            </Typography>
           </Box>
         </Box>
       </Box>
@@ -197,7 +213,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             <Box textAlign="center">
               <Typography
                 variant="h6"
-                sx={{ fontWeight: "bold", color: "#ffffff" }}
+                sx={{ fontWeight: "500", color: "#ffffff" }}
               >
                 {bet.odds}
               </Typography>
@@ -211,7 +227,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             <Box textAlign="center">
               <Typography
                 variant="h6"
-                sx={{ fontWeight: "bold", color: "#ffffff" }}
+                sx={{ fontWeight: "500", color: "#ffffff" }}
               >
                 {bet.stake}€
               </Typography>
@@ -226,7 +242,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontWeight: "bold",
+                  fontWeight: "500",
                   color: bet.gain >= 0 ? "#4CAF50" : "#FF5252",
                 }}
               >
@@ -243,7 +259,7 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontWeight: "bold",
+                  fontWeight: "500",
                   color: bet.profit >= 0 ? "#4CAF50" : "#FF5252",
                 }}
               >

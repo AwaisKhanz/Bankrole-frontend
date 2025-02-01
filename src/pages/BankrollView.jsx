@@ -141,7 +141,7 @@ const BankrollView = ({ mode }) => {
       },
       tooltip: {
         enabled: true,
-        backgroundColor: mode === "dark" ? "white" : "black",
+        backgroundColor: mode === "dark" ? "white" : "white",
         titleColor: "#000000",
         titleFont: {
           weight: "bold",
@@ -391,7 +391,6 @@ const BankrollView = ({ mode }) => {
             background: "rgba(22, 73, 255, 0.1)",
             borderRadius: "12px",
             padding: "1rem",
-            marginBottom: "2rem",
             position: "relative",
           }}
         >
@@ -529,9 +528,8 @@ const BankrollView = ({ mode }) => {
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "space-around",
-          padding: "1.5rem",
+          padding: "1.5rem 0",
           gap: "1rem",
-          marginBottom: "2rem",
         }}
       >
         {!loading &&
@@ -576,7 +574,8 @@ const BankrollView = ({ mode }) => {
               key={index}
               sx={{
                 flex: 1,
-                bgcolor: theme.palette.secondary.main,
+                bgcolor:
+                  mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
                 borderRadius: "12px",
                 padding: "1.5rem",
                 display: "flex",
@@ -584,16 +583,12 @@ const BankrollView = ({ mode }) => {
                 justifyContent: "center",
                 alignItems: "center",
                 position: "relative",
-                boxShadow:
-                  mode === "dark"
-                    ? "0px 4px 12px #192232"
-                    : "0px 4px 12px rgba(0,0,0,0.2)",
               }}
             >
               {/* Stat Value */}
               <Typography
                 variant="h6"
-                fontWeight="bold"
+                fontWeight="500"
                 sx={{
                   color: stat.color,
                   fontSize: "1.5rem",
@@ -622,7 +617,6 @@ const BankrollView = ({ mode }) => {
       <Typography
         variant="h5"
         sx={{
-          marginTop: "1rem",
           marginBottom: "1rem",
           fontWeight: "bold",
         }}
@@ -635,10 +629,13 @@ const BankrollView = ({ mode }) => {
             display: "flex",
             flexDirection: "column",
             gap: "1rem",
-            background: theme.palette.tertiary.main,
-            padding: "1rem",
             borderRadius: "12px",
-            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+            background:
+              mode === "dark" ? theme.palette.tertiary.main : "#eeeeee",
+            padding: "1rem",
+            boxShadow: mode
+              ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
+              : "0px 2px 6px rgba(0, 0, 0, 0.05)",
           }}
         >
           {groupedBets?.map((yearData) => (
@@ -647,10 +644,13 @@ const BankrollView = ({ mode }) => {
               sx={{
                 background: theme.palette.secondary.main,
                 marginBottom: "1rem",
-                borderRadius: "8px",
+                borderRadius: "12px",
                 boxShadow: "none",
                 "&.Mui-expanded": {
-                  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.4)",
+                  borderRadius: "12px",
+                  boxShadow: mode
+                    ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
+                    : "0px 2px 6px rgba(0, 0, 0, 0.05)",
                 },
               }}
               defaultExpanded={
@@ -674,7 +674,7 @@ const BankrollView = ({ mode }) => {
                   <Typography
                     sx={{
                       fontSize: { xs: "18px", md: "24px" },
-                      fontWeight: "bold",
+                      fontWeight: "500",
                     }}
                   >
                     {yearData.year}
@@ -685,9 +685,9 @@ const BankrollView = ({ mode }) => {
                       backgroundColor:
                         yearData.totalProfit >= 0 ? "#4CAF50" : "#FF5252",
                       padding: "0.5rem 1rem",
-                      borderRadius: "8px",
-                      // color: "#ffffff",
-                      fontWeight: "bold",
+                      borderRadius: "12px",
+                      color: "#ffffff",
+                      fontWeight: "500",
                     }}
                   >
                     <Typography sx={{ marginRight: "0.5rem" }}>
@@ -702,12 +702,18 @@ const BankrollView = ({ mode }) => {
                   <Accordion
                     key={monthData.month}
                     sx={{
-                      background: theme.palette.primary.main,
+                      background:
+                        mode === "dark"
+                          ? theme.palette.primary.main
+                          : "#eeeeee",
                       marginBottom: "0.5rem",
-                      borderRadius: "8px",
+                      borderRadius: "12px",
                       boxShadow: "none",
                       "&.Mui-expanded": {
-                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.3)",
+                        borderRadius: "12px",
+                        boxShadow: mode
+                          ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
+                          : "0px 2px 6px rgba(0, 0, 0, 0.05)",
                       },
                     }}
                     defaultExpanded={
@@ -726,13 +732,13 @@ const BankrollView = ({ mode }) => {
                           justifyContent: "space-between",
                           width: "100%",
                           alignItems: "center",
-                          fontWeight: "bold",
+                          fontWeight: "500",
                         }}
                       >
                         <Typography
                           sx={{
                             fontSize: { xs: "16px", md: "20px" },
-                            fontWeight: "bold",
+                            fontWeight: "500",
                           }}
                         >
                           {monthData.month}
@@ -745,9 +751,9 @@ const BankrollView = ({ mode }) => {
                                 ? "#4CAF50"
                                 : "#FF5252",
                             padding: "0.4rem 0.8rem",
-                            borderRadius: "8px",
+                            borderRadius: "12px",
                             color: "#ffffff",
-                            fontWeight: "bold",
+                            fontWeight: "500",
                           }}
                         >
                           <Typography sx={{ marginRight: "0.5rem" }}>
