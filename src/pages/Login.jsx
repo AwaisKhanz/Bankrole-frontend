@@ -28,9 +28,9 @@ const Login = ({ mode }) => {
   });
   const { loginAction } = useAuth();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setLoading(true);
-    loginAction(data);
+    await loginAction(data);
     setLoading(false);
   };
 
