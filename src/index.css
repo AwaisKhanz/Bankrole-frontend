@@ -60,13 +60,21 @@
 }
 
 .react-calendar.dark .profit-day {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: white;
+  /* background-color: rgba(76, 175, 80, 0.2); */
+  /* color: white; */
 }
 
 .react-calendar.dark .loss-day {
-  background-color: rgba(244, 67, 54, 0.2);
-  color: #ff5252;
+  /* background-color: rgba(244, 67, 54, 0.2); */
+  /* color: #ff5252; */
+}
+
+.react-calendar__month-view .react-calendar__tile abbr {
+  display: none !important; /* Hides default date numbers only in month view */
+}
+
+.react-calendar__month-view .react-calendar__tile.custom-tile abbr {
+  display: none !important; /* Hide only inside styled tiles */
 }
 
 .react-calendar.dark .neutral-day:hover,
@@ -108,13 +116,13 @@
 }
 
 .react-calendar.light .profit-day {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #000000;
+  /* background-color: rgba(76, 175, 80, 0.2); */
+  /* color: #000000; */
 }
 
 .react-calendar.light .loss-day {
-  background-color: rgba(244, 67, 54, 0.2);
-  color: #ff5252;
+  /* background-color: rgba(244, 67, 54, 0.2); */
+  /* color: #ff5252; */
 }
 
 .react-calendar.light .neutral-day:hover,

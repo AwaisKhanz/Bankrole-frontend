@@ -59,7 +59,7 @@ const CalendarPage = ({ mode }) => {
   return (
     <Box
       sx={{
-        padding: "2rem",
+        padding: "1rem",
         background: mode === "dark" ? "#1e293b" : "#ffffff",
         color: mode === "dark" ? "#ffffff" : "#000000",
       }}
@@ -91,37 +91,75 @@ const CalendarPage = ({ mode }) => {
           onActiveStartDateChange={({ activeStartDate }) =>
             setCurrentDate(activeStartDate)
           }
-          tileContent={({ date, view }) =>
-            view === "month" && (
-              <Box
-                sx={{
-                  marginTop: "0.5rem",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  color:
-                    getDailyProfit(date).profit > 0
-                      ? "#4CAF50"
-                      : getDailyProfit(date).profit < 0
-                      ? "#FF5252"
-                      : mode === "dark"
-                      ? "#ffffff"
-                      : "#000000",
-                }}
-              >
-                {getDailyProfit(date).profit !== 0 &&
-                  `${getDailyProfit(date).symbol}${
-                    getDailyProfit(date).profit
-                  }`}
-              </Box>
-            )
-          }
+          tileContent={({ date, view }) => {
+            const dailyProfit = getDailyProfit(date);
+
+            if (view === "month" && dailyProfit.profit !== 0) {
+              return (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100px",
+                    height: "120px",
+                    backgroundColor:
+                      dailyProfit.profit > 0
+                        ? "rgba(76, 175, 80, 0.2)"
+                        : "rgba(244, 67, 54, 0.2)",
+
+                    borderRadius: "8px",
+                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    borderBottom: "4px solid #E5C100",
+                    padding: "10px",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: "bold",
+                      color: mode === "dark" ? "white" : "#0A50A0",
+                    }}
+                  >
+                    {date.getDate()}{" "}
+                    {date.toLocaleString("default", { month: "short" })}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "#777", marginBottom: "4px" }}
+                  >
+                    {date.toLocaleDateString("en-US", { weekday: "long" })}
+                  </Typography>
+                  <Typography
+                    // variant="h6"
+                    sx={{
+                      fontWeight: "bold",
+                      color:
+                        dailyProfit.profit > 0
+                          ? mode === "dark"
+                            ? "white"
+                            : "#0A50A0"
+                          : "#FF5252",
+                    }}
+                  >
+                    {dailyProfit.symbol}
+                    {dailyProfit.profit.toFixed(2)}
+                  </Typography>
+                </Box>
+              );
+            }
+            return view === "month" ? (
+              <Typography>{date.getDate()}</Typography>
+            ) : null;
+          }}
           tileClassName={({ date }) => {
             const { profit } = getDailyProfit(date);
             if (profit > 0) return "profit-day";
             if (profit < 0) return "loss-day";
             return "neutral-day";
           }}
-          className={`react-calendar ${mode === "dark" ? "dark" : "light"}`} // Apply dynamic class
+          className={`react-calendar ${mode === "dark" ? "dark" : "light"}`}
         />
       </Box>
     </Box>

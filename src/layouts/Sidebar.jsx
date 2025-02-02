@@ -74,7 +74,7 @@ const Sidebar = ({ mode }) => {
         )}
       </Box>
 
-      <List>
+      <List sx={{ padding: "1rem" }}>
         {menuItems.map((item) => (
           <ListItem
             button
@@ -82,19 +82,19 @@ const Sidebar = ({ mode }) => {
             component={Link}
             to={item.path}
             sx={{
-              padding: "1rem",
-              backgroundColor:
-                location.pathname === item.path ? "#123cb6" : "inherit",
-              fontWeight: location.pathname === item.path ? "bold" : "normal",
+              padding: "0.5rem",
+              marginBottom: "8px",
+              borderRadius: "20px",
+              backgroundColor: location.pathname === item.path ? "#f6f8fe" : "",
               color:
                 location.pathname === item.path
                   ? mode === "dark"
-                    ? "white"
-                    : "white"
+                    ? "#123cb6"
+                    : "#123cb6"
                   : "",
               "&:hover": {
-                backgroundColor: "rgba(18, 60, 182, 0.8)",
-                color: mode === "dark" ? "white" : "white",
+                backgroundColor: mode === "dark" ? "#f6f8fe" : "#f6f8fe",
+                color: mode === "dark" ? "#123cb6" : "#123cb6",
               },
             }}
           >

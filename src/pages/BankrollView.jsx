@@ -388,7 +388,7 @@ const BankrollView = ({ mode }) => {
           sx={{
             width: "100%",
             height: "500px",
-            background: "rgba(22, 73, 255, 0.1)",
+            background: mode === "dark" ? "rgba(22, 73, 255, 0.1)" : "white",
             borderRadius: "12px",
             padding: "1rem",
             position: "relative",
@@ -574,15 +574,21 @@ const BankrollView = ({ mode }) => {
               key={index}
               sx={{
                 flex: 1,
-                bgcolor:
-                  mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
+
                 borderRadius: "12px",
                 padding: "1.5rem",
                 display: "flex",
+                bgcolor:
+                  mode === "dark" ? theme.palette.secondary.main : "white",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
                 position: "relative",
+                boxShadow: 2,
+                ":hover": {
+                  bgcolor:
+                    mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
+                },
               }}
             >
               {/* Stat Value */}
@@ -630,12 +636,12 @@ const BankrollView = ({ mode }) => {
             flexDirection: "column",
             gap: "1rem",
             borderRadius: "12px",
-            background:
-              mode === "dark" ? theme.palette.tertiary.main : "#eeeeee",
-            padding: "1rem",
-            boxShadow: mode
-              ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
-              : "0px 2px 6px rgba(0, 0, 0, 0.05)",
+            background: mode === "dark" ? theme.palette.tertiary.main : "white",
+            // padding: "1rem",
+            // boxShadow:
+            //   mode == "dark"
+            //     ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
+            //     : "0px 2px 6px rgba(0, 0, 0, 0.05)",
           }}
         >
           {groupedBets?.map((yearData) => (

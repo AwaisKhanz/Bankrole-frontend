@@ -64,17 +64,17 @@ const DrawerMenu = ({ isOpen, toggleDrawer, mode }) => {
               sx={{
                 padding: "1rem",
                 backgroundColor:
-                  location.pathname === item.path ? "#123cb6" : "inherit",
+                  location.pathname === item.path ? "#f6f8fe" : "",
                 fontWeight: location.pathname === item.path ? "bold" : "normal",
                 color:
                   location.pathname === item.path
                     ? mode === "dark"
-                      ? "white"
-                      : "white"
+                      ? "#123cb6"
+                      : "#123cb6"
                     : "",
                 "&:hover": {
-                  backgroundColor: "rgba(18, 60, 182, 0.8)",
-                  color: mode === "dark" ? "white" : "white",
+                  backgroundColor: mode === "dark" ? "#f6f8fe" : "#f6f8fe",
+                  color: mode === "dark" ? "#123cb6" : "#123cb6",
                 },
               }}
               onClick={toggleDrawer}
