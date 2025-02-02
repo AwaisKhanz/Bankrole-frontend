@@ -103,7 +103,6 @@ const CalendarPage = ({ mode }) => {
                     alignItems: "center",
                     justifyContent: "center",
                     width: "100px",
-                    height: "120px",
                     backgroundColor:
                       dailyProfit.profit > 0
                         ? "rgba(76, 175, 80, 0.2)"
@@ -111,8 +110,8 @@ const CalendarPage = ({ mode }) => {
 
                     borderRadius: "8px",
                     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    borderBottom: "4px solid #E5C100",
-                    padding: "10px",
+                    // borderBottom: "4px solid #1649FF",
+                    padding: { xs: "4px", md: "10px" },
                   }}
                 >
                   <Typography

@@ -95,12 +95,12 @@
 }
 
 .react-calendar.light .react-calendar__navigation {
-  background-color: #f0f0f0;
+  background-color: #1649ff;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .react-calendar.light .react-calendar__navigation button {
-  color: #000000;
+  color: white;
 }
 
 .react-calendar.light .react-calendar__tile {
