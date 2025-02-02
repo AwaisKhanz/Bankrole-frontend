@@ -56,7 +56,9 @@
 }
 
 .react-calendar.dark .react-calendar__tile--now {
-  background-color: rgba(22, 73, 255, 0.2) !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-weight: bold;
 }
 
 .react-calendar.dark .profit-day {
@@ -112,7 +114,9 @@
 }
 
 .react-calendar.light .react-calendar__tile--now {
-  background-color: rgba(22, 73, 255, 0.1) !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-weight: bold;
 }
 
 .react-calendar.light .profit-day {

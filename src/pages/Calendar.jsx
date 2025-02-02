@@ -102,7 +102,7 @@ const CalendarPage = ({ mode }) => {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "100px",
+                    width: "100%",
                     backgroundColor:
                       dailyProfit.profit > 0
                         ? "rgba(76, 175, 80, 0.2)"
