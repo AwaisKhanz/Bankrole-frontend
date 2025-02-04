@@ -41,7 +41,7 @@ ChartJS.register(
   Filler
 );
 
-const groupBetsByYearAndMonth = (bets) => {
+const groupBetsByYearAndMonth = (bankroll, bets) => {
   const grouped = {};
 
   bets.forEach((bet) => {
@@ -57,7 +57,12 @@ const groupBetsByYearAndMonth = (bets) => {
     grouped[year].months[month].bets.push(bet);
 
     // Only include verified bets in totalProfit aggregation
-    if (bet.isVerified) {
+    if (bankroll.visibility === "Public") {
+      if (bet.isVerified) {
+        grouped[year].months[month].totalProfit += parseFloat(bet.profit);
+        grouped[year].totalProfit += parseFloat(bet.profit);
+      }
+    } else {
       grouped[year].months[month].totalProfit += parseFloat(bet.profit);
       grouped[year].totalProfit += parseFloat(bet.profit);
     }
@@ -108,6 +113,7 @@ const BankrollView = ({ mode }) => {
   const [betToEdit, setBetToEdit] = useState(null);
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
+
   useEffect(() => {
     fetchBankroll();
   }, [id]);
@@ -190,7 +196,9 @@ const BankrollView = ({ mode }) => {
       : 0;
 
     const filteredBets = bets
-      .filter((bet) => bet.isVerified)
+      .filter((bet) =>
+        bankroll.visibility === "Public" ? bet.isVerified : bet
+      )
       .filter((bet) => {
         const betDate = new Date(bet.date);
         return (
@@ -313,7 +321,7 @@ const BankrollView = ({ mode }) => {
     }
   };
 
-  const groupedBets = groupBetsByYearAndMonth(bets);
+  const groupedBets = groupBetsByYearAndMonth(bankroll, bets);
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
 
