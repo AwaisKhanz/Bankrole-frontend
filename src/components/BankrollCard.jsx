@@ -26,9 +26,8 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
       onClick={() => navigate(`/bankroll/${bankroll._id}`)}
       sx={{
         borderRadius: "8px",
-
         overflow: "hidden",
-
+        height: "100%",
         transform: "scale(1)",
         transition: "transform 0.3s ease",
         cursor: "pointer",
@@ -40,6 +39,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
       <Card
         sx={{
           borderRadius: "12px",
+          height: "100%",
           boxShadow: "none",
           bgcolor: mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
           position: "relative",
@@ -189,6 +189,7 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
           </Box>
 
           {/* Pending Bets */}
+
           <Box
             sx={{
               marginTop: "1rem",
@@ -200,7 +201,9 @@ const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
             }}
           >
             <Typography variant="body2">
-              {bankroll.stats.pendingBetsCount} pending bet(s)
+              {bankroll?.visibility === "Public"
+                ? `${bankroll.stats.pendingBetsCount} pending bet(s)`
+                : `${bankroll.bets?.length} bet(s)`}
             </Typography>
           </Box>
         </CardContent>
