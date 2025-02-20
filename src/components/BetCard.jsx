@@ -80,10 +80,14 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
             right: "0",
             backgroundColor:
               bet.status === "Won"
-                ? "#4CAF50"
+                ? "#4CAF50" // Green for Won
                 : bet.status === "Loss"
-                ? "#FF5252"
-                : "#B0BEC5",
+                ? "#FF5252" // Red for Loss
+                : bet.status === "Void"
+                ? "#9E9E9E" // Grey for Void
+                : bet.status === "Cashout"
+                ? "#FFB300" // Amber/Yellow for Cashout
+                : "#B0BEC5", // Light Grey for Pending (default)
             padding: "0rem 0.3rem",
             borderTopLeftRadius: "8px",
             borderBottomLeftRadius: "8px",

@@ -68,6 +68,24 @@ const BetDetailsModal = ({ open, onClose, bet, onApprove, onReject }) => {
                 />
               </>
             )}
+            {bet?.cashoutImageUrl && (
+              <>
+                <Typography variant="body2" fontWeight="bold">
+                  Cashout Image:
+                </Typography>
+                <img
+                  src={bet.cashoutImageUrl}
+                  alt="Verification"
+                  style={{
+                    width: "100%",
+                    maxHeight: "300px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    marginTop: "0.5rem",
+                  }}
+                />
+              </>
+            )}
           </CardContent>
         </Card>
 

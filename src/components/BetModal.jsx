@@ -41,10 +41,12 @@ const betSchema = z.object({
   label: z.string().min(1, "Bet label is required"),
   odds: z.number().min(1, "Odds must be at least 1"),
   stake: z.number().min(0.01, "Stake must be greater than 0"),
-  status: z.enum(["Pending", "Won", "Loss"], {
+  status: z.enum(["Pending", "Won", "Loss", "Void", "Cashout"], {
     required_error: "Status is required",
   }),
   verificationImage: z.any().optional(),
+  cashoutImage: z.any().optional(),
+  cashoutAmount: z.number().optional(),
 });
 
 const initialValues = {
@@ -68,8 +70,9 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
     defaultValues: initialValues,
   });
   const theme = useTheme();
-  const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [cashoutPreviewImage, setCashoutPreviewImage] = useState(null);
 
   useEffect(() => {
     if (initialData && Object.entries(initialData).length) {
@@ -77,6 +80,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
         ...initialData,
         date: initialData.date ? new Date(initialData.date) : null,
         verificationImage: null,
+        cashoutImage: null,
       };
 
       reset(transformedData);
@@ -84,20 +88,31 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
       if (initialData.verificationImageUrl) {
         setPreviewImage(initialData.verificationImageUrl);
       }
+      if (initialData.cashoutImageUrl) {
+        setCashoutPreviewImage(initialData.cashoutImageUrl);
+      }
     } else {
       reset(initialValues);
       setPreviewImage(null);
+      setCashoutPreviewImage(null);
     }
   }, [initialData, reset]);
 
   const handleFormSubmit = async (data) => {
-    if (!initialData && bankroll?.visibility !== "Private")
+    if (!initialData && bankroll?.visibility !== "Private") {
       if (!data.verificationImage) {
         setError("verificationImage", {
           message: "Verification image is required",
         });
         return;
       }
+      if (data.status === "Cashout" && !data.cashoutImage) {
+        setError("cashoutImage", {
+          message: "Cashout image is required",
+        });
+        return;
+      }
+    }
     setLoading(true);
     try {
       await onSubmit(data);
@@ -115,7 +130,15 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
       clearErrors("verificationImage");
     }
   };
-  console.log(errors);
+
+  const handleCashoutImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setValue("cashoutImage", file);
+      setCashoutPreviewImage(URL.createObjectURL(file));
+      clearErrors("cashoutImage");
+    }
+  };
 
   return (
     <Dialog
@@ -309,11 +332,13 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
               control={control}
               render={({ field }) => (
                 <Select {...field} label="Status">
-                  {["Pending", "Won", "Loss"].map((status) => (
-                    <MenuItem key={status} value={status}>
-                      {status}
-                    </MenuItem>
-                  ))}
+                  {["Won", "Loss", "Void", "Cashout", "Pending"].map(
+                    (status) => (
+                      <MenuItem key={status} value={status}>
+                        {status}
+                      </MenuItem>
+                    )
+                  )}
                 </Select>
               )}
             />
@@ -323,6 +348,81 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
               </Typography>
             )}
           </FormControl>
+
+          {/* Cashout Amount Input (shown only if status is Cashout) */}
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) =>
+              field.value === "Cashout" && (
+                <>
+                  <Controller
+                    name="cashoutAmount"
+                    control={control}
+                    render={({ field: amountField }) => (
+                      <TextField
+                        {...amountField}
+                        value={amountField.value || ""}
+                        onChange={(e) =>
+                          amountField.onChange(Number(e.target.value) || "")
+                        }
+                        label={`Cashout Amount (${
+                          bankroll?.currency.symbol || "$"
+                        })`}
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                        inputProps={{
+                          step: "0.01",
+                        }}
+                        error={!!errors.cashoutAmount}
+                        helperText={errors.cashoutAmount?.message}
+                      />
+                    )}
+                  />
+
+                  {/* Cashout Image Upload */}
+                  {bankroll?.visibility !== "Private" && (
+                    <>
+                      <Button
+                        variant="contained"
+                        component="label"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                      >
+                        Upload Cashout Image
+                        <input
+                          type="file"
+                          hidden
+                          accept="image/*"
+                          onChange={handleCashoutImageChange}
+                        />
+                      </Button>
+                      {cashoutPreviewImage && (
+                        <Box mt={2}>
+                          <img
+                            src={cashoutPreviewImage}
+                            alt="Cashout Preview"
+                            style={{
+                              width: "100%",
+                              borderRadius: "8px",
+                              height: "150px",
+                              objectFit: "cover",
+                            }}
+                          />
+                        </Box>
+                      )}
+                      {errors?.cashoutImage && (
+                        <Box className=" text-red-500">
+                          {errors.cashoutImage?.message}
+                        </Box>
+                      )}
+                    </>
+                  )}
+                </>
+              )
+            }
+          />
         </form>
       </DialogContent>
       <DialogActions

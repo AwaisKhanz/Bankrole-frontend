@@ -282,6 +282,16 @@ const BankrollView = ({ mode }) => {
       formData.append("verificationImage", betData.verificationImage);
     }
 
+    // Append cashout-related fields if status is "Cashout"
+    if (betData.status === "Cashout") {
+      if (betData?.cashoutImage) {
+        formData.append("cashoutImage", betData.cashoutImage);
+      }
+      if (betData?.cashoutAmount) {
+        formData.append("cashoutAmount", betData.cashoutAmount);
+      }
+    }
+
     try {
       if (betToEdit) {
         const response = await api.put(`/bets/${betToEdit._id}`, formData, {

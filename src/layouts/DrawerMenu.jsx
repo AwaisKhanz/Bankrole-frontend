@@ -9,6 +9,7 @@ import {
   Typography,
   Button,
   useTheme,
+  ListSubheader,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 import { getMenuItems } from "../utils/menuItems";
@@ -55,32 +56,48 @@ const DrawerMenu = ({ isOpen, toggleDrawer, mode }) => {
               marginBottom: "1rem",
             }}
           />
-          {menuItems.map((item) => (
-            <ListItem
-              button
-              key={item.name}
-              component={Link}
-              to={item.path}
-              sx={{
-                padding: "1rem",
-                backgroundColor:
-                  location.pathname === item.path ? "#f6f8fe" : "",
-                fontWeight: location.pathname === item.path ? "bold" : "normal",
-                color:
-                  location.pathname === item.path
-                    ? mode === "dark"
-                      ? "#123cb6"
-                      : "#123cb6"
-                    : "",
-                "&:hover": {
-                  backgroundColor: mode === "dark" ? "#f6f8fe" : "#f6f8fe",
-                  color: mode === "dark" ? "#123cb6" : "#123cb6",
-                },
-              }}
-              onClick={toggleDrawer}
-            >
-              <ListItemText primary={item.name} />
-            </ListItem>
+          {menuItems.map((section) => (
+            <React.Fragment key={section.title}>
+              <ListSubheader
+                sx={{
+                  background: theme.palette.primary.main,
+                  color: mode === "dark" ? "white" : "black",
+                  // fontWeight: "bold",
+                  textTransform: "uppercase",
+                  padding: "0.5rem 1rem",
+                }}
+              >
+                {section.title}
+              </ListSubheader>
+              {section.items.map((item) => (
+                <ListItem
+                  button
+                  key={item.name}
+                  component={Link}
+                  to={item.path}
+                  sx={{
+                    padding: "1rem",
+                    backgroundColor:
+                      location.pathname === item.path ? "#f6f8fe" : "",
+                    fontWeight:
+                      location.pathname === item.path ? "bold" : "normal",
+                    color:
+                      location.pathname === item.path
+                        ? mode === "dark"
+                          ? "#123cb6"
+                          : "#123cb6"
+                        : "",
+                    "&:hover": {
+                      backgroundColor: mode === "dark" ? "#f6f8fe" : "#f6f8fe",
+                      color: mode === "dark" ? "#123cb6" : "#123cb6",
+                    },
+                  }}
+                  onClick={toggleDrawer}
+                >
+                  <ListItemText primary={item.name} />
+                </ListItem>
+              ))}
+            </React.Fragment>
           ))}
         </List>
         {user?.subscription?.status !== "active" && (

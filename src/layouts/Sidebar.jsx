@@ -9,6 +9,7 @@ import {
   Button,
   Chip,
   useTheme,
+  ListSubheader,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
 import { getMenuItems } from "../utils/menuItems";
@@ -75,34 +76,52 @@ const Sidebar = ({ mode }) => {
       </Box>
 
       <List sx={{ padding: "1rem" }}>
-        {menuItems.map((item) => (
-          <ListItem
-            button
-            key={item.name}
-            component={Link}
-            to={item.path}
-            sx={{
-              padding: "0.5rem",
-              marginBottom: "8px",
-              borderRadius: "20px",
-              backgroundColor: location.pathname === item.path ? "#f6f8fe" : "",
-              color:
-                location.pathname === item.path
-                  ? mode === "dark"
-                    ? "#123cb6"
-                    : "#123cb6"
-                  : "",
-              "&:hover": {
-                backgroundColor: mode === "dark" ? "#f6f8fe" : "#f6f8fe",
-                color: mode === "dark" ? "#123cb6" : "#123cb6",
-              },
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              {item.icon} {/* Display the icon */}
-              <ListItemText primary={item.name} />
-            </Box>
-          </ListItem>
+        {menuItems.map((section) => (
+          <React.Fragment key={section.title}>
+            <ListSubheader
+              sx={{
+                background: theme.palette.primary.main,
+                color: "#607D8B",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                padding: "0.5rem 0",
+              }}
+            >
+              {section.title}
+            </ListSubheader>
+            {section.items.map((item) => (
+              <ListItem
+                button
+                key={item.name}
+                component={Link}
+                to={item.path}
+                sx={{
+                  padding: "0.5rem",
+                  marginBottom: "8px",
+                  borderRadius: "20px",
+                  backgroundColor:
+                    location.pathname === item.path ? "#f6f8fe" : "",
+                  color:
+                    location.pathname === item.path
+                      ? mode === "dark"
+                        ? "#123cb6"
+                        : "#123cb6"
+                      : "",
+                  "&:hover": {
+                    backgroundColor: mode === "dark" ? "#f6f8fe" : "#f6f8fe",
+                    color: mode === "dark" ? "#123cb6" : "#123cb6",
+                  },
+                }}
+              >
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: "1rem" }}
+                >
+                  {item.icon}
+                  <ListItemText primary={item.name} />
+                </Box>
+              </ListItem>
+            ))}
+          </React.Fragment>
         ))}
       </List>
       {user?.subscription?.status !== "active" && (
