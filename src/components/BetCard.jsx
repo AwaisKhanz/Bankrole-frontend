@@ -38,7 +38,7 @@ const getVerificationAlert = (bet) => {
   return null;
 };
 
-const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
+const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
   const [expanded, setExpanded] = useState(false);
   const theme = useTheme();
 
@@ -61,14 +61,14 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
 
       {/* Header Section */}
       <Box
-        onClick={handleExpand}
+        onClick={!isViewMode && handleExpand}
         sx={{
           position: "relative",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           padding: "0.5rem 1rem",
-          cursor: "pointer",
+          cursor: !isViewMode ? "pointer" : "",
           transition: "background-color 0.3s ease",
         }}
       >
@@ -103,9 +103,11 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
         </Box>
         {/* Left Section */}
         <Box sx={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-          <IconButton onClick={handleExpand}>
-            {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
+          {!isViewMode && (
+            <IconButton onClick={handleExpand}>
+              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          )}
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <Typography variant="body2">
               {new Date(bet.date).toLocaleString()}
@@ -277,36 +279,38 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode }) => {
               </Typography>
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "1rem",
-            }}
-          >
-            <IconButton
-              onClick={() => onEdit(bet)}
+          {!isViewMode && (
+            <Box
               sx={{
-                color: "#1649ff",
-                "&:hover": {
-                  backgroundColor: "rgba(22, 73, 255, 0.1)",
-                },
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "1rem",
               }}
             >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => onDelete(bet)}
-              sx={{
-                color: "#FF5252",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 82, 82, 0.1)",
-                },
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
+              <IconButton
+                onClick={() => onEdit(bet)}
+                sx={{
+                  color: "#1649ff",
+                  "&:hover": {
+                    backgroundColor: "rgba(22, 73, 255, 0.1)",
+                  },
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                onClick={() => onDelete(bet)}
+                sx={{
+                  color: "#FF5252",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 82, 82, 0.1)",
+                  },
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          )}
         </Box>
       </Collapse>
     </Box>

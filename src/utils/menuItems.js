@@ -74,18 +74,21 @@ export const getMenuItems = (isProUser, isAdmin) => {
 
   // Add admin-specific items under MANAGEMENT if user is an admin
   if (isAdmin) {
-    menuItems[0].items.push(
-      {
-        name: "User Management",
-        path: "/user-management",
-        icon: React.createElement(UserManagementIcon),
-      },
-      {
-        name: "Betting Management",
-        path: "/betting-management",
-        icon: React.createElement(BettingManagementIcon),
-      }
-    );
+    menuItems.push({
+      title: "ADMIN",
+      items: [
+        {
+          name: "User Management",
+          path: "/user-management",
+          icon: React.createElement(UserManagementIcon),
+        },
+        {
+          name: "Betting Management",
+          path: "/betting-management",
+          icon: React.createElement(BettingManagementIcon),
+        },
+      ],
+    });
   }
 
   return menuItems;

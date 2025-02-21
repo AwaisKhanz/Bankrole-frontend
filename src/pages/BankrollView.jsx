@@ -105,13 +105,17 @@ const groupBetsByYearAndMonth = (bankroll, bets) => {
   return sortedYears;
 };
 
-const BankrollView = ({ mode }) => {
+const BankrollView = ({ mode, isViewMode }) => {
+  console.log(mode);
   const { id } = useParams();
   const [bankroll, setBankroll] = useState(null);
   const [bets, setBets] = useState([]);
   const [betModalOpen, setBetModalOpen] = useState(false);
   const [betToEdit, setBetToEdit] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [isShareable, setIsShareable] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const theme = useTheme();
 
   useEffect(() => {
@@ -248,8 +252,12 @@ const BankrollView = ({ mode }) => {
       const response = await api.get(`/bankrolls/${id}`);
       setBankroll(response.data);
       setBets(response.data?.bets);
+      if (isViewMode) {
+        setIsShareable(response.data?.isShareable || false);
+      }
     } catch (error) {
-      console.log(error);
+      setError(true);
+      setErrorMessage(error.message || "Failed to fetch bankroll.");
     } finally {
       setLoading(false);
     }
@@ -335,11 +343,44 @@ const BankrollView = ({ mode }) => {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
 
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: isViewMode ? error && "100vh" : "100%",
+          color: mode === "dark" ? "white" : "black",
+        }}
+      >
+        {errorMessage}
+      </Box>
+    );
+  }
+
+  if (isViewMode && !isShareable) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          color: mode === "dark" ? "white" : "black",
+        }}
+      >
+        This bankroll is not shareable.
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
         padding: "2rem",
         background: theme.palette.primary.main,
+        minHeight: isViewMode ? "100vh" : "100%",
       }}
     >
       <Box
@@ -355,6 +396,7 @@ const BankrollView = ({ mode }) => {
           sx={{
             textTransform: "uppercase",
             fontSize: { xs: "20px", md: "32px" },
+            color: mode === "dark" ? "white" : "black",
           }}
         >
           {bankroll?.name}
@@ -382,14 +424,28 @@ const BankrollView = ({ mode }) => {
             }}
           />
         </Typography>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleAddBet}
-          sx={{ marginBottom: "1rem" }}
-        >
-          Add Bet
-        </Button>
+        {!isViewMode ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleAddBet}
+            sx={{ marginBottom: "1rem" }}
+          >
+            Add Bet
+          </Button>
+        ) : (
+          <Chip
+            label={"View Mode"}
+            sx={{
+              backgroundColor: "#4CAF50",
+              color: "#fff",
+              fontSize: "0.75rem",
+              fontWeight: "bold",
+              marginLeft: "8px",
+              textTransform: "uppercase",
+            }}
+          />
+        )}
       </Box>
 
       <Box
@@ -436,10 +492,10 @@ const BankrollView = ({ mode }) => {
                 sx={{
                   background: "rgba(255, 255, 255, 0.1)",
                   color: "#fff",
-                  fontSize: "0.875rem", // Smaller font for compact look
-                  height: "30px", // Small height
+                  fontSize: "0.875rem",
+                  height: "30px",
                   "& .MuiSelect-select": {
-                    padding: "4px 8px", // Reduced padding inside the Select
+                    padding: "4px 8px",
                   },
                 }}
               >
@@ -479,46 +535,6 @@ const BankrollView = ({ mode }) => {
                 ))}
               </Select>
             </FormControl>
-            {/* <Button
-              variant={
-                graphFilters.includeStartingCapital ? "contained" : "outlined"
-              }
-              onClick={() =>
-                handleFilterChange(
-                  "includeStartingCapital",
-                  !graphFilters.includeStartingCapital
-                )
-              }
-              sx={{
-                textTransform: "none",
-                padding: "1px 16px",
-                fontSize: "0.875rem",
-                fontWeight: "bold",
-                borderRadius: "8px",
-                backgroundColor: graphFilters.includeStartingCapital
-                  ? "#1649FF"
-                  : "transparent",
-                color: graphFilters.includeStartingCapital
-                  ? "#FFFFFF"
-                  : "#1649FF",
-                border: graphFilters.includeStartingCapital
-                  ? "none"
-                  : "2px solid #1649FF",
-                boxShadow: graphFilters.includeStartingCapital
-                  ? "0px 4px 12px rgba(22, 73, 255, 0.4)"
-                  : "none",
-                "&:hover": {
-                  backgroundColor: graphFilters.includeStartingCapital
-                    ? "#123FCC"
-                    : "rgba(22, 73, 255, 0.1)",
-                  boxShadow: "0px 6px 16px rgba(22, 73, 255, 0.4)",
-                },
-              }}
-            >
-              {graphFilters.includeStartingCapital
-                ? "From Start"
-                : "From Filtered Date"}
-            </Button> */}
           </Box>
           <Box
             sx={{
@@ -643,6 +659,7 @@ const BankrollView = ({ mode }) => {
         sx={{
           marginBottom: "1rem",
           fontWeight: "bold",
+          color: mode === "dark" ? "white" : "black",
         }}
       >
         Bets
@@ -654,12 +671,8 @@ const BankrollView = ({ mode }) => {
             flexDirection: "column",
             gap: "1rem",
             borderRadius: "12px",
+
             background: mode === "dark" ? theme.palette.tertiary.main : "white",
-            // padding: "1rem",
-            // boxShadow:
-            //   mode == "dark"
-            //     ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
-            //     : "0px 2px 6px rgba(0, 0, 0, 0.05)",
           }}
         >
           {groupedBets?.map((yearData) => (
@@ -791,6 +804,7 @@ const BankrollView = ({ mode }) => {
                     <AccordionDetails>
                       {monthData.bets.map((bet) => (
                         <BetCard
+                          isViewMode={isViewMode}
                           mode={mode}
                           bankroll={bankroll}
                           key={bet.id}
@@ -807,7 +821,7 @@ const BankrollView = ({ mode }) => {
           ))}
         </Box>
       ) : (
-        "No bets"
+        <Box sx={{ color: mode === "dark" ? "white" : "black" }}>No bets</Box>
       )}
 
       {betModalOpen && (

@@ -52,6 +52,11 @@ const App = ({ toggleTheme, mode }) => {
           element={<ResetPassword mode={mode} />}
         />
 
+        <Route
+          path="bankroll/view/:id"
+          element={<BankrollView mode={mode} isViewMode={true} />}
+        />
+
         {/* Protected routes with Sidebar */}
         <Route
           path="/"
@@ -110,6 +115,7 @@ const App = ({ toggleTheme, mode }) => {
             }
           />
         </Route>
+
         <Route
           path="/payment"
           element={

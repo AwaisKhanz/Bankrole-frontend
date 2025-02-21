@@ -10,9 +10,11 @@ import {
   Select,
   MenuItem,
   useTheme,
+  Box,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import ConfirmationModal from "./ConfirmationModal";
+import Switch from "@mui/material/Switch";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -63,21 +65,24 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingVisibilityChange, setPendingVisibilityChange] = useState(null);
   const [initialVisibility, setInitialVisibility] = useState("Private");
+  const [shareable, setShareable] = useState(initialData?.isShareable || false); // Track shareable state
 
   useEffect(() => {
     if (initialData && Object.entries(initialData).length) {
       reset(initialData);
-      setInitialVisibility(initialData.visibility); // ✅ Track initial visibility
+      setInitialVisibility(initialData.visibility);
+      setShareable(initialData.isShareable || false);
     } else {
       reset(initialValues);
       setInitialVisibility("Private");
+      setShareable(false);
     }
   }, [initialData, reset]);
 
   const visibility = watch("visibility");
 
   const handleFormSubmit = (data) => {
-    onSubmit(data);
+    onSubmit({ ...data, isShareable: shareable });
     reset(); // Reset form after submit
     onClose();
   };
@@ -265,6 +270,41 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
               </Typography>
             )}
           </FormControl>
+
+          <Box
+            sx={{ display: "flex", alignItems: "center", marginTop: "1rem" }}
+          >
+            <Typography
+              variant="body2"
+              fontWeight="bold"
+              sx={{ color: theme.palette.text.primary, marginRight: "1rem" }}
+            >
+              Enable Shareable Link
+            </Typography>
+            <Switch
+              checked={shareable}
+              onChange={(e) => {
+                setShareable(e.target.checked);
+                setValue("isShareable", e.target.checked);
+              }}
+              color="tertiary"
+            />
+          </Box>
+          {initialData && Object.entries(initialData).length && shareable && (
+            <TextField
+              value={
+                initialData?.shareableLink ||
+                `${window.location.origin}/bankroll/view/${initialData?._id}`
+              }
+              label="Shareable Link"
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
+              helperText="Copy this link to share your bankroll"
+            />
+          )}
         </form>
       </DialogContent>
       <DialogActions
