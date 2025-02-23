@@ -150,17 +150,25 @@ const PaymentPage = ({ mode }) => {
     style: {
       base: {
         fontSize: "16px",
-        color: "#424770",
-        letterSpacing: "0.025em",
         fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
+        fontWeight: "400",
+        color: mode === "dark" ? "#E0E0E0" : "#424770", // Light grey for dark, dark blue-grey for light
         "::placeholder": {
-          color: "#aab7c4",
+          color: mode === "dark" ? "#757575" : "#aab7c4", // Medium grey for dark, light grey for light
         },
+        lineHeight: "1.5",
+        padding: "4px", // Slight padding for breathing room
       },
       invalid: {
-        color: "#9e2146",
+        color: mode === "dark" ? "#FF6B6B" : "#9e2146", // Soft red for dark, darker red for light
+        iconColor: mode === "dark" ? "#FF6B6B" : "#9e2146", // Match icon to text
+      },
+      complete: {
+        color: mode === "dark" ? "#66BB6A" : "#2E7D32", // Soft green for dark, darker green for light
+        iconColor: mode === "dark" ? "#66BB6A" : "#2E7D32", // Match icon to text
       },
     },
+    hidePostalCode: true, // Optional: hide postal code if not needed
   };
 
   if (isAuthentication) return <LoadingScreen />;
@@ -197,6 +205,17 @@ const PaymentPage = ({ mode }) => {
               "Cancel Subscription"
             )}
           </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            fullWidth
+            sx={{
+              marginTop: "1rem",
+            }}
+            onClick={() => navigate("/")}
+          >
+            Go to Home
+          </Button>
         </SubscriptionCard>
       </Box>
     );
@@ -213,6 +232,7 @@ const PaymentPage = ({ mode }) => {
       }}
     >
       <SubscriptionCard
+        mode={mode}
         title="Subscribe to Pro Plan"
         description="Unlock premium features!"
       >
@@ -232,11 +252,26 @@ const PaymentPage = ({ mode }) => {
         <form onSubmit={handleSubmit}>
           <Box
             sx={{
-              border: "1px solid #ccc",
+              border:
+                mode === "dark"
+                  ? "1px solid rgba(255, 255, 255, 0.2)"
+                  : "1px solid #ccc", // Light grey border for light, subtle white for dark
               borderRadius: "8px",
-              padding: "0.5rem",
+              padding: "0.75rem", // Slightly more padding for comfort
               marginBottom: "1rem",
-              background: "#f9f9f9",
+              backgroundColor:
+                mode === "dark"
+                  ? "" // Dark grey for dark mode
+                  : "#f9f9f9", // Light grey for light mode
+              boxShadow:
+                mode === "dark"
+                  ? "0 2px 4px rgba(0, 0, 0, 0.3)"
+                  : "0 2px 4px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
+              "&:hover": {
+                borderColor:
+                  mode === "dark" ? "rgba(255, 255, 255, 0.4)" : "#aaa", // Slightly brighter on hover
+              },
+              transition: "border-color 0.2s ease-in-out", // Smooth transition for hover
             }}
           >
             <CardElement
@@ -265,15 +300,11 @@ const PaymentPage = ({ mode }) => {
           </Button>
         </form>
         <Button
-          variant="text"
+          variant="contained"
+          color="secondary"
           fullWidth
           sx={{
             marginTop: "1rem",
-            textDecoration: "underline",
-            color: "white",
-            ":hover": {
-              bgcolor: theme.palette.primary.main,
-            },
           }}
           onClick={() => navigate("/ranking")}
         >

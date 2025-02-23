@@ -71,7 +71,6 @@ const DrawerMenu = ({ isOpen, toggleDrawer, mode }) => {
               </ListSubheader>
               {section.items.map((item) => (
                 <ListItem
-                  button
                   key={item.name}
                   component={Link}
                   to={item.path}

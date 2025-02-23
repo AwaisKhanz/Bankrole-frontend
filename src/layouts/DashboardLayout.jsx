@@ -13,6 +13,7 @@ import {
   Button,
   Chip,
   useTheme,
+  Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -134,7 +135,15 @@ const DashboardLayout = ({ toggleTheme, mode }) => {
                   <strong>Email:</strong> {user?.email}
                 </Typography>
               </MenuItem>
-              <MenuItem>
+              <MenuItem
+                sx={{
+                  borderBottom:
+                    mode === "dark"
+                      ? "1px solid rgba(255, 255, 255, 0.2)"
+                      : "1px solid #e0e0e0",
+                  mb: "1rem",
+                }}
+              >
                 <Typography
                   component={Link}
                   to={"/payment"}
@@ -156,6 +165,10 @@ const DashboardLayout = ({ toggleTheme, mode }) => {
                     }}
                   />
                 </Typography>
+              </MenuItem>
+
+              <MenuItem component={Link} to="/profile">
+                <Typography variant="body2">Profile</Typography>
               </MenuItem>
 
               <MenuItem onClick={handleLogout}>

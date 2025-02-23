@@ -21,6 +21,7 @@ import RiskCalculator from "./pages/RiskCalculator";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { Box, useTheme } from "@mui/material";
+import Profile from "./pages/Profile";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -66,6 +67,15 @@ const App = ({ toggleTheme, mode }) => {
             </ProtectedRoute>
           }
         >
+          <Route
+            path="/profile"
+            element={
+              <Elements stripe={stripePromise}>
+                <Profile mode={mode} />
+              </Elements>
+            }
+          />
+
           <Route
             path="bankroll/:id"
             element={
