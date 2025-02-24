@@ -81,24 +81,27 @@ const MasanielloCalculator = ({ mode }) => {
     const updatedResults = [...results];
     const currentBet = updatedResults[currentStep];
     const potentialWin = currentBet.betAmount * (currentBet.odd - 1);
-    let newBalance = currentBet.balance;
+    const previousBalance = currentBet.balance;
 
     if (betResult.toUpperCase() === "W") {
-      newBalance += potentialWin;
+      currentBet.balance += potentialWin;
     } else {
-      newBalance -= currentBet.betAmount;
+      currentBet.balance -= currentBet.betAmount;
     }
 
-    currentBet.balance = newBalance;
     currentBet.pending = false;
+    currentBet.status = betResult.toUpperCase() === "W" ? "Won" : "Lost";
     updatedResults[currentStep] = currentBet;
 
     // Update subsequent bets
     for (let i = currentStep + 1; i < updatedResults.length; i++) {
       if (!updatedResults[i].message) {
-        const betAmount = Math.min(newBalance * 0.1, bankroll / numBets);
+        const betAmount = Math.min(
+          currentBet.balance * 0.1,
+          bankroll / numBets
+        );
         updatedResults[i].betAmount = betAmount;
-        updatedResults[i].balance = newBalance;
+        updatedResults[i].balance = currentBet.balance;
         updatedResults[i].pending = true;
       }
     }
@@ -107,8 +110,20 @@ const MasanielloCalculator = ({ mode }) => {
     setCurrentStep(currentStep + 1);
     setBetResult("");
 
-    if (newBalance <= 0 || newBalance >= bankroll * (1 + targetProfit / 100)) {
+    if (
+      currentBet.balance <= 0 ||
+      currentBet.balance >= bankroll * (1 + targetProfit / 100)
+    ) {
       setIsCalculating(false);
+    }
+  };
+
+  const handleOddChange = (index, newOdd) => {
+    const updatedResults = [...results];
+    const parsedOdd = parseFloat(newOdd);
+    if (!isNaN(parsedOdd) && parsedOdd > 1 && updatedResults[index].pending) {
+      updatedResults[index].odd = parsedOdd;
+      setResults(updatedResults);
     }
   };
 
@@ -162,6 +177,7 @@ const MasanielloCalculator = ({ mode }) => {
             value={bankroll}
             onChange={(e) => setBankroll(e.target.value)}
             placeholder="Enter your total bankroll"
+            inputProps={{ step: "0.01" }} // Allow decimals
           />
           <TextField
             label="Number of Planned Bets"
@@ -182,6 +198,7 @@ const MasanielloCalculator = ({ mode }) => {
             value={targetProfit}
             onChange={(e) => setTargetProfit(e.target.value)}
             placeholder="Enter profit target"
+            inputProps={{ step: "0.01" }} // Allow decimals
           />
           <TextField
             label="Betting Odds (space-separated)"
@@ -281,16 +298,28 @@ const MasanielloCalculator = ({ mode }) => {
                       <TableCell sx={{ color: textColor }}>
                         {bet.betAmount.toFixed(2)}
                       </TableCell>
-                      <TableCell sx={{ color: textColor }}>{bet.odd}</TableCell>
+                      <TableCell sx={{ color: textColor }}>
+                        {bet.pending ? (
+                          <TextField
+                            variant="outlined"
+                            size="small"
+                            type="number"
+                            value={bet.odd}
+                            onChange={(e) =>
+                              handleOddChange(index, e.target.value)
+                            }
+                            sx={{ width: "80px" }}
+                            inputProps={{ step: "0.1", min: "1" }} // Allow decimals with step 0.1, min 1
+                          />
+                        ) : (
+                          bet.odd
+                        )}
+                      </TableCell>
                       <TableCell sx={{ color: textColor }}>
                         {bet.balance.toFixed(2)}
                       </TableCell>
                       <TableCell sx={{ color: textColor }}>
-                        {bet.pending
-                          ? "Pending"
-                          : bet.balance > bet.balance - bet.betAmount
-                          ? "Won"
-                          : "Lost"}
+                        {bet.pending ? "Pending" : bet.status}
                       </TableCell>
                     </>
                   )}
@@ -299,26 +328,36 @@ const MasanielloCalculator = ({ mode }) => {
             </TableBody>
           </Table>
           {currentStep >= results.length && (
-            <Button
-              variant="outlined"
-              color="error"
-              fullWidth
-              onClick={clearFields}
-              sx={{
-                mt: 2,
-                borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
-                color: mode === "dark" ? "#FF5252" : "#FF5252",
-                "&:hover": {
+            <>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                textAlign="center"
+                sx={{ mt: 2, color: mode === "dark" ? "#66BB6A" : "#2E7D32" }}
+              >
+                COMPLETED
+              </Typography>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={clearFields}
+                sx={{
+                  mt: 2,
                   borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
-                  backgroundColor:
-                    mode === "dark"
-                      ? "rgba(255, 82, 82, 0.1)"
-                      : "rgba(255, 82, 82, 0.1)",
-                },
-              }}
-            >
-              Reset
-            </Button>
+                  color: mode === "dark" ? "#FF5252" : "#FF5252",
+                  "&:hover": {
+                    borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
+                    backgroundColor:
+                      mode === "dark"
+                        ? "rgba(255, 82, 82, 0.1)"
+                        : "rgba(255, 82, 82, 0.1)",
+                  },
+                }}
+              >
+                Reset
+              </Button>
+            </>
           )}
         </Box>
       )}
