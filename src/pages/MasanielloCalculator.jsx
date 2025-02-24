@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -17,6 +17,7 @@ const MasanielloCalculator = ({ mode }) => {
   const [bankroll, setBankroll] = useState("");
   const [numBets, setNumBets] = useState("");
   const [targetProfit, setTargetProfit] = useState("");
+  const [probability, setProbability] = useState(""); // New probability input
   const [odds, setOdds] = useState("");
   const [results, setResults] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -24,10 +25,50 @@ const MasanielloCalculator = ({ mode }) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const theme = useTheme();
 
+  // Load saved state from localStorage on mount
+  useEffect(() => {
+    const savedState = JSON.parse(localStorage.getItem("masanielloState"));
+    if (savedState) {
+      setBankroll(savedState.bankroll || "");
+      setNumBets(savedState.numBets || "");
+      setTargetProfit(savedState.targetProfit || "");
+      setProbability(savedState.probability || "");
+      setOdds(savedState.odds || "");
+      setResults(savedState.results || []);
+      setCurrentStep(savedState.currentStep || 0);
+      setIsCalculating(savedState.isCalculating || false);
+    }
+  }, []);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const stateToSave = {
+      bankroll,
+      numBets,
+      targetProfit,
+      probability,
+      odds,
+      results,
+      currentStep,
+      isCalculating,
+    };
+    localStorage.setItem("masanielloState", JSON.stringify(stateToSave));
+  }, [
+    bankroll,
+    numBets,
+    targetProfit,
+    probability,
+    odds,
+    results,
+    currentStep,
+    isCalculating,
+  ]);
+
   const calculateBets = () => {
     const bankrollValue = parseFloat(bankroll);
     const numBetsValue = parseInt(numBets);
-    const targetProfitValue = parseFloat(targetProfit) / 100;
+    const targetProfitValue = parseFloat(targetProfit);
+    const probabilityValue = parseFloat(probability) / 100;
     const oddsArray = odds
       .split(" ")
       .map(Number)
@@ -37,9 +78,12 @@ const MasanielloCalculator = ({ mode }) => {
       isNaN(bankrollValue) ||
       isNaN(numBetsValue) ||
       isNaN(targetProfitValue) ||
+      isNaN(probabilityValue) ||
       bankrollValue <= 0 ||
       numBetsValue <= 0 ||
       targetProfitValue <= 0 ||
+      probabilityValue <= 0 ||
+      probabilityValue > 1 ||
       oddsArray.length === 0
     ) {
       setResults([{ message: "Please enter valid values!" }]);
@@ -49,25 +93,31 @@ const MasanielloCalculator = ({ mode }) => {
     setIsCalculating(true);
     setCurrentStep(0);
     setResults([]);
-    const initialStake = bankrollValue / numBetsValue;
-    const targetBalance = bankrollValue * (1 + targetProfitValue);
-    let balance = bankrollValue;
+
+    // Masaniello staking calculation
+    const factor =
+      (bankrollValue * targetProfitValue) /
+      Math.pow(oddsArray[0] - 1, numBetsValue);
+    let remainingBankroll = bankrollValue;
     let bets = [];
 
     for (let i = 0; i < numBetsValue; i++) {
-      if (balance <= 0) {
+      if (remainingBankroll <= 0) {
         bets.push({ message: "❌ Bankroll depleted!" });
         break;
       }
 
       const odd = oddsArray[i] || oddsArray[oddsArray.length - 1];
-      const betAmount = Math.min(balance * 0.1, initialStake); // Max 10% of balance
-      bets.push({ step: i + 1, betAmount, odd, balance, pending: true });
-
-      if (balance >= targetBalance) {
-        bets.push({ message: "🎯 Profit target achieved!" });
-        break;
-      }
+      const stake = (factor * (odd - 1)) / (numBetsValue - i);
+      const betAmount = Math.min(stake, remainingBankroll);
+      bets.push({
+        step: i + 1,
+        betAmount,
+        odd,
+        balance: remainingBankroll,
+        pending: true,
+      });
+      remainingBankroll -= betAmount;
     }
 
     setResults(bets);
@@ -81,7 +131,6 @@ const MasanielloCalculator = ({ mode }) => {
     const updatedResults = [...results];
     const currentBet = updatedResults[currentStep];
     const potentialWin = currentBet.betAmount * (currentBet.odd - 1);
-    const previousBalance = currentBet.balance;
 
     if (betResult.toUpperCase() === "W") {
       currentBet.balance += potentialWin;
@@ -90,19 +139,14 @@ const MasanielloCalculator = ({ mode }) => {
     }
 
     currentBet.pending = false;
-    currentBet.status = betResult.toUpperCase() === "W" ? "Won" : "Lost";
+    currentBet.status = betResult.toUpperCase() === "W" ? "Won" : "Lost"; // Fixed status
     updatedResults[currentStep] = currentBet;
 
-    // Update subsequent bets
+    // Update subsequent bets' balance
     for (let i = currentStep + 1; i < updatedResults.length; i++) {
       if (!updatedResults[i].message) {
-        const betAmount = Math.min(
-          currentBet.balance * 0.1,
-          bankroll / numBets
-        );
-        updatedResults[i].betAmount = betAmount;
         updatedResults[i].balance = currentBet.balance;
-        updatedResults[i].pending = true;
+        // Recalculate stake for remaining bets (not re-applying full Masaniello here, just updating balance)
       }
     }
 
@@ -131,11 +175,13 @@ const MasanielloCalculator = ({ mode }) => {
     setBankroll("");
     setNumBets("");
     setTargetProfit("");
+    setProbability("");
     setOdds("");
     setResults([]);
     setCurrentStep(0);
     setBetResult("");
     setIsCalculating(false);
+    localStorage.removeItem("masanielloState"); // Clear saved state
   };
 
   const backgroundColor = mode === "dark" ? "#1e293b" : "#ffffff";
@@ -177,7 +223,7 @@ const MasanielloCalculator = ({ mode }) => {
             value={bankroll}
             onChange={(e) => setBankroll(e.target.value)}
             placeholder="Enter your total bankroll"
-            inputProps={{ step: "0.01" }} // Allow decimals
+            inputProps={{ step: "0.01" }}
           />
           <TextField
             label="Number of Planned Bets"
@@ -190,7 +236,7 @@ const MasanielloCalculator = ({ mode }) => {
             placeholder="Enter number of bets"
           />
           <TextField
-            label="Profit Target (%)"
+            label="Profit Target (e.g., 1.5 for 50%)"
             variant="outlined"
             fullWidth
             margin="normal"
@@ -198,7 +244,18 @@ const MasanielloCalculator = ({ mode }) => {
             value={targetProfit}
             onChange={(e) => setTargetProfit(e.target.value)}
             placeholder="Enter profit target"
-            inputProps={{ step: "0.01" }} // Allow decimals
+            inputProps={{ step: "0.01" }}
+          />
+          <TextField
+            label="Probability of Winning (%)"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            type="number"
+            value={probability}
+            onChange={(e) => setProbability(e.target.value)}
+            placeholder="Enter probability (e.g., 60)"
+            inputProps={{ step: "1", min: "0", max: "100" }}
           />
           <TextField
             label="Betting Odds (space-separated)"
@@ -309,7 +366,7 @@ const MasanielloCalculator = ({ mode }) => {
                               handleOddChange(index, e.target.value)
                             }
                             sx={{ width: "80px" }}
-                            inputProps={{ step: "0.1", min: "1" }} // Allow decimals with step 0.1, min 1
+                            inputProps={{ step: "0.1", min: "1" }}
                           />
                         ) : (
                           bet.odd
