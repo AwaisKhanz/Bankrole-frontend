@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import api from "../services/api";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { Card, CardContent, Alert } from "@mui/material";
+import { Divider } from "@mui/material"; // Add Divider for separation
 
 // Schema for profile update
 const profileSchema = z.object({
@@ -244,6 +245,37 @@ export default function Profile({ mode }) {
             )}
           </Button>
         </form>
+
+        <Box className="flex flex-col gap-4" sx={{ marginTop: "2rem" }}>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            textAlign="center"
+            sx={{ marginBottom: "1rem" }}
+          >
+            Membership Details
+          </Typography>
+          {user?.subscription?.status ? (
+            <Box>
+              <Typography>
+                Status:{" "}
+                <span style={{ textTransform: "capitalize" }}>
+                  {user.subscription.status}
+                </span>
+              </Typography>
+              {user.subscription.currentPeriodEnd && (
+                <Typography>
+                  Expires:{" "}
+                  {new Date(
+                    user.subscription.currentPeriodEnd
+                  ).toLocaleDateString()}
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            <Typography>No active membership.</Typography>
+          )}
+        </Box>
 
         <Box className="flex flex-col gap-4" sx={{ marginTop: "2rem" }}>
           <Typography

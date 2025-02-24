@@ -22,6 +22,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { Box, useTheme } from "@mui/material";
 import Profile from "./pages/Profile";
+import MasanielloCalculator from "./pages/MasanielloCalculator";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -105,6 +106,11 @@ const App = ({ toggleTheme, mode }) => {
           <Route
             path="/risk-calculator"
             element={<RiskCalculator mode={mode} />}
+          />
+
+          <Route
+            path="/masaniello"
+            element={<MasanielloCalculator mode={mode} />}
           />
 
           {/* Admin Routes */}
