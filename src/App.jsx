@@ -22,7 +22,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { Box, useTheme } from "@mui/material";
 import Profile from "./pages/Profile";
-import MasanielloCalculator from "./pages/MasanielloCalculator";
+import PoissonMatchCalculator from "./pages/PoissonMatchCalculator";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -109,8 +109,8 @@ const App = ({ toggleTheme, mode }) => {
           />
 
           <Route
-            path="/masaniello"
-            element={<MasanielloCalculator mode={mode} />}
+            path="/poisson-match-calculator"
+            element={<PoissonMatchCalculator mode={mode} />}
           />
 
           {/* Admin Routes */}

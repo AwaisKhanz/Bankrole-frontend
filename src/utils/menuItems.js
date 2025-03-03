@@ -48,8 +48,8 @@ export const getMenuItems = (isProUser, isAdmin) => {
           icon: React.createElement(RiskCalculatorIcon),
         },
         {
-          name: "Masaniello",
-          path: "/masaniello",
+          name: "Poisson Match",
+          path: "/poisson-match-calculator",
           icon: React.createElement(MasanielloIcon),
         },
       ],

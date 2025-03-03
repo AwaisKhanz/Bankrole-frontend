@@ -34,6 +34,7 @@ const Sidebar = ({ mode }) => {
         display: { xs: "none", md: "block" },
         position: "fixed",
         borderRight: mode !== "dark" && "1px solid #e0e0e0",
+        overflow: "auto",
       }}
     >
       <Box
