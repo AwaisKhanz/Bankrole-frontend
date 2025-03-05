@@ -123,17 +123,16 @@ const BankrollView = ({ mode, isViewMode }) => {
   }, [id]);
 
   const [graphFilters, setGraphFilters] = useState({
-    month: new Date().getMonth() + 1,
-    year: new Date().getFullYear(),
+    month: null, // Default to null for all data
+    year: null, // Default to null for all data
     includeStartingCapital: true,
   });
-
   const [graphData, setGraphData] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const handleFilterChange = (key, value) => {
     setGraphFilters((prev) => ({ ...prev, [key]: value }));
   };
-
   const graphOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -201,16 +200,19 @@ const BankrollView = ({ mode, isViewMode }) => {
 
     const filteredBets = bets
       .filter((bet) =>
-        bankroll.visibility === "Public" ? bet.isVerified : bet
+        bankroll.visibility === "Public" ? bet.isVerified : true
       )
       .filter((bet) => {
         const betDate = new Date(bet.date);
-        return (
-          graphFilters.includeStartingCapital ||
-          (betDate.getFullYear() === graphFilters.year &&
-            betDate.getMonth() + 1 === graphFilters.month)
-        );
-      });
+        const matchesYear = graphFilters.year
+          ? betDate.getFullYear() === graphFilters.year
+          : true;
+        const matchesMonth = graphFilters.month
+          ? betDate.getMonth() + 1 === graphFilters.month
+          : true;
+        return matchesYear && matchesMonth;
+      })
+      .sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
 
     const graphPoints = filteredBets.reduce(
       (acc, bet) => {
@@ -244,7 +246,16 @@ const BankrollView = ({ mode, isViewMode }) => {
     if (bets && bankroll) {
       calculateGraphData(bets);
     }
-  }, [bets, graphFilters]);
+  }, [bets, bankroll, graphFilters]);
+
+  const clearFilters = () => {
+    setGraphFilters({
+      month: null,
+      year: null,
+      includeStartingCapital: true,
+    });
+    setShowFilters(false); // Hide filters after clearing
+  };
 
   const fetchBankroll = async () => {
     setLoading(true);
@@ -461,92 +472,113 @@ const BankrollView = ({ mode, isViewMode }) => {
         <Box
           sx={{
             width: "100%",
-            height: "500px",
             background: mode === "dark" ? "rgba(22, 73, 255, 0.1)" : "white",
             borderRadius: "12px",
             padding: "1rem",
             position: "relative",
+            mb: 4,
           }}
         >
-          {/* Filters Above the Graph */}
           <Box
             sx={{
               display: "flex",
-              justifyContent: "flex-end",
-              gap: "1rem",
-              position: "absolute",
-              top: "10px",
-              left: "10px",
-              zIndex: 1,
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
             }}
           >
-            <FormControl
-              sx={{
-                minWidth: "80px",
-                maxWidth: "120px",
-              }}
+            <Typography
+              variant="h6"
+              sx={{ color: mode === "dark" ? "white" : "black" }}
             >
-              <Select
-                value={graphFilters.month}
-                onChange={(e) => handleFilterChange("month", e.target.value)}
-                sx={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  fontSize: "0.875rem",
-                  height: "30px",
-                  "& .MuiSelect-select": {
-                    padding: "4px 8px",
-                  },
-                }}
+              Bankroll Progression
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setShowFilters(!showFilters)}
+                sx={{ color: mode === "dark" ? "white" : "black" }}
               >
-                {Array.from({ length: 12 }, (_, i) => (
-                  <MenuItem key={i + 1} value={i + 1}>
-                    {new Date(0, i).toLocaleString("en-US", { month: "long" })}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl
-              sx={{
-                minWidth: "80px",
-                maxWidth: "120px",
-              }}
-            >
-              <Select
-                value={graphFilters.year}
-                onChange={(e) => handleFilterChange("year", e.target.value)}
-                sx={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  color: "#fff",
-                  fontSize: "0.875rem", // Smaller font for compact look
-                  height: "30px", // Small height
-                  "& .MuiSelect-select": {
-                    padding: "4px 8px", // Reduced padding inside the Select
-                  },
-                }}
-              >
-                {Array.from(
-                  { length: 5 },
-                  (_, i) => new Date().getFullYear() - i
-                ).map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                {showFilters ? "Hide Filters" : "Filter"}
+              </Button>
+              {showFilters && (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={clearFilters}
+                  sx={{ color: mode === "dark" ? "white" : "black" }}
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </Box>
           </Box>
-          <Box
-            sx={{
-              width: "100%",
-              height: "85%",
-              background: "rgba(22, 73, 255, 0.1)",
-              borderRadius: "12px",
-              padding: "1rem",
-              marginTop: "3rem",
-              marginBottom: "2rem",
-            }}
-          >
+
+          {showFilters && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-start",
+                gap: "1rem",
+                mb: 2,
+              }}
+            >
+              <FormControl sx={{ minWidth: "80px", maxWidth: "120px" }}>
+                <Select
+                  value={graphFilters.month || ""}
+                  onChange={(e) =>
+                    handleFilterChange("month", e.target.value || null)
+                  }
+                  displayEmpty
+                  sx={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    color: mode === "dark" ? "white" : "black",
+                    fontSize: "0.875rem",
+                    height: "30px",
+                    "& .MuiSelect-select": { padding: "4px 8px" },
+                  }}
+                >
+                  <MenuItem value="">All Months</MenuItem>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <MenuItem key={i + 1} value={i + 1}>
+                      {new Date(0, i).toLocaleString("en-US", {
+                        month: "long",
+                      })}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl sx={{ minWidth: "80px", maxWidth: "120px" }}>
+                <Select
+                  value={graphFilters.year || ""}
+                  onChange={(e) =>
+                    handleFilterChange("year", e.target.value || null)
+                  }
+                  displayEmpty
+                  sx={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    color: mode === "dark" ? "white" : "black",
+                    fontSize: "0.875rem",
+                    height: "30px",
+                    "& .MuiSelect-select": { padding: "4px 8px" },
+                  }}
+                >
+                  <MenuItem value="">All Years</MenuItem>
+                  {Array.from(
+                    { length: 5 },
+                    (_, i) => new Date().getFullYear() - i
+                  ).map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+
+          <Box sx={{ height: "400px" }}>
             {graphData ? (
               <Line data={graphData} options={graphOptions} />
             ) : (
@@ -555,7 +587,6 @@ const BankrollView = ({ mode, isViewMode }) => {
           </Box>
         </Box>
       </Box>
-
       {/* Stats Section */}
       <Box
         sx={{

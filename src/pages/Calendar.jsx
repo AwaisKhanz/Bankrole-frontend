@@ -1,44 +1,28 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { Box, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import api from "../services/api";
 
 const CalendarPage = ({ mode }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dailyData, setDailyData] = useState({});
+  const [filter, setFilter] = useState("all"); // Default filter: all bankrolls
+  const [bankrolls, setBankrolls] = useState([]); // Store raw bankroll data
   const theme = useTheme();
 
   const fetchBankrollData = async () => {
     try {
       const response = await api.get("/bankrolls");
-      const bankrolls = response.data;
-
-      const dailyProfits = bankrolls.reduce((acc, bankroll) => {
-        bankroll.bets.forEach((bet) => {
-          const date = new Date(bet.date);
-          const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-          let profit = 0;
-
-          if (bet.status === "Won") {
-            profit = bet.stake * (bet.odds - 1);
-          } else if (bet.status === "Loss") {
-            profit = -bet.stake;
-          }
-
-          if (!acc[formattedDate])
-            acc[formattedDate] = {
-              profit: 0,
-              symbol: bankroll.currency.symbol,
-            };
-          acc[formattedDate].profit += profit;
-        });
-        return acc;
-      }, {});
-
-      setDailyData(dailyProfits);
+      setBankrolls(response.data); // Store all bankrolls
     } catch (error) {
       console.error("Failed to fetch bankroll data:", error);
     }
@@ -48,11 +32,49 @@ const CalendarPage = ({ mode }) => {
     fetchBankrollData();
   }, []);
 
+  useEffect(() => {
+    // Filter bankrolls based on selected filter and calculate daily profits
+    const filteredBankrolls = bankrolls.filter((bankroll) => {
+      if (filter === "all") return true;
+      return bankroll.visibility.toLowerCase() === filter;
+    });
+
+    const dailyProfits = filteredBankrolls.reduce((acc, bankroll) => {
+      bankroll.bets.forEach((bet) => {
+        const date = new Date(bet.date);
+        const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+        let profit = 0;
+
+        if (bet.status === "Won") {
+          profit = bet.stake * (bet.odds - 1);
+        } else if (bet.status === "Loss") {
+          profit = -bet.stake;
+        }
+
+        if (!acc[formattedDate]) {
+          acc[formattedDate] = {
+            profit: 0,
+            symbol: bankroll.currency.symbol,
+          };
+        }
+        acc[formattedDate].profit += profit;
+      });
+      return acc;
+    }, {});
+
+    setDailyData(dailyProfits);
+  }, [bankrolls, filter]); // Re-run when bankrolls or filter changes
+
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
+  };
+
   const getDailyProfit = (date) => {
     const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-
     return dailyData[formattedDate] || { profit: 0, symbol: "" };
   };
 
@@ -74,6 +96,21 @@ const CalendarPage = ({ mode }) => {
       >
         Calendar
       </Typography>
+
+      {/* Filter Dropdown */}
+      <FormControl sx={{ mb: 4, minWidth: 200, maxWidth: 300, mx: "auto" }}>
+        <InputLabel>Filter Bankrolls</InputLabel>
+        <Select
+          value={filter}
+          onChange={handleFilterChange}
+          label="Filter Bankrolls"
+        >
+          <MenuItem value="all">All Bankrolls</MenuItem>
+          <MenuItem value="public">Public Bankroll</MenuItem>
+          <MenuItem value="private">Private Bankroll</MenuItem>
+        </Select>
+      </FormControl>
+
       <Box
         sx={{
           display: "flex",
@@ -107,10 +144,8 @@ const CalendarPage = ({ mode }) => {
                       dailyProfit.profit > 0
                         ? "rgba(76, 175, 80, 0.2)"
                         : "rgba(244, 67, 54, 0.2)",
-
                     borderRadius: "8px",
                     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    // borderBottom: "4px solid #1649FF",
                     padding: { xs: "4px", md: "10px" },
                   }}
                 >
@@ -131,7 +166,6 @@ const CalendarPage = ({ mode }) => {
                     {date.toLocaleDateString("en-US", { weekday: "long" })}
                   </Typography>
                   <Typography
-                    // variant="h6"
                     sx={{
                       fontWeight: "bold",
                       color:
