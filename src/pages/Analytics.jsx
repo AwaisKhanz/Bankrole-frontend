@@ -166,13 +166,11 @@ const Analytics = ({ mode }) => {
       {
         label: "Profit (€)",
         data: Object.values(analytics.profitByDay),
-        backgroundColor: Object.values(analytics.profitByDay).map((value) =>
-          value >= 0
-            ? alpha(theme.palette.primary.main, 0.7)
-            : alpha(theme.palette.error.main, 0.7)
+        backgroundColor: Object.values(analytics.profitByDay).map(
+          (value) => (value >= 0 ? "#4CAF50" : "#F44336") // Solid green for positive, red for negative
         ),
-        borderColor: Object.values(analytics.profitByDay).map((value) =>
-          value >= 0 ? theme.palette.primary.main : theme.palette.error.main
+        borderColor: Object.values(analytics.profitByDay).map(
+          (value) => (value >= 0 ? "#388E3C" : "#D32F2F") // Darker green/red for borders
         ),
         borderWidth: 1,
         borderRadius: 4,
@@ -187,13 +185,11 @@ const Analytics = ({ mode }) => {
       {
         label: "Profit (€)",
         data: Object.values(analytics.profitByMonth),
-        backgroundColor: Object.values(analytics.profitByMonth).map((value) =>
-          value >= 0
-            ? alpha(theme.palette.primary.main, 0.7)
-            : alpha(theme.palette.error.main, 0.7)
+        backgroundColor: Object.values(analytics.profitByMonth).map(
+          (value) => (value >= 0 ? "#4CAF50" : "#F44336") // Solid green for positive, red for negative
         ),
-        borderColor: Object.values(analytics.profitByMonth).map((value) =>
-          value >= 0 ? theme.palette.primary.main : theme.palette.error.main
+        borderColor: Object.values(analytics.profitByMonth).map(
+          (value) => (value >= 0 ? "#388E3C" : "#D32F2F") // Darker green/red for borders
         ),
         borderWidth: 1,
         borderRadius: 4,
