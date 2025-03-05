@@ -23,6 +23,7 @@ import ResetPassword from "./pages/ResetPassword";
 import { Box, useTheme } from "@mui/material";
 import Profile from "./pages/Profile";
 import PoissonMatchCalculator from "./pages/PoissonMatchCalculator";
+import Analytics from "./pages/Analytics";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -111,6 +112,15 @@ const App = ({ toggleTheme, mode }) => {
           <Route
             path="/poisson-match-calculator"
             element={<PoissonMatchCalculator mode={mode} />}
+          />
+
+          <Route
+            path="analytics"
+            element={
+              <SubscriptionGuard>
+                <Analytics mode={mode} />
+              </SubscriptionGuard>
+            }
           />
 
           {/* Admin Routes */}
