@@ -1,14 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { Typography, Box, Chip, useTheme } from "@mui/material";
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Typography,
+  Box,
+  Chip,
+  useTheme,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  IconButton,
+  Avatar,
+  Tooltip,
+  useMediaQuery,
+} from "@mui/material";
 import api from "../services/api"; // Replace with your actual API service
 import { useSearchParams } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
-import { Fade } from "@mui/material";
 import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip as ChartTooltip,
+  Legend,
+} from "chart.js";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import CloseIcon from "@mui/icons-material/Close";
+import LooksTwoIcon from "@mui/icons-material/LooksTwo";
+import Looks3Icon from "@mui/icons-material/Looks3";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import PercentIcon from "@mui/icons-material/Percent";
 
 // Register Chart.js components
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, ChartTooltip, Legend);
 
 const Ranking = ({ mode }) => {
   const [topBankrolls, setTopBankrolls] = useState([]);
@@ -16,6 +42,7 @@ const Ranking = ({ mode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedRow, setSelectedRow] = useState(null);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [pagination, setPagination] = useState({
     page: Number(searchParams.get("page") || 0),
     pageSize: Number(searchParams.get("limit") || 10),
@@ -89,14 +116,22 @@ const Ranking = ({ mode }) => {
       datasets: [
         {
           data: Object.values(statusBetDistribution),
-          backgroundColor: ["#4CAF50", "#F44336", "#FFC107", "#9C27B0"],
-          borderColor: theme.palette.background.default,
-          borderWidth: 1,
+          backgroundColor: [
+            "#4CAF50", // Won - Vibrant green
+            "#F44336", // Loss - Vibrant red
+            "#FFC107", // Void - Amber
+            "#9C27B0", // Cash Out - Purple
+          ],
+          borderColor:
+            mode === "dark" ? theme.palette.background.paper : "#ffffff",
+          borderWidth: 2,
+          hoverOffset: 4,
         },
       ],
     };
   };
 
+  // Update the getSportBetData function with better colors
   const getSportBetData = (selectedRow) => {
     const sportBetDistribution = selectedRow?.stats?.sportBetDistribution || {
       Football: 0,
@@ -114,19 +149,78 @@ const Ranking = ({ mode }) => {
         {
           data: Object.values(sportBetDistribution),
           backgroundColor: [
-            "#FF6384",
-            "#36A2EB",
-            "#FFCE56",
-            "#4BC0C0",
-            "#9966FF",
-            "#FF9F40",
-            "#C9CBCF",
+            "#2196F3", // Football - Blue
+            "#E91E63", // Tennis - Pink
+            "#FF9800", // Basketball - Orange
+            "#00BCD4", // Volleyball - Cyan
+            "#3F51B5", // American Football - Indigo
+            "#03A9F4", // Ice Hockey - Light Blue
+            "#607D8B", // Other Sport - Blue Grey
           ],
-          borderColor: theme.palette.background.default,
-          borderWidth: 1,
+          borderColor:
+            mode === "dark" ? theme.palette.background.paper : "#ffffff",
+          borderWidth: 2,
+          hoverOffset: 4,
         },
       ],
     };
+  };
+
+  const getRankIcon = (rank) => {
+    switch (rank) {
+      case 1:
+        return (
+          <Avatar
+            sx={{
+              bgcolor: "gold",
+              width: 36,
+              height: 36,
+              boxShadow: 2,
+            }}
+          >
+            <EmojiEventsIcon />
+          </Avatar>
+        );
+      case 2:
+        return (
+          <Avatar
+            sx={{
+              bgcolor: "silver",
+              width: 36,
+              height: 36,
+              boxShadow: 1,
+            }}
+          >
+            <LooksTwoIcon />
+          </Avatar>
+        );
+      case 3:
+        return (
+          <Avatar
+            sx={{
+              bgcolor: "#cd7f32",
+              width: 36,
+              height: 36,
+              boxShadow: 1,
+            }}
+          >
+            <Looks3Icon />
+          </Avatar>
+        );
+      default:
+        return (
+          <Avatar
+            sx={{
+              bgcolor: theme.palette.grey[200],
+              color: theme.palette.text.primary,
+              width: 36,
+              height: 36,
+            }}
+          >
+            {rank}
+          </Avatar>
+        );
+    }
   };
 
   const columns = [
@@ -135,26 +229,12 @@ const Ranking = ({ mode }) => {
       headerName: "Rank",
       flex: 0.5,
       minWidth: 100,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => {
         const sortedRowIds = params.api.getSortedRowIds();
         const rank = sortedRowIds.indexOf(params.id) + 1;
-        let icon;
-
-        switch (rank) {
-          case 1:
-            icon = "🥇";
-            break;
-          case 2:
-            icon = "🥈";
-            break;
-          case 3:
-            icon = "🥉";
-            break;
-          default:
-            icon = rank;
-        }
-
-        return <Box sx={{ fontSize: { xs: "20px", md: "32px" } }}>{icon}</Box>;
+        return getRankIcon(rank);
       },
     },
     {
@@ -163,6 +243,11 @@ const Ranking = ({ mode }) => {
       flex: 1,
       minWidth: 150,
       valueGetter: (value, row) => row?.name || "N/A",
+      renderCell: (params) => (
+        <Typography variant="body1" fontWeight="medium">
+          {params.value}
+        </Typography>
+      ),
     },
     {
       field: "_id",
@@ -170,21 +255,44 @@ const Ranking = ({ mode }) => {
       flex: 1,
       minWidth: 250,
       valueGetter: (value, row) => row?.userId?._id || "N/A",
+      renderCell: (params) => (
+        <Tooltip title={params.value} arrow>
+          <Typography
+            variant="body2"
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: theme.palette.text.secondary,
+            }}
+          >
+            {params.value}
+          </Typography>
+        </Tooltip>
+      ),
     },
     {
       field: "profitPercentage",
       headerName: "Profit %",
       flex: 0.5,
       minWidth: 150,
+      align: "right",
+      headerAlign: "right",
       valueGetter: (value, row) => row?.stats?.profitPercentage || "0",
       renderCell: (params) => {
-        const progressionValue = parseFloat(params.value);
+        const progressionValue = Number.parseFloat(params.value);
         return (
           <Chip
             label={`${progressionValue}%`}
             sx={{
-              backgroundColor: progressionValue >= 0 ? "#4CAF50" : "#F44336",
+              backgroundColor:
+                progressionValue >= 0
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
               color: "#fff",
+              fontWeight: "bold",
+              "& .MuiChip-label": {
+                padding: "0 10px",
+              },
             }}
           />
         );
@@ -193,30 +301,48 @@ const Ranking = ({ mode }) => {
   ];
 
   return (
-    <Box sx={{ display: "flex", height: "100%" }}>
-      <Box
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        gap: 2,
+        height: "100%",
+      }}
+    >
+      {/* Main Ranking Table */}
+      <Paper
+        elevation={2}
         sx={{
-          width: selectedRow ? "50%" : "100%",
-          transition: "width 0.3s ease",
-          height: "100%",
+          flex: selectedRow ? 3 : 1,
+          overflow: "hidden",
+          borderRadius: 2,
+          transition: "all 0.3s ease",
         }}
       >
-        {/* Data Grid */}
         <Box
           sx={{
-            width: "100%",
-            overflowX: "auto",
-            height: "100%",
+            p: 2,
+            // borderBottom: `1px solid ${theme.palette.divider}`,
+            bgcolor: theme.palette.background.default,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
+          <Typography variant="h6" fontWeight="bold">
+            Top Bankrolls Ranking
+          </Typography>
+        </Box>
+
+        <Box sx={{ height: "calc(100% - 64px)" }}>
           <DataGrid
             rows={topBankrolls}
             columns={columns}
             pagination
             pageSize={pagination.pageSize}
             getRowId={(row) => row._id}
-            pageSizeOptions={[10, 50, 100]}
-            rowHeight={80}
+            pageSizeOptions={[10, 25, 50, 100]}
+            rowHeight={60}
             rowCount={pagination.total}
             page={pagination.page}
             loading={loading}
@@ -227,182 +353,371 @@ const Ranking = ({ mode }) => {
             }}
             autoHeight
             onPaginationModelChange={handlePaginationModelChange}
-            getRowSpacing={(params) => ({
-              top: 5, // Adjust the spacing above each row
-              bottom: 5, // Adjust the spacing below each row
+            getRowSpacing={() => ({
+              top: 8,
+              bottom: 8,
             })}
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             onRowClick={(params) => setSelectedRow(params.row)}
             sx={{
-              borderRadius: "8px",
+              border: "none",
               height: "100% !important",
-              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
               "& .MuiDataGrid-columnHeaders": {
-                fontSize: "16px",
+                backgroundColor: theme.palette.background.default,
+                // borderBottom: `1px solid ${theme.palette.divider}`,
+                fontSize: "0.875rem",
+                fontWeight: "bold",
               },
               "& .MuiDataGrid-cell": {
-                wordBreak: "break-word",
-                borderBottom:
-                  mode === "dark"
-                    ? `1px solid ${theme.palette.primary.main}`
-                    : `1px solid #e5e7eb`,
+                // borderBottom: `1px solid ${theme.palette.divider}`,
+                fontSize: "0.875rem",
+              },
+              "& .MuiDataGrid-row:hover": {
+                backgroundColor: theme.palette.action.hover,
+                cursor: "pointer",
+              },
+              "& .MuiDataGrid-row.Mui-selected": {
+                backgroundColor: `${theme.palette.primary.light}20`,
+                "&:hover": {
+                  backgroundColor: `${theme.palette.primary.light}30`,
+                },
+              },
+              "& .MuiDataGrid-footerContainer": {
+                // borderTop: `1px solid ${theme.palette.divider}`,
               },
             }}
           />
         </Box>
-      </Box>
+      </Paper>
 
-      {/* Right Side (Selected Row Data) */}
-      <Box
-        sx={{
-          width: selectedRow ? "50%" : "0%",
-          display: selectedRow ? "flex" : "none",
-          flexDirection: "column",
-          transition: "width 0.3s ease",
-          background: theme.palette.primary.main,
-          p: 2,
-          borderRadius: "8px",
-          overflowY: "auto",
-          border: `1px solid ${mode === "dark" ? "black" : "#eeeeee"}`,
-        }}
-      >
-        {/* Bankroll Name */}
-        <Typography
-          variant="h5"
+      {/* Details Panel */}
+      {selectedRow && (
+        <Paper
+          elevation={3}
           sx={{
-            mb: 3,
-            fontWeight: "bold",
+            flex: 2,
+            display: "flex",
+            flexDirection: "column",
+            borderRadius: 2,
+            overflow: "hidden",
+            transition: "all 0.3s ease",
           }}
         >
-          {selectedRow?.name}
-        </Typography>
-
-        <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
-          {/* Stats Cards */}
           <Box
             sx={{
+              p: 2,
+              // borderBottom: `1px solid ${theme.palette.divider}`,
+              bgcolor: theme.palette.background.default,
               display: "flex",
-              flexDirection: "column",
-              gap: 2,
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            {/* ROI Card */}
-            <Box
+            <Typography variant="h6" fontWeight="bold">
+              Bankroll Details
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => setSelectedRow(null)}
               sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                background: theme.palette.secondary.light,
-                padding: "1rem",
-                borderRadius: "8px",
-                textAlign: "center",
-                minWidth: "180px",
-                boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.1)",
+                bgcolor: theme.palette.action.hover,
+                "&:hover": {
+                  bgcolor: theme.palette.action.selected,
+                },
               }}
             >
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                ROI
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: "bold",
-                  color:
-                    parseFloat(selectedRow?.stats?.roi || 0) >= 0
-                      ? "#4CAF50"
-                      : "#F44336",
-                }}
-              >
-                {selectedRow?.stats?.roi || "0"}%
-              </Typography>
-            </Box>
-
-            {/* Winning Rate Card */}
-            <Box
-              sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                background: theme.palette.secondary.light,
-                padding: "1rem",
-                borderRadius: "8px",
-                textAlign: "center",
-                minWidth: "180px",
-                boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Winning Rate
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: "bold",
-                  color:
-                    parseFloat(selectedRow?.stats?.winningRate || 0) >= 50
-                      ? "#4CAF50"
-                      : "#F44336",
-                }}
-              >
-                {selectedRow?.stats?.winningRate || "0"}%
-              </Typography>
-            </Box>
+              <CloseIcon fontSize="small" />
+            </IconButton>
           </Box>
 
-          {/* Graphs Section */}
-          <Box
-            sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}
-          >
-            {/* % OF STATS BET (Pie Chart) */}
-            <Box
+          <Box sx={{ p: 3, overflow: "auto" }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              {selectedRow.name}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
               sx={{
-                background: theme.palette.background.default,
-                borderRadius: "12px",
-                p: 2,
-                flex: 1,
-                textAlign: "center",
-                height: "100%",
+                mb: 3,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-                % OF STATS BET
-              </Typography>
-              <Pie
-                data={getStatusBetData(selectedRow)}
-                options={{
-                  responsive: true,
-                }}
-              />
-            </Box>
+              ID: {selectedRow.userId?._id || "N/A"}
+            </Typography>
 
-            {/* % OF SPORT BET (Pie Chart) */}
-            <Box
-              sx={{
-                background: theme.palette.background.default,
-                borderRadius: "12px",
-                p: 2,
-                flex: 1,
-                textAlign: "center",
-                height: "100%",
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-                % OF SPORT BET
-              </Typography>
-              <Pie
-                data={getSportBetData(selectedRow)}
-                options={{
-                  responsive: true,
-                }}
-              />
-            </Box>
+            <Grid container spacing={2} sx={{ mb: 4 }}>
+              {/* ROI Card */}
+              <Grid item xs={12} sm={6}>
+                <Card
+                  elevation={1}
+                  sx={{
+                    height: "100%",
+                    borderRadius: 2,
+                    // border: `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      p: 2,
+                      "&:last-child": { pb: 2 },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        mb: 1,
+                        color: theme.palette.text.secondary,
+                      }}
+                    >
+                      <TrendingUpIcon sx={{ mr: 0.5 }} fontSize="small" />
+                      <Typography variant="body2" fontWeight="medium">
+                        ROI
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="h4"
+                      fontWeight="bold"
+                      sx={{
+                        color:
+                          Number.parseFloat(selectedRow?.stats?.roi || 0) >= 0
+                            ? theme.palette.success.main
+                            : theme.palette.error.main,
+                      }}
+                    >
+                      {selectedRow?.stats?.roi || "0"}%
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Winning Rate Card */}
+              <Grid item xs={12} sm={6}>
+                <Card
+                  elevation={1}
+                  sx={{
+                    height: "100%",
+                    borderRadius: 2,
+                    // border: `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      p: 2,
+                      "&:last-child": { pb: 2 },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        mb: 1,
+                        color: theme.palette.text.secondary,
+                      }}
+                    >
+                      <PercentIcon sx={{ mr: 0.5 }} fontSize="small" />
+                      <Typography variant="body2" fontWeight="medium">
+                        Winning Rate
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="h4"
+                      fontWeight="bold"
+                      sx={{
+                        color:
+                          Number.parseFloat(
+                            selectedRow?.stats?.winningRate || 0
+                          ) >= 50
+                            ? theme.palette.success.main
+                            : theme.palette.error.main,
+                      }}
+                    >
+                      {selectedRow?.stats?.winningRate || "0"}%
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={3}>
+              {/* % OF STATS BET (Pie Chart) */}
+              <Grid item xs={12} md={6}>
+                <Card
+                  elevation={2}
+                  sx={{
+                    borderRadius: 2,
+                    height: "100%",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <CardHeader
+                    title="Bet Status Distribution"
+                    titleTypographyProps={{
+                      variant: "subtitle1",
+                      fontWeight: "bold",
+                    }}
+                    sx={{
+                      p: 2,
+                      // borderBottom: `1px solid ${theme.palette.divider}`,
+                      bgcolor:
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.05)"
+                          : "rgba(0,0,0,0.02)",
+                    }}
+                  />
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      p: 3,
+                      pt: 4,
+                      "&:last-child": { pb: 4 },
+                    }}
+                  >
+                    <Box sx={{ height: 240, width: "100%", maxWidth: 300 }}>
+                      <Pie
+                        data={getStatusBetData(selectedRow)}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: true,
+                          plugins: {
+                            legend: {
+                              position: "top",
+                              labels: {
+                                boxWidth: 15,
+                                font: {
+                                  size: 12,
+                                  weight: "bold",
+                                },
+                                color: theme.palette.text.primary,
+                              },
+                            },
+                            tooltip: {
+                              backgroundColor:
+                                theme.palette.mode === "dark"
+                                  ? "rgba(0,0,0,0.8)"
+                                  : "rgba(255,255,255,0.9)",
+                              titleColor:
+                                theme.palette.mode === "dark" ? "#fff" : "#000",
+                              bodyColor:
+                                theme.palette.mode === "dark" ? "#fff" : "#000",
+                              // borderColor: theme.palette.divider,
+                              borderWidth: 1,
+                              padding: 12,
+                              cornerRadius: 8,
+                              titleFont: {
+                                weight: "bold",
+                              },
+                            },
+                          },
+                          cutout: "60%",
+                          animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                          },
+                        }}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* % OF SPORT BET (Pie Chart) */}
+              <Grid item xs={12} md={6}>
+                <Card
+                  elevation={2}
+                  sx={{
+                    borderRadius: 2,
+                    height: "100%",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <CardHeader
+                    title="Sport Bet Distribution"
+                    titleTypographyProps={{
+                      variant: "subtitle1",
+                      fontWeight: "bold",
+                    }}
+                    sx={{
+                      p: 2,
+                      // borderBottom: `1px solid ${theme.palette.divider}`,
+                      bgcolor:
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.05)"
+                          : "rgba(0,0,0,0.02)",
+                    }}
+                  />
+                  <CardContent
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      p: 3,
+                      pt: 4,
+                      "&:last-child": { pb: 4 },
+                    }}
+                  >
+                    <Box sx={{ height: 240, width: "100%", maxWidth: 300 }}>
+                      <Pie
+                        data={getSportBetData(selectedRow)}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: true,
+                          plugins: {
+                            legend: {
+                              position: "top",
+                              labels: {
+                                boxWidth: 15,
+                                font: {
+                                  size: 12,
+                                  weight: "bold",
+                                },
+                                color: theme.palette.text.primary,
+                              },
+                            },
+                            tooltip: {
+                              backgroundColor:
+                                theme.palette.mode === "dark"
+                                  ? "rgba(0,0,0,0.8)"
+                                  : "rgba(255,255,255,0.9)",
+                              titleColor:
+                                theme.palette.mode === "dark" ? "#fff" : "#000",
+                              bodyColor:
+                                theme.palette.mode === "dark" ? "#fff" : "#000",
+                              borderColor: theme.palette.divider,
+                              borderWidth: 1,
+                              padding: 12,
+                              cornerRadius: 8,
+                              titleFont: {
+                                weight: "bold",
+                              },
+                            },
+                          },
+                          cutout: "60%",
+                          animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                          },
+                        }}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
           </Box>
-        </Box>
-      </Box>
+        </Paper>
+      )}
     </Box>
   );
 };

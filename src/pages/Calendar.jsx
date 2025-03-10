@@ -183,7 +183,13 @@ const CalendarPage = ({ mode }) => {
               );
             }
             return view === "month" ? (
-              <Typography>{date.getDate()}</Typography>
+              <Typography
+                sx={{
+                  padding: { xs: "4px", md: "10px" },
+                }}
+              >
+                {date.getDate()}
+              </Typography>
             ) : null;
           }}
           tileClassName={({ date }) => {

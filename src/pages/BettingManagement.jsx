@@ -14,8 +14,7 @@ const BettingManagement = () => {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [selectedBet, setSelectedBet] = useState(null);
   const [betDetailsOpen, setBetDetailsOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("");
-  console.log(statusFilter);
+  const [statusFilter, setStatusFilter] = useState("Pending");
 
   useEffect(() => {
     if (
@@ -251,29 +250,7 @@ const BettingManagement = () => {
           sx={{ flex: 1 }}
         />
         {/** ✅ Verification Status Filter */}
-        <FormControl
-          sx={{
-            minWidth: 200,
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: "rgba(255, 255, 255, 0.7)",
-              },
-              "&:hover fieldset": {
-                borderColor: "#FFFFFF",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#FFFFFF",
-                borderWidth: "2px",
-              },
-            },
-            "& .MuiInputLabel-root": {
-              color: "rgba(255, 255, 255, 0.7)",
-              "&.Mui-focused": {
-                color: "#FFFFFF",
-              },
-            },
-          }}
-        >
+        <FormControl>
           <InputLabel>Verification Status</InputLabel>
           <Select
             value={statusFilter}

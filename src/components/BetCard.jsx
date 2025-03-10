@@ -6,12 +6,13 @@ import {
   Collapse,
   IconButton,
   useTheme,
+  Tooltip,
+  Alert,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { Alert, Tooltip } from "@mui/material";
 
 const getVerificationAlert = (bet) => {
   if (bet.verificationStatus === "Pending") {
@@ -30,8 +31,7 @@ const getVerificationAlert = (bet) => {
         severity="error"
         sx={{ backgroundColor: "#FFCDD2", color: "#000" }}
       >
-        This bet verification has been rejected. Please correct your
-        verification code.
+        This bet verification has been rejected.
       </Alert>
     );
   }
@@ -41,6 +41,15 @@ const getVerificationAlert = (bet) => {
 const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
   const [expanded, setExpanded] = useState(false);
   const theme = useTheme();
+
+  // Check if bet is within 24 hours of creation
+  const createdAt = new Date(bet.createdAt || bet._id.getTimestamp()); // Adjust based on backend data
+  const now = new Date();
+  const hoursSinceCreation = (now - createdAt) / (1000 * 60 * 60); // Convert ms to hours
+  const isPublicBankroll = bankroll?.visibility === "Public";
+  const isWithin24Hours = hoursSinceCreation < 24;
+  const canDelete = !isPublicBankroll || !isWithin24Hours;
+  const canEdit = !(isPublicBankroll && bet.verificationStatus === "Pending");
 
   const handleExpand = () => {
     setExpanded(!expanded);
@@ -279,36 +288,71 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
               </Typography>
             </Box>
           </Box>
+
           {!isViewMode && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "1rem",
-              }}
-            >
-              <IconButton
-                onClick={() => onEdit(bet)}
+            <Box sx={{ marginBottom: "1rem" }}>
+              {isPublicBankroll && isWithin24Hours && (
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#FF5252", fontStyle: "italic", mb: 1 }}
+                >
+                  Cannot delete this bet within 24 hours of upload. Please
+                  contact support if needed.
+                </Typography>
+              )}
+
+              <Box
                 sx={{
-                  color: "#1649ff",
-                  "&:hover": {
-                    backgroundColor: "rgba(22, 73, 255, 0.1)",
-                  },
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "1rem",
                 }}
               >
-                <EditIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => onDelete(bet)}
-                sx={{
-                  color: "#FF5252",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 82, 82, 0.1)",
-                  },
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
+                <Tooltip
+                  title={
+                    isPublicBankroll && bet.verificationStatus === "Pending"
+                      ? "Cannot edit while verification is pending."
+                      : "Edit this bet"
+                  }
+                >
+                  <span>
+                    <IconButton
+                      onClick={() => canEdit && onEdit(bet)}
+                      disabled={!canEdit}
+                      sx={{
+                        color: canEdit ? "#1649ff" : "grey",
+                        "&:hover": canEdit
+                          ? { backgroundColor: "rgba(22, 73, 255, 0.1)" }
+                          : {},
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip
+                  title={
+                    isPublicBankroll && isWithin24Hours
+                      ? "Deletion locked for 24 hours. Contact support."
+                      : "Delete this bet"
+                  }
+                >
+                  <span>
+                    <IconButton
+                      onClick={() => canDelete && onDelete(bet)}
+                      disabled={!canDelete}
+                      sx={{
+                        color: canDelete ? "#FF5252" : "grey",
+                        "&:hover": canDelete
+                          ? { backgroundColor: "rgba(255, 82, 82, 0.1)" }
+                          : {},
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
             </Box>
           )}
         </Box>

@@ -332,13 +332,19 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
               control={control}
               render={({ field }) => (
                 <Select {...field} label="Status">
-                  {["Won", "Loss", "Void", "Cashout", "Pending"].map(
-                    (status) => (
-                      <MenuItem key={status} value={status}>
-                        {status}
-                      </MenuItem>
-                    )
-                  )}
+                  {bankroll?.visibility === "Public" && !initialData
+                    ? [
+                        <MenuItem key="Pending" value="Pending">
+                          Pending
+                        </MenuItem>,
+                      ]
+                    : ["Won", "Loss", "Void", "Cashout", "Pending"].map(
+                        (status) => (
+                          <MenuItem key={status} value={status}>
+                            {status}
+                          </MenuItem>
+                        )
+                      )}
                 </Select>
               )}
             />
