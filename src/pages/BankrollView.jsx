@@ -566,7 +566,7 @@ const BankrollView = ({ mode, isViewMode }) => {
                 >
                   <MenuItem value="">All Years</MenuItem>
                   {Array.from(
-                    { length: 5 },
+                    { length: 26 },
                     (_, i) => new Date().getFullYear() - i
                   ).map((year) => (
                     <MenuItem key={year} value={year}>
@@ -725,11 +725,7 @@ const BankrollView = ({ mode, isViewMode }) => {
                 yearData.year.toString() === currentYear.toString()
               }
             >
-              <AccordionSummary
-                sx={{
-                  "&.Mui-expanded": {},
-                }}
-              >
+              <AccordionSummary sx={{}}>
                 <Box
                   style={{
                     display: "flex",
@@ -775,7 +771,6 @@ const BankrollView = ({ mode, isViewMode }) => {
                           ? theme.palette.primary.main
                           : "#eeeeee",
                       marginBottom: "0.5rem",
-                      borderRadius: "12px",
                       boxShadow: "none",
                       "&.Mui-expanded": {
                         borderRadius: "12px",

@@ -32,7 +32,6 @@ const theme = (mode) =>
         primary: mode === "dark" ? "#ffffff" : "#000000",
         secondary: mode === "dark" ? "#A0AEC0" : "#333333",
       },
-      divider: mode === "dark" ? "#334155" : "#000",
     },
     typography: {
       fontFamily: "Arial, sans-serif",

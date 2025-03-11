@@ -103,19 +103,6 @@
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.react-calendar.light .react-calendar__navigation,
-.react-calendar.light .react-calendar__navigation__label:hover,
-.react-calendar.light .react-calendar__navigation__arrow:hover {
-  background-color: #1649ff !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-
-.react-calendar.dark .react-calendar__navigation,
-.react-calendar.dark .react-calendar__navigation__label:hover,
-.react-calendar.dark .react-calendar__navigation__arrow:hover {
-  background-color: #000000 !important;
-}
-
 .react-calendar.light .react-calendar__navigation button {
   color: white;
 }
@@ -132,6 +119,10 @@
   background: transparent !important;
   color: inherit !important;
   font-weight: bold;
+}
+
+.react-calendar__tile--hasActive {
+  background: transparent;
 }
 
 .react-calendar.light .profit-day {
@@ -155,4 +146,129 @@
 .react-calendar.dark .neutral-day:active {
   background-color: transparent !important;
   color: #ffffff !important;
+}
+
+/* Dark Mode Header Styles */
+.react-calendar.dark .react-calendar__navigation {
+  background-color: #0f172a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px 8px 0 0;
+  padding: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Navigation button styles for dark mode */
+.react-calendar.dark .react-calendar__navigation button {
+  color: white;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  min-width: 44px;
+  height: 38px;
+  margin: 0 2px;
+  background-color: transparent;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.react-calendar.dark .react-calendar__navigation button:hover {
+  background-color: rgba(22, 73, 255, 0.3) !important;
+}
+
+.react-calendar.dark .react-calendar__navigation button:focus,
+.react-calendar.dark .react-calendar__navigation button:active {
+  background-color: #1649ff !important;
+  color: white !important;
+  outline: none;
+}
+
+/* Style for the month label button in dark mode */
+.react-calendar.dark .react-calendar__navigation__label {
+  font-weight: bold;
+  font-size: 1.1em;
+  flex-grow: 1;
+}
+
+.react-calendar.dark .react-calendar__navigation__label:hover,
+.react-calendar.dark .react-calendar__navigation__label:focus,
+.react-calendar.dark .react-calendar__navigation__label:active {
+  background-color: #1649ff !important;
+}
+
+/* Light Mode Header Styles */
+.react-calendar.light .react-calendar__navigation {
+  background-color: #1649ff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Navigation button styles for light mode */
+.react-calendar.light .react-calendar__navigation button {
+  color: white;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  min-width: 44px;
+  height: 38px;
+  margin: 0 2px;
+  background-color: transparent;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.react-calendar.light .react-calendar__navigation button:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.react-calendar.light .react-calendar__navigation button:focus,
+.react-calendar.light .react-calendar__navigation button:active {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  color: white !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+  outline: none;
+}
+
+/* Style for the month label button in light mode */
+.react-calendar.light .react-calendar__navigation__label {
+  font-weight: bold;
+  font-size: 1.1em;
+  flex-grow: 1;
+}
+
+/* Disabled navigation button styles */
+.react-calendar .react-calendar__navigation button:disabled {
+  background-color: transparent !important;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Active navigation button animation */
+.react-calendar .react-calendar__navigation button:active {
+  transform: scale(0.95);
+}
+
+/* Button ripple effect */
+.react-calendar .react-calendar__navigation button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.react-calendar .react-calendar__navigation button:active::after {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
 }

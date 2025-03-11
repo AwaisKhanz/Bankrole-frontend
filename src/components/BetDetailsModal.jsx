@@ -40,7 +40,8 @@ const BetDetailsModal = ({ open, onClose, bet, onApprove, onReject }) => {
               <strong>Stake:</strong> {bet?.stake}
             </Typography>
             <Typography variant="body2">
-              <strong>Status:</strong> {bet?.status}
+              <strong>Status:</strong> From {bet?.previousStatus || "null"} to{" "}
+              {bet?.status}
             </Typography>
             <Typography variant="body2">
               <strong>Verification Status:</strong> {bet?.verificationStatus}

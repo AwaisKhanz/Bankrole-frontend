@@ -230,11 +230,22 @@ const Ranking = ({ mode }) => {
       flex: 0.5,
       minWidth: 100,
       align: "center",
-      headerAlign: "center",
       renderCell: (params) => {
         const sortedRowIds = params.api.getSortedRowIds();
         const rank = sortedRowIds.indexOf(params.id) + 1;
-        return getRankIcon(rank);
+        return (
+          <Box
+            variant="body1"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: "100%",
+            }}
+            fontWeight="medium"
+          >
+            {getRankIcon(rank)}
+          </Box>
+        );
       },
     },
     {
@@ -244,9 +255,9 @@ const Ranking = ({ mode }) => {
       minWidth: 150,
       valueGetter: (value, row) => row?.name || "N/A",
       renderCell: (params) => (
-        <Typography variant="body1" fontWeight="medium">
+        <Box variant="body1" fontWeight="medium">
           {params.value}
-        </Typography>
+        </Box>
       ),
     },
     {
@@ -257,7 +268,7 @@ const Ranking = ({ mode }) => {
       valueGetter: (value, row) => row?.userId?._id || "N/A",
       renderCell: (params) => (
         <Tooltip title={params.value} arrow>
-          <Typography
+          <Box
             variant="body2"
             sx={{
               overflow: "hidden",
@@ -266,7 +277,7 @@ const Ranking = ({ mode }) => {
             }}
           >
             {params.value}
-          </Typography>
+          </Box>
         </Tooltip>
       ),
     },
@@ -342,7 +353,7 @@ const Ranking = ({ mode }) => {
             pageSize={pagination.pageSize}
             getRowId={(row) => row._id}
             pageSizeOptions={[10, 25, 50, 100]}
-            rowHeight={60}
+            rowHeight={80}
             rowCount={pagination.total}
             page={pagination.page}
             loading={loading}
@@ -353,37 +364,20 @@ const Ranking = ({ mode }) => {
             }}
             autoHeight
             onPaginationModelChange={handlePaginationModelChange}
-            getRowSpacing={() => ({
-              top: 8,
-              bottom: 8,
+            getRowSpacing={(params) => ({
+              top: 5, // Adjust the spacing above each row
+              bottom: 5, // Adjust the spacing below each row
             })}
             disableRowSelectionOnClick
             onRowClick={(params) => setSelectedRow(params.row)}
             sx={{
-              border: "none",
-              height: "100% !important",
+              borderRadius: "8px",
+              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
               "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: theme.palette.background.default,
-                // borderBottom: `1px solid ${theme.palette.divider}`,
-                fontSize: "0.875rem",
-                fontWeight: "bold",
+                fontSize: "16px",
               },
               "& .MuiDataGrid-cell": {
-                // borderBottom: `1px solid ${theme.palette.divider}`,
-                fontSize: "0.875rem",
-              },
-              "& .MuiDataGrid-row:hover": {
-                backgroundColor: theme.palette.action.hover,
-                cursor: "pointer",
-              },
-              "& .MuiDataGrid-row.Mui-selected": {
-                backgroundColor: `${theme.palette.primary.light}20`,
-                "&:hover": {
-                  backgroundColor: `${theme.palette.primary.light}30`,
-                },
-              },
-              "& .MuiDataGrid-footerContainer": {
-                // borderTop: `1px solid ${theme.palette.divider}`,
+                wordBreak: "break-word",
               },
             }}
           />
