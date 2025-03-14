@@ -266,118 +266,6 @@ const Analytics = ({ mode }) => {
     );
   }
 
-  // Generate mock data for additional visualizations
-  const generateMockTimeSeriesData = () => {
-    const labels = Array.from({ length: 12 }, (_, i) => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - 11 + i);
-      return date.toLocaleString("default", { month: "short" });
-    });
-
-    const data1 = Array.from(
-      { length: 12 },
-      () => Math.floor(Math.random() * 100) - 20
-    );
-    const data2 = Array.from(
-      { length: 12 },
-      () => Math.floor(Math.random() * 100) - 10
-    );
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: "ROI %",
-          data: data1,
-          borderColor: theme.palette.primary.main,
-          backgroundColor: (context) => {
-            if (!lineChartRef.current) return theme.palette.primary.main;
-            const chart = lineChartRef.current;
-            const { ctx, chartArea } = chart;
-            if (!chartArea) return theme.palette.primary.main;
-            return createGradient(
-              ctx,
-              chartArea,
-              alpha(theme.palette.primary.main, 0.1),
-              alpha(theme.palette.primary.main, 0.6)
-            );
-          },
-          borderWidth: 3,
-          pointBackgroundColor: theme.palette.primary.main,
-          pointBorderColor: theme.palette.background.paper,
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0.4,
-          fill: true,
-        },
-        {
-          label: "Win Rate %",
-          data: data2,
-          borderColor: theme.palette.secondary.main,
-          backgroundColor: (context) => {
-            if (!lineChartRef.current) return theme.palette.secondary.main;
-            const chart = lineChartRef.current;
-            const { ctx, chartArea } = chart;
-            if (!chartArea) return theme.palette.secondary.main;
-            return createGradient(
-              ctx,
-              chartArea,
-              alpha(theme.palette.secondary.main, 0.1),
-              alpha(theme.palette.secondary.main, 0.6)
-            );
-          },
-          borderWidth: 3,
-          pointBackgroundColor: theme.palette.secondary.main,
-          pointBorderColor: theme.palette.background.paper,
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          tension: 0.4,
-          fill: true,
-        },
-      ],
-    };
-  };
-
-  // Generate mock radar data for betting strategy analysis
-  const generateMockRadarData = () => {
-    return {
-      labels: [
-        "Risk Management",
-        "Consistency",
-        "Value Betting",
-        "Market Selection",
-        "Timing",
-        "Discipline",
-      ],
-      datasets: [
-        {
-          label: "Your Performance",
-          data: [85, 70, 65, 80, 60, 75],
-          backgroundColor: alpha(theme.palette.primary.main, 0.5),
-          borderColor: theme.palette.primary.main,
-          borderWidth: 2,
-          pointBackgroundColor: theme.palette.primary.main,
-          pointBorderColor: theme.palette.background.paper,
-          pointBorderWidth: 2,
-          pointRadius: 4,
-        },
-        {
-          label: "Average User",
-          data: [65, 60, 70, 60, 65, 60],
-          backgroundColor: alpha(theme.palette.secondary.main, 0.5),
-          borderColor: theme.palette.secondary.main,
-          borderWidth: 2,
-          pointBackgroundColor: theme.palette.secondary.main,
-          pointBorderColor: theme.palette.background.paper,
-          pointBorderWidth: 2,
-          pointRadius: 4,
-        },
-      ],
-    };
-  };
-
   // Chart colors using theme palette with transparency
   const chartColors = [
     alpha(theme.palette.primary.main, 0.8),
@@ -1258,16 +1146,6 @@ const Analytics = ({ mode }) => {
             iconPosition="start"
             label="Profit Analysis"
           />
-          <Tab
-            icon={<TimelineIcon />}
-            iconPosition="start"
-            label="Performance Trends"
-          />
-          <Tab
-            icon={<RadarIcon />}
-            iconPosition="start"
-            label="Strategy Analysis"
-          />
         </Tabs>
 
         {/* Tab Content */}
@@ -1357,47 +1235,6 @@ const Analytics = ({ mode }) => {
                     data={profitByMonthData}
                     options={barOptions}
                     chartRef={barChartRef2}
-                  />
-                </ChartCard>
-              </Grid>
-            </Grid>
-          )}
-
-          {/* Performance Trends */}
-          {activeTab === 2 && (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <ChartCard
-                  title="Performance Trends Over Time"
-                  height={isMobile ? 300 : 400}
-                  icon={<TimelineIcon fontSize="large" />}
-                  info="ROI and Win Rate trends over the past 12 months"
-                >
-                  <SafeChart
-                    chartType={Line}
-                    data={generateMockTimeSeriesData()}
-                    options={lineChartOptions}
-                    chartRef={lineChartRef}
-                  />
-                </ChartCard>
-              </Grid>
-            </Grid>
-          )}
-
-          {/* Strategy Analysis */}
-          {activeTab === 3 && (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <ChartCard
-                  title="Betting Strategy Analysis"
-                  height={isMobile ? 300 : 400}
-                  icon={<RadarIcon fontSize="large" />}
-                  info="Analysis of your betting strategy across key performance indicators"
-                >
-                  <SafeChart
-                    chartType={Radar}
-                    data={generateMockRadarData()}
-                    options={radarOptions}
                   />
                 </ChartCard>
               </Grid>

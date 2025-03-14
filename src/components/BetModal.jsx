@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -17,6 +19,7 @@ import {
   IconButton,
   Paper,
   Divider,
+  Alert,
 } from "@mui/material";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers/DesktopDateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -199,8 +202,14 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 3, mt: 2 }}>
         <form id="bet-form" onSubmit={handleSubmit(handleFormSubmit)}>
+          {initialData?.verificationStatus === "Accepted" && (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              This bet has been verified. You can only edit the status and
+              label.
+            </Alert>
+          )}
           {/* Date Input */}
           <Controller
             name="date"
@@ -213,6 +222,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                   label="Date"
                   format="dd/MM/yyyy"
                   views={["year", "month", "date", "day"]}
+                  disabled={initialData?.verificationStatus === "Accepted"}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -246,6 +256,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                 <Select
                   {...field}
                   label="Sport"
+                  disabled={initialData?.verificationStatus === "Accepted"}
                   startAdornment={
                     <SportsSoccerIcon
                       sx={{ mr: 1, color: theme.palette.text.secondary }}
@@ -309,6 +320,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                 type="number"
                 fullWidth
                 margin="normal"
+                disabled={initialData?.verificationStatus === "Accepted"}
                 inputProps={{
                   step: "0.01",
                 }}
@@ -338,6 +350,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                 type="number"
                 fullWidth
                 margin="normal"
+                disabled={initialData?.verificationStatus === "Accepted"}
                 inputProps={{
                   step: "0.01",
                 }}

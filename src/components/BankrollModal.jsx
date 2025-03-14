@@ -185,7 +185,7 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, mode }) => {
               fullWidth
               error={!!errors.name}
               helperText={errors.name?.message}
-              sx={{ mb: 2.5 }}
+              sx={{ mb: 2.5, mt: 2 }}
             />
 
             <TextField

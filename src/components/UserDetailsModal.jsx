@@ -157,6 +157,8 @@ const UserDetailsModal = ({ open, onClose, user }) => {
 
   if (!user) return null;
 
+  console.log(user);
+
   return (
     <Dialog
       open={open}
@@ -585,7 +587,7 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                                   </Typography>
                                 </Grid>
 
-                                <Grid item xs={6}>
+                                {/* <Grid item xs={6}>
                                   <Typography
                                     variant="body2"
                                     color="text.secondary"
@@ -607,7 +609,7 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                                   >
                                     {bankroll.stats?.roi || "0"}%
                                   </Typography>
-                                </Grid>
+                                </Grid> */}
                               </Grid>
                             </Box>
                           </CardContent>
@@ -657,109 +659,98 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                   }}
                 >
                   <Typography variant="h6" fontWeight={600}>
-                    Pending Bets
+                    User Bets
                   </Typography>
                 </Box>
 
-                {user?.bettings?.filter(
-                  (bet) => bet.verificationStatus === "Pending"
-                )?.length > 0 ? (
+                {user?.bettings.length > 0 ? (
                   <List
                     sx={{ width: "100%", bgcolor: "background.paper", p: 0 }}
                   >
-                    {user?.bettings
-                      ?.filter((bet) => bet.verificationStatus === "Pending")
-                      ?.map((bet) => (
-                        <ListItem
-                          key={bet._id}
-                          alignItems="flex-start"
-                          sx={{
-                            px: 2,
-                            py: 1.5,
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              backgroundColor:
-                                theme.palette.mode === "dark"
-                                  ? "rgba(255, 255, 255, 0.05)"
-                                  : "rgba(0, 0, 0, 0.02)",
-                            },
-                          }}
-                          secondaryAction={
+                    {user?.bettings?.map((bet) => (
+                      <ListItem
+                        key={bet._id}
+                        alignItems="flex-start"
+                        sx={{
+                          px: 2,
+                          py: 1.5,
+                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            backgroundColor:
+                              theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.05)"
+                                : "rgba(0, 0, 0, 0.02)",
+                          },
+                        }}
+                        secondaryAction={
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              height: "100%",
+                            }}
+                          >
+                            {getStatusChip(bet.verificationStatus)}
+                          </Box>
+                        }
+                      >
+                        <ListItemAvatar>
+                          <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                            <SportsSoccerIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
                             <Box
                               sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                height: "100%",
+                                gap: 1,
                               }}
                             >
-                              {getStatusChip(bet.verificationStatus)}
+                              <Typography variant="subtitle2" fontWeight={600}>
+                                {bet.sport}
+                              </Typography>
+                              <Chip
+                                label={bet.status}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: "0.7rem",
+                                  fontWeight: 500,
+                                  backgroundColor:
+                                    bet.status === "Won"
+                                      ? theme.palette.success.main
+                                      : bet.status === "Loss"
+                                      ? theme.palette.error.main
+                                      : theme.palette.grey[500],
+                                  color: "#fff",
+                                }}
+                              />
                             </Box>
                           }
-                        >
-                          <ListItemAvatar>
-                            <Avatar
-                              sx={{ bgcolor: theme.palette.primary.main }}
-                            >
-                              <SportsSoccerIcon />
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
+                          secondary={
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                component="span"
                               >
-                                <Typography
-                                  variant="subtitle2"
-                                  fontWeight={600}
-                                >
-                                  {bet.sport}
-                                </Typography>
-                                <Chip
-                                  label={bet.status}
-                                  size="small"
-                                  sx={{
-                                    height: 20,
-                                    fontSize: "0.7rem",
-                                    fontWeight: 500,
-                                    backgroundColor:
-                                      bet.status === "Won"
-                                        ? theme.palette.success.main
-                                        : bet.status === "Loss"
-                                        ? theme.palette.error.main
-                                        : theme.palette.grey[500],
-                                    color: "#fff",
-                                  }}
-                                />
-                              </Box>
-                            }
-                            secondary={
-                              <>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  component="span"
-                                >
-                                  Stake: €{bet.stake} • Odds:{" "}
-                                  {bet.odds || "N/A"}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  component="div"
-                                >
-                                  Date:{" "}
-                                  {new Date(bet.date).toLocaleDateString()}
-                                </Typography>
-                              </>
-                            }
-                          />
-                        </ListItem>
-                      ))}
+                                Stake: €{bet.stake} • Odds: {bet.odds || "N/A"}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                component="div"
+                              >
+                                Date: {new Date(bet.date).toLocaleDateString()}
+                              </Typography>
+                            </>
+                          }
+                        />
+                      </ListItem>
+                    ))}
                   </List>
                 ) : (
                   <Box

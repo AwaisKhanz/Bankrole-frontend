@@ -65,9 +65,24 @@ const Login = ({ mode }) => {
         backgroundColor: theme.palette.background.default,
         backgroundImage:
           mode === "dark"
-            ? "linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px)"
-            : "linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
+            ? "linear-gradient(135deg, #0a2463 0%, #1649ff 50%, #0a2463 100%)"
+            : "linear-gradient(135deg, #c5d5ff 0%, #1649ff 50%, #0d3ad9 100%)",
+        backgroundSize: "cover",
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background:
+            mode === "dark"
+              ? "radial-gradient(circle at 50% 50%, rgba(61, 90, 254, 0.2) 0%, rgba(22, 73, 255, 0) 50%)"
+              : "radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 60%)",
+          opacity: 0.8,
+          zIndex: 1,
+        },
       }}
     >
       <Paper
@@ -82,6 +97,12 @@ const Login = ({ mode }) => {
           "&:hover": {
             transform: "translateY(-5px)",
           },
+          position: "relative",
+          zIndex: 2,
+          boxShadow:
+            mode === "dark"
+              ? "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px rgba(22, 73, 255, 0.2)"
+              : "0 8px 32px rgba(22, 73, 255, 0.15)",
         }}
       >
         <Box
@@ -195,6 +216,10 @@ const Login = ({ mode }) => {
                   py: 1.5,
                   fontWeight: 500,
                   position: "relative",
+                  bgcolor: "#1649ff",
+                  "&:hover": {
+                    bgcolor: "#0d3ad9",
+                  },
                 }}
               >
                 {loading ? (
@@ -224,7 +249,7 @@ const Login = ({ mode }) => {
               <Link
                 to="/register"
                 style={{
-                  color: theme.palette.primary.main,
+                  color: "#1649ff",
                   textDecoration: "none",
                   fontWeight: 500,
                   "&:hover": {

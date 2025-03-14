@@ -19,11 +19,6 @@ import {
   Alert,
   Stack,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Slide,
-  Fade,
 } from "@mui/material";
 import api from "../services/api"; // Replace with your actual API service
 import { useSearchParams } from "react-router-dom";
@@ -45,20 +40,9 @@ import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SportsScoreIcon from "@mui/icons-material/SportsScore";
 import PieChartIcon from "@mui/icons-material/PieChart";
-import { forwardRef } from "react";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, ChartTooltip, Legend);
-
-// Transition component for the dialog
-const Transition = forwardRef(function Transition(props, ref) {
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
-  return isMobile ? (
-    <Slide direction="up" ref={ref} {...props} />
-  ) : (
-    <Fade ref={ref} {...props} />
-  );
-});
 
 const Ranking = ({ mode }) => {
   const [topBankrolls, setTopBankrolls] = useState([]);
@@ -66,7 +50,6 @@ const Ranking = ({ mode }) => {
   const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedRow, setSelectedRow] = useState(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [pagination, setPagination] = useState({
@@ -132,19 +115,6 @@ const Ranking = ({ mode }) => {
       page: model.page,
       pageSize: model.pageSize,
     }));
-  };
-
-  const handleRowClick = (params) => {
-    setSelectedRow(params.row);
-    setDetailsOpen(true);
-  };
-
-  const handleCloseDetails = () => {
-    setDetailsOpen(false);
-    // Optional: delay clearing the selected row until after the dialog closes
-    setTimeout(() => {
-      setSelectedRow(null);
-    }, 300);
   };
 
   // Data for Pie Charts
@@ -320,6 +290,7 @@ const Ranking = ({ mode }) => {
               overflow: "hidden",
               textOverflow: "ellipsis",
               color: theme.palette.text.secondary,
+              fontWeight: 900,
               maxWidth: 200,
             }}
           >
@@ -366,7 +337,6 @@ const Ranking = ({ mode }) => {
           clearTimeout(window.resizeTimer);
         }
         window.resizeTimer = setTimeout(() => {
-          // Force a re-render of the selected row to update charts
           setSelectedRow({ ...selectedRow });
         }, 250);
       }
@@ -380,6 +350,18 @@ const Ranking = ({ mode }) => {
       }
     };
   }, [selectedRow]);
+
+  useEffect(() => {
+    if (selectedRow && isMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [selectedRow, isMobile]);
 
   return (
     <Box>
@@ -419,212 +401,225 @@ const Ranking = ({ mode }) => {
         </Stack>
       </Paper>
 
-      {/* Main Ranking Table */}
-      <Paper
-        elevation={0}
+      <Box
         sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 3,
           width: "100%",
-          overflow: "hidden",
-          borderRadius: 1,
-          border: `1px solid ${theme.palette.divider}`,
-          transition: "all 0.3s ease",
         }}
       >
-        <Box
+        {/* Main Ranking Table */}
+        <Paper
+          elevation={0}
           sx={{
-            p: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            flex: { md: selectedRow ? 1 : 1 },
+            width: "100%",
+            overflow: "hidden",
+            borderRadius: 1,
+            border: `1px solid ${theme.palette.divider}`,
+            transition: "all 0.3s ease",
           }}
         >
-          <Typography variant="h6" fontWeight={600}>
-            Top Bankrolls
-          </Typography>
-          <Tooltip title="Click on a row to view detailed statistics">
-            <IconButton size="small">
-              <InfoOutlinedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+          <Box
+            sx={{
+              p: 2,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="h6" fontWeight={600}>
+              Top Bankrolls
+            </Typography>
+            <Tooltip title="Click on a row to view detailed statistics">
+              <IconButton size="small">
+                <InfoOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
 
-        <Box sx={{ height: "calc(100% - 64px)" }}>
-          {error ? (
-            <Alert
-              severity="error"
-              sx={{ m: 2 }}
-              action={
-                <IconButton
-                  color="inherit"
-                  size="small"
-                  onClick={fetchTopBankrolls}
-                >
-                  <SportsScoreIcon fontSize="small" />
-                </IconButton>
-              }
-            >
-              {error}
-            </Alert>
-          ) : (
-            <DataGrid
-              rows={topBankrolls}
-              columns={columns}
-              pagination
-              pageSize={pagination.pageSize}
-              getRowId={(row) => row._id}
-              pageSizeOptions={[10, 25, 50, 100]}
-              rowHeight={70}
-              rowCount={pagination.total}
-              page={pagination.page}
-              loading={loading}
-              paginationMode="server"
-              paginationModel={{
-                page: pagination.page,
-                pageSize: pagination.pageSize,
-              }}
-              autoHeight
-              onPaginationModelChange={handlePaginationModelChange}
-              getRowSpacing={() => ({
-                top: 4,
-                bottom: 4,
-              })}
-              disableRowSelectionOnClick
-              onRowClick={handleRowClick}
+          <Box sx={{ height: "calc(100% - 64px)" }}>
+            {error ? (
+              <Alert
+                severity="error"
+                sx={{ m: 2 }}
+                action={
+                  <IconButton
+                    color="inherit"
+                    size="small"
+                    onClick={fetchTopBankrolls}
+                  >
+                    <SportsScoreIcon fontSize="small" />
+                  </IconButton>
+                }
+              >
+                {error}
+              </Alert>
+            ) : (
+              <DataGrid
+                rows={topBankrolls}
+                columns={columns}
+                pagination
+                pageSize={pagination.pageSize}
+                getRowId={(row) => row._id}
+                pageSizeOptions={[10, 25, 50, 100]}
+                rowHeight={70}
+                rowCount={pagination.total}
+                page={pagination.page}
+                loading={loading}
+                paginationMode="server"
+                paginationModel={{
+                  page: pagination.page,
+                  pageSize: pagination.pageSize,
+                }}
+                autoHeight
+                onPaginationModelChange={handlePaginationModelChange}
+                getRowSpacing={() => ({
+                  top: 4,
+                  bottom: 4,
+                })}
+                disableRowSelectionOnClick
+                onRowClick={(params) => setSelectedRow(params.row)}
+                sx={{
+                  border: "none",
+                  width: "100%",
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.05)"
+                        : "rgba(0, 0, 0, 0.02)",
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    fontWeight: 600,
+                  },
+                  "& .MuiDataGrid-cell": {
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  },
+                  "& .MuiDataGrid-row:hover": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.08)"
+                        : "rgba(0, 0, 0, 0.04)",
+                    cursor: "pointer",
+                  },
+                  "& .MuiDataGrid-row.Mui-selected": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(25, 118, 210, 0.16)"
+                        : "rgba(25, 118, 210, 0.08)",
+                  },
+                  "& .MuiDataGrid-footerContainer": {
+                    borderTop: `1px solid ${theme.palette.divider}`,
+                  },
+                  "& .MuiDataGrid-virtualScroller": {
+                    backgroundColor: theme.palette.background.paper,
+                  },
+                  // Responsive adjustments
+                  "& .MuiDataGrid-toolbarContainer": {
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 1,
+                  },
+                  "& .MuiTablePagination-root": {
+                    width: "100%",
+                    "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                      {
+                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      },
+                  },
+                }}
+                components={{
+                  NoRowsOverlay: () => (
+                    <Stack
+                      height="100%"
+                      alignItems="center"
+                      justifyContent="center"
+                      sx={{ py: 5 }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        No bankrolls found
+                      </Typography>
+                    </Stack>
+                  ),
+                  LoadingOverlay: () => (
+                    <Stack
+                      height="100%"
+                      alignItems="center"
+                      justifyContent="center"
+                      sx={{ py: 5 }}
+                    >
+                      <CircularProgress size={40} />
+                    </Stack>
+                  ),
+                }}
+              />
+            )}
+          </Box>
+        </Paper>
+
+        {/* Details Panel */}
+        {selectedRow && (
+          <Paper
+            elevation={0}
+            sx={{
+              flex: { md: 1 },
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`,
+              overflow: "hidden",
+              transition: "all 0.3s ease",
+              position: { xs: "fixed", md: "relative" },
+              top: { xs: 0, md: "auto" },
+              left: { xs: 0, md: "auto" },
+              right: { xs: 0, md: "auto" },
+              bottom: { xs: 0, md: "auto" },
+              height: { xs: "100%", md: "auto" },
+              zIndex: { xs: 1200, md: 1 },
+              maxHeight: { xs: "100vh", md: "none" },
+              overflowY: "auto",
+              backgroundColor: theme.palette.background.paper,
+            }}
+          >
+            <Box
               sx={{
-                border: "none",
-                width: "100%",
-                "& .MuiDataGrid-columnHeaders": {
+                p: 2,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                position: "sticky",
+                top: 0,
+                backgroundColor: theme.palette.background.paper,
+                zIndex: 10,
+              }}
+            >
+              <Typography variant="h6" fontWeight={600}>
+                Bankroll Details
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setSelectedRow(null)}
+                sx={{
+                  color: theme.palette.text.secondary,
                   backgroundColor:
                     theme.palette.mode === "dark"
                       ? "rgba(255, 255, 255, 0.05)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  fontWeight: 600,
-                },
-                "& .MuiDataGrid-cell": {
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                },
-                "& .MuiDataGrid-row:hover": {
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.08)"
                       : "rgba(0, 0, 0, 0.04)",
-                  cursor: "pointer",
-                },
-                "& .MuiDataGrid-row.Mui-selected": {
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(25, 118, 210, 0.16)"
-                      : "rgba(25, 118, 210, 0.08)",
-                },
-                "& .MuiDataGrid-footerContainer": {
-                  borderTop: `1px solid ${theme.palette.divider}`,
-                },
-                "& .MuiDataGrid-virtualScroller": {
-                  backgroundColor: theme.palette.background.paper,
-                },
-                // Responsive adjustments
-                "& .MuiDataGrid-toolbarContainer": {
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 1,
-                },
-                "& .MuiTablePagination-root": {
-                  width: "100%",
-                  "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-                    {
-                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                    },
-                },
-              }}
-              components={{
-                NoRowsOverlay: () => (
-                  <Stack
-                    height="100%"
-                    alignItems="center"
-                    justifyContent="center"
-                    sx={{ py: 5 }}
-                  >
-                    <Typography variant="body2" color="text.secondary">
-                      No bankrolls found
-                    </Typography>
-                  </Stack>
-                ),
-                LoadingOverlay: () => (
-                  <Stack
-                    height="100%"
-                    alignItems="center"
-                    justifyContent="center"
-                    sx={{ py: 5 }}
-                  >
-                    <CircularProgress size={40} />
-                  </Stack>
-                ),
-              }}
-            />
-          )}
-        </Box>
-      </Paper>
+                  "&:hover": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "rgba(0, 0, 0, 0.08)",
+                  },
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
 
-      {/* Details Dialog */}
-      <Dialog
-        open={detailsOpen}
-        onClose={handleCloseDetails}
-        fullScreen={isMobile}
-        maxWidth="md"
-        fullWidth
-        TransitionComponent={Transition}
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 1,
-            m: isMobile ? 0 : 2,
-            height: isMobile ? "100%" : "auto",
-            overflow: "hidden",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            p: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            position: "sticky",
-            top: 0,
-            backgroundColor: theme.palette.background.paper,
-            zIndex: 10,
-          }}
-        >
-          <Typography variant="h6" fontWeight={600}>
-            Bankroll Details
-          </Typography>
-          <IconButton
-            edge="end"
-            onClick={handleCloseDetails}
-            aria-label="close"
-            size="small"
-            sx={{
-              color: theme.palette.text.secondary,
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.05)"
-                  : "rgba(0, 0, 0, 0.04)",
-              "&:hover": {
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.1)"
-                    : "rgba(0, 0, 0, 0.08)",
-              },
-            }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
-          {selectedRow && (
-            <>
+            <Box sx={{ p: { xs: 2, sm: 3 }, overflow: "auto" }}>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h5" fontWeight={600} gutterBottom>
                   {selectedRow.name}
@@ -670,8 +665,7 @@ const Ranking = ({ mode }) => {
                     sx={{
                       height: "100%",
                       borderRadius: 1,
-                      transition:
-                        "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                      transition: "transform 0.2s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: theme.shadows[2],
@@ -724,8 +718,7 @@ const Ranking = ({ mode }) => {
                     sx={{
                       height: "100%",
                       borderRadius: 1,
-                      transition:
-                        "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                      transition: "transform 0.2s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: theme.shadows[2],
@@ -795,8 +788,7 @@ const Ranking = ({ mode }) => {
                       borderRadius: 1,
                       height: "100%",
                       overflow: "hidden",
-                      transition:
-                        "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                      transition: "transform 0.2s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: theme.shadows[2],
@@ -922,8 +914,7 @@ const Ranking = ({ mode }) => {
                       borderRadius: 1,
                       height: "100%",
                       overflow: "hidden",
-                      transition:
-                        "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                      transition: "transform 0.2s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: theme.shadows[2],
@@ -1041,10 +1032,10 @@ const Ranking = ({ mode }) => {
                   </Card>
                 </Grid>
               </Grid>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            </Box>
+          </Paper>
+        )}
+      </Box>
     </Box>
   );
 };

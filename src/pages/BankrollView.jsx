@@ -203,8 +203,7 @@ const BankrollView = ({ mode, isViewMode }) => {
           },
         },
         grid: {
-          color: theme.palette.divider,
-          drawBorder: false,
+          display: false, // Hide x-axis grid
         },
       },
       y: {
@@ -215,8 +214,7 @@ const BankrollView = ({ mode, isViewMode }) => {
           },
         },
         grid: {
-          color: theme.palette.divider,
-          drawBorder: false,
+          display: false, // Hide x-axis grid
         },
         beginAtZero: true,
       },
@@ -720,7 +718,7 @@ const BankrollView = ({ mode, isViewMode }) => {
               value: `${bets?.length || 0}`,
               icon: (
                 <SportsSoccerIcon
-                  sx={{ fontSize: "2rem", color: theme.palette.primary.main }}
+                // sx={{ fontSize: "2rem", color: theme.palette.primary.main }}
                 />
               ),
               color: theme.palette.text.primary,
@@ -732,7 +730,7 @@ const BankrollView = ({ mode, isViewMode }) => {
               }`,
               icon: (
                 <TrendingUpIcon
-                  sx={{ fontSize: "2rem", color: theme.palette.success.main }}
+                // sx={{ fontSize: "2rem", color: theme.palette.success.main }}
                 />
               ),
               color:
@@ -745,7 +743,7 @@ const BankrollView = ({ mode, isViewMode }) => {
               value: `${bankroll?.stats?.roi || 0}%`,
               icon: (
                 <PercentIcon
-                  sx={{ fontSize: "2rem", color: theme.palette.info.main }}
+                // sx={{ fontSize: "2rem", color: theme.palette.info.main }}
                 />
               ),
               color:
@@ -758,7 +756,7 @@ const BankrollView = ({ mode, isViewMode }) => {
               value: `${bankroll?.stats?.progression || 0}%`,
               icon: (
                 <ShowChartIcon
-                  sx={{ fontSize: "2rem", color: theme.palette.warning.main }}
+                // sx={{ fontSize: "2rem", color: theme.palette.warning.main }}
                 />
               ),
               color:

@@ -174,12 +174,25 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
           size="small"
           sx={{
             position: "absolute",
-            top: 12,
-            right: 16,
+            top: 0,
+            right: 0,
+            width: "30px",
+            height: "100%",
+            borderRadius: "0 4px 4px 0",
             backgroundColor: getStatusColor(bet.status),
             color: "#fff",
             fontWeight: 500,
             fontSize: "0.75rem",
+            "& .MuiChip-label": {
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%) rotate(90deg)",
+              whiteSpace: "nowrap",
+              padding: 0,
+              width: "auto",
+              maxWidth: "none",
+            },
           }}
         />
 
@@ -389,91 +402,6 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
                 : "rgba(0, 0, 0, 0.02)",
           }}
         >
-          {/* Show additional data in details for small screens */}
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={3}>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                  display="block"
-                >
-                  Odds
-                </Typography>
-                <Typography variant="body2" fontWeight={600}>
-                  {bet.odds}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={3}>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                  display="block"
-                >
-                  Stake
-                </Typography>
-                <Typography variant="body2" fontWeight={600}>
-                  {bankroll?.currency?.symbol || "$"}
-                  {bet.stake}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={3}>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                  display="block"
-                >
-                  Gain
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  sx={{
-                    color:
-                      bet.gain >= 0
-                        ? theme.palette.success.main
-                        : theme.palette.error.main,
-                  }}
-                >
-                  {bankroll?.currency?.symbol || "$"}
-                  {Math.abs(bet.gain)}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={3}>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  gutterBottom
-                  display="block"
-                >
-                  Profit
-                </Typography>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  sx={{
-                    color:
-                      bet.profit >= 0
-                        ? theme.palette.success.main
-                        : theme.palette.error.main,
-                  }}
-                >
-                  {bankroll?.currency?.symbol || "$"}
-                  {Math.abs(bet.profit)}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-
           {!isViewMode && (
             <Box>
               {isPublicBankroll && isWithin24Hours && (
