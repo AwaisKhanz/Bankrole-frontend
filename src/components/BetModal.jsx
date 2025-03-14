@@ -14,6 +14,9 @@ import {
   useTheme,
   Box,
   CircularProgress,
+  IconButton,
+  Paper,
+  Divider,
 } from "@mui/material";
 import { DesktopDateTimePicker } from "@mui/x-date-pickers/DesktopDateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -21,6 +24,14 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import CloseIcon from "@mui/icons-material/Close";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import LabelIcon from "@mui/icons-material/Label";
+import SpeedIcon from "@mui/icons-material/Speed";
+import PaidIcon from "@mui/icons-material/Paid";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 const betSchema = z.object({
   date: z.date({ required_error: "Date is required" }),
@@ -148,26 +159,47 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: "16px",
-          boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.2)",
-          background: theme.palette.tertiary.main,
-          padding: "1rem",
+          borderRadius: 1,
+          backgroundColor: theme.palette.background.paper,
+          overflow: "hidden",
         },
       }}
     >
       <DialogTitle
         sx={{
-          background: theme.palette.primary.main,
-          padding: "1.5rem",
-          textAlign: "center",
-          fontSize: "1.5rem",
-          fontWeight: "bold",
+          p: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        {initialData ? "Update Bet" : "Add Bet"}
+        <Typography variant="h6" fontWeight={600}>
+          {initialData ? "Update Bet" : "Add Bet"}
+        </Typography>
+        <IconButton
+          edge="end"
+          onClick={onClose}
+          size="small"
+          sx={{
+            color: theme.palette.text.secondary,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(0, 0, 0, 0.04)",
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.08)",
+            },
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: "0px", mb: "1rem", mt: "2rem" }}>
+      <DialogContent sx={{ p: 3 }}>
         <form id="bet-form" onSubmit={handleSubmit(handleFormSubmit)}>
           {/* Date Input */}
           <Controller
@@ -177,27 +209,32 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
             render={({ field }) => (
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DesktopDateTimePicker
-                  className="w-full  !mb-[0.5rem] !mt-2"
                   {...field}
                   label="Date"
                   format="dd/MM/yyyy"
                   views={["year", "month", "date", "day"]}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.date}
-                      helperText={errors.date?.message}
-                    />
-                  )}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      margin: "normal",
+                      error: !!errors.date,
+                      helperText: errors.date?.message,
+                      InputProps: {
+                        startAdornment: (
+                          <CalendarTodayIcon
+                            sx={{
+                              mr: 1,
+                              color: theme.palette.text.secondary,
+                            }}
+                          />
+                        ),
+                      },
+                    },
+                  }}
                 />
               </LocalizationProvider>
             )}
           />
-          {errors?.date && (
-            <Box className=" text-red-500">{errors.date.message}</Box>
-          )}
 
           {/* Sport Input */}
           <FormControl fullWidth margin="normal" error={!!errors.sport}>
@@ -206,7 +243,15 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
               name="sport"
               control={control}
               render={({ field }) => (
-                <Select {...field} label="Sport">
+                <Select
+                  {...field}
+                  label="Sport"
+                  startAdornment={
+                    <SportsSoccerIcon
+                      sx={{ mr: 1, color: theme.palette.text.secondary }}
+                    />
+                  }
+                >
                   {[
                     "Football",
                     "Tennis",
@@ -224,7 +269,11 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
               )}
             />
             {errors.sport && (
-              <Typography variant="body2" color="error">
+              <Typography
+                variant="body2"
+                color="error"
+                sx={{ mt: 0.5, ml: 1.5 }}
+              >
                 {errors.sport.message}
               </Typography>
             )}
@@ -238,6 +287,13 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
             margin="normal"
             error={!!errors.label}
             helperText={errors.label?.message}
+            InputProps={{
+              startAdornment: (
+                <LabelIcon
+                  sx={{ mr: 1, color: theme.palette.text.secondary }}
+                />
+              ),
+            }}
           />
 
           {/* Odds Input */}
@@ -258,6 +314,13 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                 }}
                 error={!!errors.odds}
                 helperText={errors.odds?.message}
+                InputProps={{
+                  startAdornment: (
+                    <SpeedIcon
+                      sx={{ mr: 1, color: theme.palette.text.secondary }}
+                    />
+                  ),
+                }}
               />
             )}
           />
@@ -271,7 +334,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                 {...field}
                 value={field.value || ""}
                 onChange={(e) => field.onChange(Number(e.target.value) || "")}
-                label={`Stake (${bankroll?.currency.symbol || "$"})`}
+                label={`Stake (${bankroll?.currency?.symbol || "$"})`}
                 type="number"
                 fullWidth
                 margin="normal"
@@ -280,19 +343,35 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                 }}
                 error={!!errors.stake}
                 helperText={errors.stake?.message}
+                InputProps={{
+                  startAdornment: (
+                    <PaidIcon
+                      sx={{ mr: 1, color: theme.palette.text.secondary }}
+                    />
+                  ),
+                }}
               />
             )}
           />
 
-          {/* ✅ Verification Image Upload */}
+          {/* Verification Image Upload */}
           {bankroll?.visibility !== "Private" && (
-            <>
-              {" "}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" fontWeight={500} gutterBottom>
+                Verification Image
+              </Typography>
+
               <Button
-                variant="contained"
+                variant="outlined"
                 component="label"
                 fullWidth
-                sx={{ mt: 2 }}
+                startIcon={<UploadFileIcon />}
+                sx={{
+                  py: 1.25,
+                  textTransform: "none",
+                  fontWeight: 500,
+                  borderStyle: "dashed",
+                }}
               >
                 Upload Verification Image
                 <input
@@ -302,26 +381,53 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                   onChange={handleImageChange}
                 />
               </Button>
+
               {previewImage && (
-                <Box mt={2}>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    mt: 2,
+                    borderRadius: 1,
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
                   <img
-                    src={previewImage}
+                    src={previewImage || "/placeholder.svg"}
                     alt="Verification Preview"
                     style={{
                       width: "100%",
-                      borderRadius: "8px",
                       height: "150px",
                       objectFit: "cover",
+                      display: "block",
                     }}
                   />
-                </Box>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      p: 1,
+                      backgroundColor: "rgba(0,0,0,0.6)",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <PhotoCameraIcon sx={{ color: "white", mr: 1 }} />
+                    <Typography variant="caption" sx={{ color: "white" }}>
+                      Verification Image
+                    </Typography>
+                  </Box>
+                </Paper>
               )}
+
               {errors?.verificationImage && (
-                <Box className=" text-red-500">
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
                   {errors.verificationImage?.message}
-                </Box>
+                </Typography>
               )}
-            </>
+            </Box>
           )}
 
           {/* Status Input */}
@@ -349,7 +455,11 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
               )}
             />
             {errors.status && (
-              <Typography variant="body2" color="error">
+              <Typography
+                variant="body2"
+                color="error"
+                sx={{ mt: 0.5, ml: 1.5 }}
+              >
                 {errors.status.message}
               </Typography>
             )}
@@ -361,7 +471,13 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
             control={control}
             render={({ field }) =>
               field.value === "Cashout" && (
-                <>
+                <Box sx={{ mt: 2 }}>
+                  <Divider sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Cashout Details
+                    </Typography>
+                  </Divider>
+
                   <Controller
                     name="cashoutAmount"
                     control={control}
@@ -373,7 +489,7 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                           amountField.onChange(Number(e.target.value) || "")
                         }
                         label={`Cashout Amount (${
-                          bankroll?.currency.symbol || "$"
+                          bankroll?.currency?.symbol || "$"
                         })`}
                         type="number"
                         fullWidth
@@ -383,18 +499,42 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                         }}
                         error={!!errors.cashoutAmount}
                         helperText={errors.cashoutAmount?.message}
+                        InputProps={{
+                          startAdornment: (
+                            <PaidIcon
+                              sx={{
+                                mr: 1,
+                                color: theme.palette.text.secondary,
+                              }}
+                            />
+                          ),
+                        }}
                       />
                     )}
                   />
 
                   {/* Cashout Image Upload */}
                   {bankroll?.visibility !== "Private" && (
-                    <>
+                    <Box sx={{ mt: 2 }}>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={500}
+                        gutterBottom
+                      >
+                        Cashout Image
+                      </Typography>
+
                       <Button
-                        variant="contained"
+                        variant="outlined"
                         component="label"
                         fullWidth
-                        sx={{ mt: 2 }}
+                        startIcon={<UploadFileIcon />}
+                        sx={{
+                          py: 1.25,
+                          textTransform: "none",
+                          fontWeight: 500,
+                          borderStyle: "dashed",
+                        }}
                       >
                         Upload Cashout Image
                         <input
@@ -404,50 +544,95 @@ const BetModal = ({ open, onClose, onSubmit, bankroll, initialData, mode }) => {
                           onChange={handleCashoutImageChange}
                         />
                       </Button>
+
                       {cashoutPreviewImage && (
-                        <Box mt={2}>
+                        <Paper
+                          variant="outlined"
+                          sx={{
+                            mt: 2,
+                            borderRadius: 1,
+                            overflow: "hidden",
+                            position: "relative",
+                          }}
+                        >
                           <img
-                            src={cashoutPreviewImage}
+                            src={cashoutPreviewImage || "/placeholder.svg"}
                             alt="Cashout Preview"
                             style={{
                               width: "100%",
-                              borderRadius: "8px",
                               height: "150px",
                               objectFit: "cover",
+                              display: "block",
                             }}
                           />
-                        </Box>
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              p: 1,
+                              backgroundColor: "rgba(0,0,0,0.6)",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <PhotoCameraIcon sx={{ color: "white", mr: 1 }} />
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "white" }}
+                            >
+                              Cashout Image
+                            </Typography>
+                          </Box>
+                        </Paper>
                       )}
+
                       {errors?.cashoutImage && (
-                        <Box className=" text-red-500">
+                        <Typography
+                          variant="body2"
+                          color="error"
+                          sx={{ mt: 1 }}
+                        >
                           {errors.cashoutImage?.message}
-                        </Box>
+                        </Typography>
                       )}
-                    </>
+                    </Box>
                   )}
-                </>
+                </Box>
               )
             }
           />
         </form>
       </DialogContent>
+
       <DialogActions
-        sx={{
-          display: "flex",
-          justifyContent: "end",
-          paddingTop: "1rem",
-          borderTop: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
+        sx={{ p: 3, pt: 2, borderTop: `1px solid ${theme.palette.divider}` }}
       >
-        <Button onClick={onClose} variant="contained" color="primary">
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{
+            fontWeight: 500,
+            textTransform: "none",
+          }}
+        >
           Cancel
         </Button>
         <Button
-          color="secondary"
+          color="primary"
           variant="contained"
           type="submit"
           form="bet-form"
           disabled={loading}
+          sx={{
+            fontWeight: 500,
+            textTransform: "none",
+            boxShadow: "none",
+            "&:hover": {
+              boxShadow: "none",
+            },
+          }}
           startIcon={
             loading ? <CircularProgress size={20} color="inherit" /> : null
           }

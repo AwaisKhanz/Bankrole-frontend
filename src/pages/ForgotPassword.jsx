@@ -1,11 +1,24 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { TextField, Button, Typography, Box, useTheme } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  useTheme,
+  Paper,
+  InputAdornment,
+  Divider,
+  CircularProgress,
+} from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { toast } from "react-toastify";
+import { Email } from "@mui/icons-material";
 
 const forgotPasswordSchema = z.object({
   email: z
@@ -43,86 +56,130 @@ const ForgotPassword = ({ mode }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
         minHeight: "100vh",
-        padding: "1rem",
-        background: theme.palette.primary.main,
-        color: mode === "dark" ? "white" : "black",
+        padding: { xs: "1rem", sm: "2rem" },
+        backgroundColor: theme.palette.background.default,
+        backgroundImage:
+          mode === "dark"
+            ? "linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px)"
+            : "linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
       }}
     >
-      <Box
+      <Paper
+        elevation={4}
         sx={{
-          maxWidth: "550px",
+          maxWidth: "450px",
           width: "100%",
-          padding: "2rem",
-          borderRadius: "12px",
-          backgroundColor: theme.palette.tertiary.main,
-          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-          backdropFilter: "blur(8px)",
+          overflow: "hidden",
+          borderRadius: "8px",
+          backgroundColor: theme.palette.background.paper,
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-          <img
-            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
-            style={{
-              width: "200px",
-              height: "60px",
-              objectFit: "cover",
-            }}
-            alt="Logo"
-          />
-        </Box>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          textAlign="center"
-          gutterBottom
+        <Box
+          sx={{
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
         >
-          Forgot Password
-        </Typography>
-        <Typography
-          variant="body2"
-          textAlign="center"
-          sx={{ marginBottom: "1rem" }}
-        >
-          Enter your email to receive a password reset link.
-        </Typography>
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+            <img
+              src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
+              alt="Logo"
+              style={{
+                width: "180px",
+                height: "54px",
+                objectFit: "cover",
+              }}
+            />
+          </Box>
 
-        <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: "2rem" }}>
-          <TextField
-            {...register("email")}
-            label="Email"
-            variant="outlined"
-            fullWidth
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="secondary"
-            fullWidth
-            disabled={loading}
-            sx={{
-              marginTop: "1rem",
-              padding: "0.75rem",
-              fontWeight: "bold",
-              fontSize: "1rem",
-            }}
-          >
-            {loading ? "Sending..." : "Send Reset Link"}
-          </Button>
-        </form>
+          <Box sx={{ textAlign: "center" }}>
+            <Typography
+              variant="h5"
+              fontWeight={500}
+              gutterBottom
+              sx={{ color: theme.palette.text.primary }}
+            >
+              Reset Your Password
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              Enter your email to receive a password reset link
+            </Typography>
+          </Box>
 
-        <Box sx={{ marginTop: "1rem", textAlign: "center" }}>
-          <Typography variant="body2">
-            Remembered your password?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </Typography>
+          <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <TextField
+                {...register("email")}
+                label="Email"
+                variant="outlined"
+                fullWidth
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={loading}
+                sx={{
+                  py: 1.5,
+                  fontWeight: 500,
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Send Reset Link"
+                )}
+              </Button>
+            </Box>
+          </form>
+
+          <Divider sx={{ my: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              OR
+            </Typography>
+          </Divider>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              Remembered your password?{" "}
+              <Link
+                to="/login"
+                style={{
+                  color: theme.palette.primary.main,
+                  textDecoration: "none",
+                  fontWeight: 500,
+                }}
+              >
+                Back to login
+              </Link>
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      </Paper>
     </Box>
   );
 };

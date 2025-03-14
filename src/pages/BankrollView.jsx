@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -11,12 +13,27 @@ import {
   AccordionDetails,
   Chip,
   useTheme,
+  Paper,
+  Grid,
+  Stack,
+  Tooltip,
+  CircularProgress,
+  Alert,
+  InputLabel,
 } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import BetCard from "../components/BetCard";
 import BetModal from "../components/BetModal";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import api from "../services/api";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import ClearAllIcon from "@mui/icons-material/ClearAll";
+import AddIcon from "@mui/icons-material/Add";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import PercentIcon from "@mui/icons-material/Percent";
 
 import {
   Chart as ChartJS,
@@ -24,7 +41,7 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  Tooltip,
+  Tooltip as ChartTooltip,
   Legend,
   Filler,
 } from "chart.js";
@@ -36,7 +53,7 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
-  Tooltip,
+  ChartTooltip,
   Legend,
   Filler
 );
@@ -59,12 +76,14 @@ const groupBetsByYearAndMonth = (bankroll, bets) => {
     // Only include verified bets in totalProfit aggregation
     if (bankroll.visibility === "Public") {
       if (bet.isVerified) {
-        grouped[year].months[month].totalProfit += parseFloat(bet.profit);
-        grouped[year].totalProfit += parseFloat(bet.profit);
+        grouped[year].months[month].totalProfit += Number.parseFloat(
+          bet.profit
+        );
+        grouped[year].totalProfit += Number.parseFloat(bet.profit);
       }
     } else {
-      grouped[year].months[month].totalProfit += parseFloat(bet.profit);
-      grouped[year].totalProfit += parseFloat(bet.profit);
+      grouped[year].months[month].totalProfit += Number.parseFloat(bet.profit);
+      grouped[year].totalProfit += Number.parseFloat(bet.profit);
     }
   });
 
@@ -106,7 +125,6 @@ const groupBetsByYearAndMonth = (bankroll, bets) => {
 };
 
 const BankrollView = ({ mode, isViewMode }) => {
-  console.log(mode);
   const { id } = useParams();
   const [bankroll, setBankroll] = useState(null);
   const [bets, setBets] = useState([]);
@@ -133,6 +151,7 @@ const BankrollView = ({ mode, isViewMode }) => {
   const handleFilterChange = (key, value) => {
     setGraphFilters((prev) => ({ ...prev, [key]: value }));
   };
+
   const graphOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -141,22 +160,25 @@ const BankrollView = ({ mode, isViewMode }) => {
         display: true,
         position: "top",
         labels: {
-          color: mode === "dark" ? "white" : "black",
+          color: theme.palette.text.primary,
           font: {
             size: 14,
-            family: "Arial, sans-serif",
+            family: '"Roboto", "Helvetica", "Arial", sans-serif',
+            weight: 500,
           },
+          usePointStyle: true,
+          pointStyle: "circle",
         },
       },
       tooltip: {
         enabled: true,
-        backgroundColor: mode === "dark" ? "white" : "white",
-        titleColor: "#000000",
+        backgroundColor: theme.palette.mode === "dark" ? "#424242" : "#ffffff",
+        titleColor: theme.palette.mode === "dark" ? "#ffffff" : "#212121",
+        bodyColor: theme.palette.mode === "dark" ? "#ffffff" : "#212121",
         titleFont: {
           weight: "bold",
         },
-        bodyColor: "#000000", // Black body text
-        borderColor: "#4CAF50", // Green border
+        borderColor: theme.palette.divider,
         borderWidth: 1,
         padding: 10,
         callbacks: {
@@ -167,7 +189,7 @@ const BankrollView = ({ mode, isViewMode }) => {
           label: (tooltipItem) => {
             // Show the capital amount
             const value = tooltipItem.raw; // Get the data value
-            return `Capital: ${value}$`;
+            return `Capital: ${bankroll?.currency?.symbol || "$"}${value}`;
           },
         },
       },
@@ -175,19 +197,37 @@ const BankrollView = ({ mode, isViewMode }) => {
     scales: {
       x: {
         ticks: {
-          color: mode === "dark" ? "white" : "black",
+          color: theme.palette.text.secondary,
+          font: {
+            size: 11,
+          },
         },
         grid: {
-          color: "rgba(255, 255, 255, 0.1)",
+          color: theme.palette.divider,
+          drawBorder: false,
         },
       },
       y: {
         ticks: {
-          color: mode === "dark" ? "white" : "black",
+          color: theme.palette.text.secondary,
+          font: {
+            size: 11,
+          },
         },
         grid: {
-          color: "rgba(255, 255, 255, 0.1)",
+          color: theme.palette.divider,
+          drawBorder: false,
         },
+        beginAtZero: true,
+      },
+    },
+    elements: {
+      line: {
+        tension: 0.4,
+      },
+      point: {
+        radius: 4,
+        hoverRadius: 6,
       },
     },
     spanGaps: false,
@@ -216,7 +256,7 @@ const BankrollView = ({ mode, isViewMode }) => {
 
     const graphPoints = filteredBets.reduce(
       (acc, bet) => {
-        currentCapital += parseFloat(bet.profit);
+        currentCapital += Number.parseFloat(bet.profit);
         acc.push(currentCapital);
         return acc;
       },
@@ -232,9 +272,11 @@ const BankrollView = ({ mode, isViewMode }) => {
         {
           label: "Bankroll Progression",
           data: graphPoints,
-          borderColor: "#1649ff",
-          backgroundColor: "rgba(22, 73, 255, 0.4)",
-          pointBackgroundColor: "#ffffff",
+          borderColor: theme.palette.primary.main,
+          backgroundColor: `${theme.palette.primary.main}20`,
+          pointBackgroundColor: theme.palette.primary.main,
+          pointBorderColor: theme.palette.background.paper,
+          pointBorderWidth: 2,
           fill: true,
           tension: 0.4,
         },
@@ -296,7 +338,7 @@ const BankrollView = ({ mode, isViewMode }) => {
     formData.append("status", betData.status);
     formData.append("bankrollId", bankroll._id);
 
-    // ✅ Append the uploaded image
+    // Append the uploaded image
     if (betData.verificationImage) {
       formData.append("verificationImage", betData.verificationImage);
     }
@@ -324,6 +366,7 @@ const BankrollView = ({ mode, isViewMode }) => {
             bet._id === response.data.bet._id ? response.data.bet : bet
           )
         );
+        toast.success("Bet updated successfully");
       } else {
         const response = await api.post("/bets", formData, {
           headers: {
@@ -332,27 +375,46 @@ const BankrollView = ({ mode, isViewMode }) => {
         });
 
         setBets((prevBets) => [...prevBets, response.data.bet]);
+        toast.success("Bet added successfully");
       }
       fetchBankroll();
       setBetModalOpen(false);
     } catch (error) {
-      console.error(error.response?.data?.message || "Error submitting bet.");
+      toast.error(error.response?.data?.message || "Error submitting bet");
     }
   };
 
   const handleDeleteBet = async (bet) => {
     try {
       await api.delete(`/bets/${bet._id}`);
-      toast.success("Bet deleted successfully.");
+      toast.success("Bet deleted successfully");
       fetchBankroll();
     } catch (error) {
-      toast.error("Failed to delete bet.");
+      toast.error("Failed to delete bet");
     }
   };
 
-  const groupedBets = groupBetsByYearAndMonth(bankroll, bets);
+  const groupedBets = groupBetsByYearAndMonth(
+    bankroll || { visibility: "Private" },
+    bets
+  );
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().toLocaleString("default", { month: "long" });
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: isViewMode ? "100vh" : "50vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (error) {
     return (
@@ -361,11 +423,21 @@ const BankrollView = ({ mode, isViewMode }) => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: isViewMode ? error && "100vh" : "100%",
-          color: mode === "dark" ? "white" : "black",
+          minHeight: isViewMode ? "100vh" : "50vh",
+          p: 3,
         }}
       >
-        {errorMessage}
+        <Alert
+          severity="error"
+          sx={{ maxWidth: 500 }}
+          action={
+            <Button color="inherit" size="small" onClick={fetchBankroll}>
+              Retry
+            </Button>
+          }
+        >
+          {errorMessage}
+        </Alert>
       </Box>
     );
   }
@@ -378,10 +450,12 @@ const BankrollView = ({ mode, isViewMode }) => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          color: mode === "dark" ? "white" : "black",
+          p: 3,
         }}
       >
-        This bankroll is not shareable.
+        <Alert severity="info" sx={{ maxWidth: 500 }}>
+          This bankroll is not shareable
+        </Alert>
       </Box>
     );
   }
@@ -389,466 +463,583 @@ const BankrollView = ({ mode, isViewMode }) => {
   return (
     <Box
       sx={{
-        padding: "2rem",
-        background: theme.palette.primary.main,
+        p: { xs: 2, sm: 3 },
+        backgroundColor: theme.palette.background.default,
         minHeight: isViewMode ? "100vh" : "100%",
       }}
     >
-      <Box
+      <Paper
+        elevation={0}
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          p: 3,
+          mb: 3,
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography
-          fontWeight="bold"
-          gutterBottom
-          sx={{
-            textTransform: "uppercase",
-            fontSize: { xs: "20px", md: "32px" },
-            color: mode === "dark" ? "white" : "black",
-          }}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={2}
         >
-          {bankroll?.name}
-          {bankroll?.stats.isVerified && (
-            <VerifiedIcon
-              sx={{
-                color: "#4CAF50",
-                fontSize: { xs: "1.2rem", md: "1.5rem" },
-                marginLeft: "6px",
-                marginBottom: "6px",
-              }}
-              titleAccess="Verified Bankroll"
-            />
-          )}
-          <Chip
-            label={bankroll?.visibility}
-            sx={{
-              backgroundColor:
-                bankroll?.visibility === "Public" ? "#4CAF50" : "#1649FF",
-              color: "#fff",
-              fontSize: "0.75rem",
-              fontWeight: "bold",
-              marginLeft: "8px",
-              textTransform: "uppercase",
-            }}
-          />
-        </Typography>
-        {!isViewMode ? (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleAddBet}
-            sx={{ marginBottom: "1rem" }}
-          >
-            Add Bet
-          </Button>
-        ) : (
-          <Chip
-            label={"View Mode"}
-            sx={{
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              fontSize: "0.75rem",
-              fontWeight: "bold",
-              marginLeft: "8px",
-              textTransform: "uppercase",
-            }}
-          />
-        )}
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-        }}
-      >
-        {/* Chart Section */}
-        <Box
-          sx={{
-            width: "100%",
-            background: mode === "dark" ? "rgba(22, 73, 255, 0.1)" : "white",
-            borderRadius: "12px",
-            padding: "1rem",
-            position: "relative",
-            mb: 4,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{ color: mode === "dark" ? "white" : "black" }}
-            >
-              Bankroll Progression
-            </Typography>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => setShowFilters(!showFilters)}
-                sx={{ color: mode === "dark" ? "white" : "black" }}
-              >
-                {showFilters ? "Hide Filters" : "Filter"}
-              </Button>
-              {showFilters && (
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={clearFilters}
-                  sx={{ color: mode === "dark" ? "white" : "black" }}
-                >
-                  Clear Filters
-                </Button>
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+              <Typography variant="h4" fontWeight={600}>
+                {bankroll?.name}
+              </Typography>
+              {bankroll?.stats?.isVerified && (
+                <Tooltip title="Verified Bankroll">
+                  <VerifiedIcon
+                    sx={{
+                      color: theme.palette.success.main,
+                      ml: 1,
+                      fontSize: "1.25rem",
+                    }}
+                  />
+                </Tooltip>
               )}
+              <Chip
+                label={bankroll?.visibility}
+                size="small"
+                sx={{
+                  ml: 1,
+                  backgroundColor:
+                    bankroll?.visibility === "Public"
+                      ? theme.palette.success.main
+                      : theme.palette.primary.main,
+                  color: "#fff",
+                  fontWeight: 500,
+                  fontSize: "0.7rem",
+                  height: 20,
+                }}
+              />
             </Box>
+            <Typography variant="body2" color="text.secondary">
+              Track your betting performance and analyze your results
+            </Typography>
           </Box>
 
-          {showFilters && (
-            <Box
+          {!isViewMode ? (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleAddBet}
               sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-                gap: "1rem",
-                mb: 2,
+                fontWeight: 500,
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": {
+                  boxShadow: "none",
+                },
               }}
             >
-              <FormControl sx={{ minWidth: "80px", maxWidth: "120px" }}>
-                <Select
-                  value={graphFilters.month || ""}
-                  onChange={(e) =>
-                    handleFilterChange("month", e.target.value || null)
-                  }
-                  displayEmpty
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    color: mode === "dark" ? "white" : "black",
-                    fontSize: "0.875rem",
-                    height: "30px",
-                    "& .MuiSelect-select": { padding: "4px 8px" },
-                  }}
-                >
-                  <MenuItem value="">All Months</MenuItem>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <MenuItem key={i + 1} value={i + 1}>
-                      {new Date(0, i).toLocaleString("en-US", {
-                        month: "long",
-                      })}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl sx={{ minWidth: "80px", maxWidth: "120px" }}>
-                <Select
-                  value={graphFilters.year || ""}
-                  onChange={(e) =>
-                    handleFilterChange("year", e.target.value || null)
-                  }
-                  displayEmpty
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    color: mode === "dark" ? "white" : "black",
-                    fontSize: "0.875rem",
-                    height: "30px",
-                    "& .MuiSelect-select": { padding: "4px 8px" },
-                  }}
-                >
-                  <MenuItem value="">All Years</MenuItem>
-                  {Array.from(
-                    { length: 26 },
-                    (_, i) => new Date().getFullYear() - i
-                  ).map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
+              Add Bet
+            </Button>
+          ) : (
+            <Chip
+              label="View Mode"
+              sx={{
+                backgroundColor: theme.palette.info.main,
+                color: "#fff",
+                fontWeight: 500,
+              }}
+            />
           )}
+        </Stack>
+      </Paper>
 
-          <Box sx={{ height: "400px" }}>
-            {graphData ? (
-              <Line data={graphData} options={graphOptions} />
-            ) : (
-              <Typography>Loading Graph...</Typography>
+      {/* Chart Section */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+          overflow: "hidden",
+          mb: 3,
+        }}
+      >
+        <Box
+          sx={{
+            p: 3,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <ShowChartIcon
+              sx={{ color: theme.palette.primary.main, mr: 1.5 }}
+            />
+            <Typography variant="h6" fontWeight={600}>
+              Bankroll Progression
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              sx={{
+                fontWeight: 500,
+                textTransform: "none",
+              }}
+            >
+              {showFilters ? "Hide Filters" : "Filter"}
+            </Button>
+
+            {showFilters && (
+              <Button
+                variant="outlined"
+                size="small"
+                color="secondary"
+                startIcon={<ClearAllIcon />}
+                onClick={clearFilters}
+                sx={{
+                  fontWeight: 500,
+                  textTransform: "none",
+                }}
+              >
+                Clear
+              </Button>
             )}
           </Box>
         </Box>
-      </Box>
+
+        {showFilters && (
+          <Box
+            sx={{
+              p: 2,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.02)",
+            }}
+          >
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Month</InputLabel>
+                  <Select
+                    value={graphFilters.month || ""}
+                    onChange={(e) =>
+                      handleFilterChange("month", e.target.value || null)
+                    }
+                    label="Month"
+                  >
+                    <MenuItem value="">All Months</MenuItem>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <MenuItem key={i + 1} value={i + 1}>
+                        {new Date(0, i).toLocaleString("en-US", {
+                          month: "long",
+                        })}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Year</InputLabel>
+                  <Select
+                    value={graphFilters.year || ""}
+                    onChange={(e) =>
+                      handleFilterChange("year", e.target.value || null)
+                    }
+                    label="Year"
+                  >
+                    <MenuItem value="">All Years</MenuItem>
+                    {Array.from(
+                      { length: 5 },
+                      (_, i) => new Date().getFullYear() - i
+                    ).map((year) => (
+                      <MenuItem key={year} value={year}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Starting Capital</InputLabel>
+                  <Select
+                    value={graphFilters.includeStartingCapital}
+                    onChange={(e) =>
+                      handleFilterChange(
+                        "includeStartingCapital",
+                        e.target.value
+                      )
+                    }
+                    label="Starting Capital"
+                  >
+                    <MenuItem value={true}>Include</MenuItem>
+                    <MenuItem value={false}>Exclude</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Box>
+        )}
+
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ height: 400 }}>
+            {graphData ? (
+              <Line data={graphData} options={graphOptions} />
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  No data available for chart
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Paper>
+
       {/* Stats Section */}
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-around",
-          padding: "1.5rem 0",
-          gap: "1rem",
-        }}
-      >
+      <Grid container spacing={3} sx={{ mb: 3 }}>
         {!loading &&
           [
             {
               label: "BETS",
-              value: `${bets?.length}`,
-              color: mode === "dark" ? "white" : "black",
+              value: `${bets?.length || 0}`,
+              icon: (
+                <SportsSoccerIcon
+                  sx={{ fontSize: "2rem", color: theme.palette.primary.main }}
+                />
+              ),
+              color: theme.palette.text.primary,
             },
             {
               label: "PROFIT",
-              value: `${bankroll?.stats?.totalProfit}${bankroll?.currency?.symbol}`,
+              value: `${bankroll?.currency?.symbol || "$"}${
+                bankroll?.stats?.totalProfit || 0
+              }`,
+              icon: (
+                <TrendingUpIcon
+                  sx={{ fontSize: "2rem", color: theme.palette.success.main }}
+                />
+              ),
               color:
-                bankroll?.stats?.totalProfit >= 0
-                  ? mode === "dark"
-                    ? "white"
-                    : "black"
-                  : "#FF5252",
+                (bankroll?.stats?.totalProfit || 0) >= 0
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
             },
             {
               label: "ROI",
-              value: `${bankroll?.stats?.roi}%`,
+              value: `${bankroll?.stats?.roi || 0}%`,
+              icon: (
+                <PercentIcon
+                  sx={{ fontSize: "2rem", color: theme.palette.info.main }}
+                />
+              ),
               color:
-                bankroll?.stats?.roi >= 0
-                  ? mode === "dark"
-                    ? "white"
-                    : "black"
-                  : "#FF5252",
+                (bankroll?.stats?.roi || 0) >= 0
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
             },
             {
               label: "PROGRESSION",
-              value: `${bankroll?.stats?.progression}%`,
+              value: `${bankroll?.stats?.progression || 0}%`,
+              icon: (
+                <ShowChartIcon
+                  sx={{ fontSize: "2rem", color: theme.palette.warning.main }}
+                />
+              ),
               color:
-                bankroll?.stats?.progression >= 0
-                  ? mode === "dark"
-                    ? "white"
-                    : "black"
-                  : "#FF5252",
+                (bankroll?.stats?.progression || 0) >= 0
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
             },
           ].map((stat, index) => (
-            <Box
-              key={index}
-              sx={{
-                flex: 1,
-
-                borderRadius: "12px",
-                padding: "1.5rem",
-                display: "flex",
-                bgcolor:
-                  mode === "dark" ? theme.palette.secondary.main : "white",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                position: "relative",
-                boxShadow: 2,
-                ":hover": {
-                  bgcolor:
-                    mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
-                },
-              }}
-            >
-              {/* Stat Value */}
-              <Typography
-                variant="h6"
-                fontWeight="500"
+            <Grid item xs={6} sm={3} key={index}>
+              <Paper
+                elevation={0}
                 sx={{
-                  color: stat.color,
-                  fontSize: "1.5rem",
-                  marginBottom: "0.5rem",
+                  p: 2,
+                  height: "100%",
+                  borderRadius: 1,
+                  border: `1px solid ${theme.palette.divider}`,
+                  transition:
+                    "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: theme.shadows[2],
+                  },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                {stat.value}
-              </Typography>
+                <Box sx={{ mb: 1 }}>{stat.icon}</Box>
 
-              {/* Stat Label */}
-              <Typography
-                variant="caption"
-                sx={{
-                  color: mode === "dark" ? "white" : "black",
-                  textTransform: "uppercase",
-                  fontSize: "0.9rem",
-                }}
-              >
-                {stat.label}
-              </Typography>
-            </Box>
-          ))}
-      </Box>
-
-      {/* Bets Section */}
-      <Typography
-        variant="h5"
-        sx={{
-          marginBottom: "1rem",
-          fontWeight: "bold",
-          color: mode === "dark" ? "white" : "black",
-        }}
-      >
-        Bets
-      </Typography>
-      {groupedBets.length > 0 ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            borderRadius: "12px",
-
-            background: mode === "dark" ? theme.palette.tertiary.main : "white",
-          }}
-        >
-          {groupedBets?.map((yearData) => (
-            <Accordion
-              key={yearData.year}
-              sx={{
-                background: theme.palette.secondary.main,
-                marginBottom: "1rem",
-                borderRadius: "12px",
-                boxShadow: "none",
-                "&.Mui-expanded": {
-                  borderRadius: "12px",
-                  boxShadow: mode
-                    ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
-                    : "0px 2px 6px rgba(0, 0, 0, 0.05)",
-                },
-              }}
-              defaultExpanded={
-                yearData.year.toString() === currentYear.toString()
-              }
-            >
-              <AccordionSummary sx={{}}>
-                <Box
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    alignItems: "center",
-                    fontWeight: "bold",
+                <Typography
+                  variant="h5"
+                  fontWeight={600}
+                  sx={{
+                    color: stat.color,
+                    mb: 0.5,
                   }}
                 >
-                  <Typography
-                    sx={{
-                      fontSize: { xs: "18px", md: "24px" },
-                      fontWeight: "500",
-                    }}
-                  >
-                    {yearData.year}
-                  </Typography>
-                  {/* Profit or Loss on the right */}
-                  <Box
+                  {stat.value}
+                </Typography>
+
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                  }}
+                >
+                  {stat.label}
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
+      </Grid>
+
+      {/* Bets Section */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            p: 3,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <SportsSoccerIcon
+              sx={{ color: theme.palette.primary.main, mr: 1.5 }}
+            />
+            <Typography variant="h6" fontWeight={600}>
+              Bets
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ p: 3 }}>
+          {groupedBets.length > 0 ? (
+            <Box>
+              {groupedBets?.map((yearData) => (
+                <Accordion
+                  key={yearData.year}
+                  defaultExpanded={
+                    yearData.year.toString() === currentYear.toString()
+                  }
+                  disableGutters
+                  elevation={0}
+                  sx={{
+                    mb: 2,
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: 1,
+                    overflow: "hidden",
+                    "&:before": {
+                      display: "none",
+                    },
+                    "&.Mui-expanded": {
+                      margin: 0,
+                      mb: 2,
+                    },
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
                     sx={{
                       backgroundColor:
-                        yearData.totalProfit >= 0 ? "#4CAF50" : "#FF5252",
-                      padding: "0.5rem 1rem",
-                      borderRadius: "12px",
-                      color: "#ffffff",
-                      fontWeight: "500",
-                    }}
-                  >
-                    <Typography sx={{ marginRight: "0.5rem" }}>
-                      {bankroll.currency.symbol}
-                      {yearData.totalProfit}
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails>
-                {yearData.months.map((monthData) => (
-                  <Accordion
-                    key={monthData.month}
-                    sx={{
-                      background:
-                        mode === "dark"
-                          ? theme.palette.primary.main
-                          : "#eeeeee",
-                      marginBottom: "0.5rem",
-                      boxShadow: "none",
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "rgba(0, 0, 0, 0.02)",
+                      borderBottom: `1px solid ${theme.palette.divider}`,
+                      minHeight: 56,
                       "&.Mui-expanded": {
-                        borderRadius: "12px",
-                        boxShadow: mode
-                          ? "0px 2px 6px rgba(0, 0, 0, 0.1)"
-                          : "0px 2px 6px rgba(0, 0, 0, 0.05)",
+                        minHeight: 56,
                       },
                     }}
-                    defaultExpanded={
-                      yearData.year.toString() === currentYear.toString() &&
-                      monthData.month === currentMonth
-                    }
                   >
-                    <AccordionSummary
+                    <Box
                       sx={{
-                        "&.Mui-expanded": {},
+                        display: "flex",
+                        justifyContent: "space-between",
+                        width: "100%",
+                        alignItems: "center",
                       }}
                     >
-                      <Box
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          width: "100%",
-                          alignItems: "center",
-                          fontWeight: "500",
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        {yearData.year}
+                      </Typography>
+
+                      <Chip
+                        label={`${bankroll?.currency?.symbol || "$"}${
+                          yearData.totalProfit
+                        }`}
+                        size="small"
+                        sx={{
+                          backgroundColor:
+                            Number(yearData.totalProfit) >= 0
+                              ? theme.palette.success.main
+                              : theme.palette.error.main,
+                          color: "#fff",
+                          fontWeight: 500,
                         }}
+                      />
+                    </Box>
+                  </AccordionSummary>
+
+                  <AccordionDetails sx={{ p: 0 }}>
+                    {yearData.months.map((monthData) => (
+                      <Accordion
+                        key={monthData.month}
+                        disableGutters
+                        elevation={0}
+                        sx={{
+                          border: "none",
+                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          "&:last-child": {
+                            borderBottom: "none",
+                          },
+                          "&:before": {
+                            display: "none",
+                          },
+                          "&.Mui-expanded": {
+                            margin: 0,
+                          },
+                        }}
+                        defaultExpanded={
+                          yearData.year.toString() === currentYear.toString() &&
+                          monthData.month === currentMonth
+                        }
                       >
-                        <Typography
-                          sx={{
-                            fontSize: { xs: "16px", md: "20px" },
-                            fontWeight: "500",
-                          }}
-                        >
-                          {monthData.month}
-                        </Typography>
-                        {/* Profit or Loss on the right */}
-                        <Box
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
                           sx={{
                             backgroundColor:
-                              monthData.totalProfit >= 0
-                                ? "#4CAF50"
-                                : "#FF5252",
-                            padding: "0.4rem 0.8rem",
-                            borderRadius: "12px",
-                            color: "#ffffff",
-                            fontWeight: "500",
+                              theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.03)"
+                                : "rgba(0, 0, 0, 0.01)",
+                            borderBottom: `1px solid ${theme.palette.divider}`,
+                            minHeight: 48,
+                            "&.Mui-expanded": {
+                              minHeight: 48,
+                            },
+                            pl: 3,
                           }}
                         >
-                          <Typography sx={{ marginRight: "0.5rem" }}>
-                            {bankroll.currency.symbol}
-                            {monthData.totalProfit}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </AccordionSummary>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              width: "100%",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography variant="subtitle2" fontWeight={500}>
+                              {monthData.month}
+                            </Typography>
 
-                    <AccordionDetails>
-                      {monthData.bets.map((bet) => (
-                        <BetCard
-                          isViewMode={isViewMode}
-                          mode={mode}
-                          bankroll={bankroll}
-                          key={bet.id}
-                          bet={bet}
-                          onEdit={handleEditBet}
-                          onDelete={handleDeleteBet}
-                        />
-                      ))}
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
-              </AccordionDetails>
-            </Accordion>
-          ))}
+                            <Chip
+                              label={`${bankroll?.currency?.symbol || "$"}${
+                                monthData.totalProfit
+                              }`}
+                              size="small"
+                              sx={{
+                                backgroundColor:
+                                  Number(monthData.totalProfit) >= 0
+                                    ? theme.palette.success.main
+                                    : theme.palette.error.main,
+                                color: "#fff",
+                                fontWeight: 500,
+                                height: 20,
+                                fontSize: "0.7rem",
+                              }}
+                            />
+                          </Box>
+                        </AccordionSummary>
+
+                        <AccordionDetails sx={{ p: 2 }}>
+                          {monthData.bets.map((bet) => (
+                            <BetCard
+                              isViewMode={isViewMode}
+                              mode={mode}
+                              bankroll={bankroll}
+                              key={bet._id}
+                              bet={bet}
+                              onEdit={handleEditBet}
+                              onDelete={handleDeleteBet}
+                            />
+                          ))}
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <SportsSoccerIcon
+                sx={{
+                  fontSize: 48,
+                  color: theme.palette.text.secondary,
+                  mb: 2,
+                }}
+              />
+              <Typography variant="h6" gutterBottom>
+                No Bets Yet
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {!isViewMode
+                  ? "Add your first bet to start tracking your performance"
+                  : "This bankroll has no bets yet"}
+              </Typography>
+
+              {!isViewMode && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddIcon />}
+                  onClick={handleAddBet}
+                  sx={{
+                    fontWeight: 500,
+                    textTransform: "none",
+                    boxShadow: "none",
+                    "&:hover": {
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  Add Your First Bet
+                </Button>
+              )}
+            </Box>
+          )}
         </Box>
-      ) : (
-        <Box sx={{ color: mode === "dark" ? "white" : "black" }}>No bets</Box>
-      )}
+      </Paper>
 
       {betModalOpen && (
         <BetModal

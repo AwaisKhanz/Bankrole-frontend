@@ -1,7 +1,13 @@
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import LockIcon from "@mui/icons-material/Lock";
-import SecurityIcon from "@mui/icons-material/Security";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
   ToggleButtonGroup,
   ToggleButton,
   Typography,
@@ -11,23 +17,21 @@ import {
   MenuItem,
   useTheme,
   Box,
+  Switch,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
+  Paper,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import ConfirmationModal from "./ConfirmationModal";
-import Switch from "@mui/material/Switch";
-
-import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-} from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { currencies } from "../utils/common";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import LockIcon from "@mui/icons-material/Lock";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CloseIcon from "@mui/icons-material/Close";
 
 const bankrollSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -43,11 +47,11 @@ const bankrollSchema = z.object({
 const initialValues = {
   name: "",
   startingCapital: "",
-  visibility: "Public",
+  visibility: "Private",
   currency: "",
 };
 
-const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
+const BankrollModal = ({ open, onClose, onSubmit, initialData, mode }) => {
   const {
     register,
     handleSubmit,
@@ -61,11 +65,12 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
   });
   const theme = useTheme();
 
-  // ✅ Add state for confirmation modal
+  // Add state for confirmation modal
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingVisibilityChange, setPendingVisibilityChange] = useState(null);
   const [initialVisibility, setInitialVisibility] = useState("Private");
   const [shareable, setShareable] = useState(initialData?.isShareable || false); // Track shareable state
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     if (initialData && Object.entries(initialData).length) {
@@ -87,7 +92,7 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
     onClose();
   };
 
-  // ✅ Handle visibility change with confirmation
+  // Handle visibility change with confirmation
   const handleVisibilityChange = (e, newValue) => {
     if (
       initialData &&
@@ -97,22 +102,31 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
     ) {
       setPendingVisibilityChange(newValue); // Save intended change
       setConfirmOpen(true); // Show confirmation modal
-    } else {
+    } else if (newValue !== null) {
       setValue("visibility", newValue);
     }
   };
 
-  // ✅ Confirm visibility change
+  // Confirm visibility change
   const handleConfirmVisibilityChange = () => {
     setValue("visibility", pendingVisibilityChange);
     setConfirmOpen(false);
     setPendingVisibilityChange(null);
   };
 
-  // ✅ Cancel visibility change
+  // Cancel visibility change
   const handleCancelVisibilityChange = () => {
     setConfirmOpen(false);
     setPendingVisibilityChange(null);
+  };
+
+  const copyToClipboard = () => {
+    const link =
+      initialData?.shareableLink ||
+      `${window.location.origin}/bankroll/view/${initialData?._id}`;
+    navigator.clipboard.writeText(link);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   return (
@@ -123,206 +137,276 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: "16px",
-          boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.2)",
-          background: theme.palette.primary.main,
-          padding: "1rem",
-          color: theme.palette.text.primary,
+          borderRadius: 1,
+          backgroundColor: theme.palette.background.paper,
         },
       }}
     >
       <DialogTitle
         sx={{
-          background: theme.palette.secondary.main,
-          color: theme.palette.primary.contrastText,
-          padding: "1.5rem",
-          textAlign: "center",
-          fontSize: "1.5rem",
-          fontWeight: "bold",
+          p: 3,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        {initialData ? "Update Bankroll" : "Add Bankroll"}
+        <Typography variant="h6" fontWeight={600}>
+          {initialData ? "Update Bankroll" : "Add Bankroll"}
+        </Typography>
+        <IconButton
+          edge="end"
+          onClick={onClose}
+          size="small"
+          sx={{
+            color: theme.palette.text.secondary,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(0, 0, 0, 0.04)",
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.08)",
+            },
+          }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
       </DialogTitle>
-      <DialogContent sx={{ padding: "0px", mb: "1rem" }}>
+
+      <DialogContent sx={{ p: 3, mt: 2 }}>
         <form id="bankroll-form" onSubmit={handleSubmit(handleFormSubmit)}>
-          <TextField
-            {...register("name")}
-            label="Name"
-            fullWidth
-            margin="normal"
-            error={!!errors.name}
-            helperText={errors.name?.message}
-          />
-          <TextField
-            {...register("startingCapital", { valueAsNumber: true })}
-            label="Starting Capital"
-            type="number"
-            fullWidth
-            margin="normal"
-            error={!!errors.startingCapital}
-            helperText={errors.startingCapital?.message}
-          />
-          <Typography
-            variant="body2"
-            fontWeight="bold"
-            gutterBottom
-            sx={{ marginTop: "1rem", color: theme.palette.text.primary }}
-          >
-            Status
-          </Typography>
-          <ToggleButtonGroup
-            value={visibility}
-            exclusive
-            onChange={handleVisibilityChange}
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-              marginBottom: "1.5rem",
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: "8px",
-              padding: "0.75rem",
-              backgroundColor: theme.palette.primary.main,
-            }}
-          >
-            <ToggleButton
-              value="Public"
-              sx={{
-                flex: 1,
-                textTransform: "none",
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: "8px",
-                backgroundColor:
-                  visibility === "Public"
-                    ? theme.palette.primary.main
-                    : "transparent",
-                color:
-                  visibility === "Public"
-                    ? theme.palette.primary.contrastText
-                    : theme.palette.text.secondary,
-                "&:hover": { backgroundColor: theme.palette.action.hover },
-              }}
-            >
-              <VisibilityIcon sx={{ marginRight: "8px" }} />
-              Public
-            </ToggleButton>
-            <ToggleButton
-              value="Private"
-              sx={{
-                flex: 1,
-                textTransform: "none",
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: "8px",
-                backgroundColor:
-                  visibility === "Private"
-                    ? theme.palette.primary.main
-                    : "transparent",
-                color:
-                  visibility === "Private"
-                    ? theme.palette.primary.contrastText
-                    : theme.palette.text.secondary,
-                "&:hover": { backgroundColor: theme.palette.action.hover },
-              }}
-            >
-              <LockIcon sx={{ marginRight: "8px" }} />
-              Private
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              {...register("name")}
+              label="Bankroll Name"
+              fullWidth
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              sx={{ mb: 2.5 }}
+            />
 
-          {errors.visibility && (
-            <Typography
-              variant="body2"
-              color="error"
-              sx={{ marginBottom: "1rem" }}
-            >
-              {errors.visibility.message}
+            <TextField
+              {...register("startingCapital", { valueAsNumber: true })}
+              label="Starting Capital"
+              type="number"
+              fullWidth
+              error={!!errors.startingCapital}
+              helperText={errors.startingCapital?.message}
+            />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" fontWeight={500} gutterBottom>
+              Visibility
             </Typography>
-          )}
-          <FormControl
-            sx={{
-              minWidth: 200,
-            }}
-            fullWidth
-            margin="normal"
-            error={!!errors.currency}
-          >
-            <InputLabel>Currency</InputLabel>
-            <Select
-              value={watch("currency")?.code || ""}
-              onChange={(e) => {
-                const selectedCurrency = currencies.find(
-                  (cur) => cur.code === e.target.value
-                );
-                setValue("currency", selectedCurrency);
-              }}
-              label="Currency"
-            >
-              {currencies.map((cur) => (
-                <MenuItem key={cur.code} value={cur.code}>
-                  {`${cur.symbol} - ${cur.label}`}
-                </MenuItem>
-              ))}
-            </Select>
 
-            {errors.currency?.code && (
-              <Typography variant="body2" color="error">
-                {errors.currency.code.message}
-              </Typography>
+            <Paper
+              elevation={0}
+              variant="outlined"
+              sx={{
+                p: 1,
+                borderRadius: 1,
+                backgroundColor: theme.palette.background.paper,
+              }}
+            >
+              <ToggleButtonGroup
+                value={visibility}
+                exclusive
+                onChange={handleVisibilityChange}
+                aria-label="bankroll visibility"
+                fullWidth
+                size="small"
+                sx={{
+                  "& .MuiToggleButtonGroup-grouped": {
+                    border: 0,
+                    borderRadius: 1,
+                    mx: 0.5,
+                    py: 1,
+                  },
+                }}
+              >
+                <ToggleButton
+                  value="Public"
+                  aria-label="public"
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 500,
+                    color:
+                      visibility === "Public"
+                        ? theme.palette.primary.contrastText
+                        : theme.palette.text.primary,
+                    backgroundColor:
+                      visibility === "Public"
+                        ? theme.palette.primary.main
+                        : "transparent",
+                    "&:hover": {
+                      backgroundColor:
+                        visibility === "Public"
+                          ? theme.palette.primary.dark
+                          : theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  <VisibilityIcon sx={{ mr: 1, fontSize: "1.25rem" }} />
+                  Public
+                </ToggleButton>
+
+                <ToggleButton
+                  value="Private"
+                  aria-label="private"
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 500,
+                    color:
+                      visibility === "Private"
+                        ? theme.palette.primary.contrastText
+                        : theme.palette.text.primary,
+                    backgroundColor:
+                      visibility === "Private"
+                        ? theme.palette.primary.main
+                        : "transparent",
+                    "&:hover": {
+                      backgroundColor:
+                        visibility === "Private"
+                          ? theme.palette.primary.dark
+                          : theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  <LockIcon sx={{ mr: 1, fontSize: "1.25rem" }} />
+                  Private
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Paper>
+
+            {errors.visibility && (
+              <FormHelperText error>{errors.visibility.message}</FormHelperText>
             )}
-          </FormControl>
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <FormControl fullWidth error={!!errors.currency}>
+              <InputLabel>Currency</InputLabel>
+              <Select
+                value={watch("currency")?.code || ""}
+                onChange={(e) => {
+                  const selectedCurrency = currencies.find(
+                    (cur) => cur.code === e.target.value
+                  );
+                  setValue("currency", selectedCurrency);
+                }}
+                label="Currency"
+              >
+                {currencies.map((cur) => (
+                  <MenuItem key={cur.code} value={cur.code}>
+                    {`${cur.symbol} - ${cur.label}`}
+                  </MenuItem>
+                ))}
+              </Select>
+
+              {errors.currency?.code && (
+                <FormHelperText error>
+                  {errors.currency.code.message}
+                </FormHelperText>
+              )}
+            </FormControl>
+          </Box>
 
           <Box
-            sx={{ display: "flex", alignItems: "center", marginTop: "1rem" }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              p: 2,
+              borderRadius: 1,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.02)",
+            }}
           >
-            <Typography
-              variant="body2"
-              fontWeight="bold"
-              sx={{ color: theme.palette.text.primary, marginRight: "1rem" }}
-            >
-              Enable Shareable Link
-            </Typography>
+            <Box>
+              <Typography variant="subtitle2" fontWeight={500}>
+                Enable Shareable Link
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Allow others to view this bankroll
+              </Typography>
+            </Box>
+
             <Switch
               checked={shareable}
               onChange={(e) => {
                 setShareable(e.target.checked);
                 setValue("isShareable", e.target.checked);
               }}
-              color="tertiary"
+              color="primary"
             />
           </Box>
+
           {initialData && Object.entries(initialData).length && shareable && (
-            <TextField
-              value={
-                initialData?.shareableLink ||
-                `${window.location.origin}/bankroll/view/${initialData?._id}`
-              }
-              label="Shareable Link"
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              helperText="Copy this link to share your bankroll"
-            />
+            <Box sx={{ mt: 3 }}>
+              <TextField
+                value={
+                  initialData?.shareableLink ||
+                  `${window.location.origin}/bankroll/view/${initialData?._id}`
+                }
+                label="Shareable Link"
+                fullWidth
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        edge="end"
+                        onClick={copyToClipboard}
+                        color={linkCopied ? "success" : "default"}
+                      >
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                helperText={
+                  linkCopied
+                    ? "Link copied to clipboard!"
+                    : "Copy this link to share your bankroll"
+                }
+              />
+            </Box>
           )}
         </form>
       </DialogContent>
+
       <DialogActions
-        sx={{
-          display: "flex",
-          justifyContent: "end",
-          paddingTop: "1rem",
-          borderTop: `1px solid ${theme.palette.divider}`,
-        }}
+        sx={{ p: 3, pt: 2, borderTop: `1px solid ${theme.palette.divider}` }}
       >
-        <Button onClick={onClose} variant="contained" color="primary">
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{
+            fontWeight: 500,
+            textTransform: "none",
+          }}
+        >
           Cancel
         </Button>
         <Button
-          color="secondary"
+          color="primary"
           variant="contained"
           type="submit"
           form="bankroll-form"
+          sx={{
+            fontWeight: 500,
+            textTransform: "none",
+            boxShadow: "none",
+            "&:hover": {
+              boxShadow: "none",
+            },
+          }}
         >
           {initialData ? "Update" : "Add"}
         </Button>
@@ -334,6 +418,7 @@ const BankrollModal = ({ open, onClose, onSubmit, initialData, model }) => {
         message="Changing this bankroll to public will delete all existing bets. Are you sure you want to proceed?"
         onConfirm={handleConfirmVisibilityChange}
         onCancel={handleCancelVisibilityChange}
+        mode={mode}
       />
     </Dialog>
   );

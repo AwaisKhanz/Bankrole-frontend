@@ -2,26 +2,51 @@ import React, { useState } from "react";
 import {
   Box,
   Typography,
-  Button,
-  Collapse,
   IconButton,
   useTheme,
   Tooltip,
   Alert,
+  Collapse,
+  Paper,
+  Chip,
+  Divider,
+  Stack,
+  Grid,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import PaidIcon from "@mui/icons-material/Paid";
+import SpeedIcon from "@mui/icons-material/Speed";
 
-const getVerificationAlert = (bet) => {
+const getVerificationAlert = (bet, theme) => {
   if (bet.verificationStatus === "Pending") {
     return (
       <Alert
         severity="warning"
-        sx={{ backgroundColor: "#FFEB3B", color: "#000" }}
+        icon={<WarningAmberIcon fontSize="inherit" />}
+        sx={{
+          borderRadius: 0,
+          py: 0.75,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "rgba(255, 193, 7, 0.15)"
+              : "rgba(255, 193, 7, 0.1)",
+          color: theme.palette.warning.main,
+          "& .MuiAlert-icon": {
+            color: theme.palette.warning.main,
+          },
+        }}
       >
-        This bet is pending verification.
+        This bet is pending verification
       </Alert>
     );
   }
@@ -29,9 +54,43 @@ const getVerificationAlert = (bet) => {
     return (
       <Alert
         severity="error"
-        sx={{ backgroundColor: "#FFCDD2", color: "#000" }}
+        icon={<ErrorOutlineIcon fontSize="inherit" />}
+        sx={{
+          borderRadius: 0,
+          py: 0.75,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "rgba(244, 67, 54, 0.15)"
+              : "rgba(244, 67, 54, 0.1)",
+          color: theme.palette.error.main,
+          "& .MuiAlert-icon": {
+            color: theme.palette.error.main,
+          },
+        }}
       >
-        This bet verification has been rejected.
+        This bet verification has been rejected
+      </Alert>
+    );
+  }
+  if (bet.verificationStatus === "Accepted") {
+    return (
+      <Alert
+        severity="success"
+        icon={<CheckCircleOutlineIcon fontSize="inherit" />}
+        sx={{
+          borderRadius: 0,
+          py: 0.75,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "rgba(76, 175, 80, 0.15)"
+              : "rgba(76, 175, 80, 0.1)",
+          color: theme.palette.success.main,
+          "& .MuiAlert-icon": {
+            color: theme.palette.success.main,
+          },
+        }}
+      >
+        This bet has been verified
       </Alert>
     );
   }
@@ -55,79 +114,129 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
     setExpanded(!expanded);
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Won":
+        return theme.palette.success.main;
+      case "Loss":
+        return theme.palette.error.main;
+      case "Void":
+        return theme.palette.grey[500];
+      case "Cashout":
+        return theme.palette.warning.main;
+      default: // Pending
+        return theme.palette.info.main;
+    }
+  };
+
   return (
-    <Box
+    <Paper
+      elevation={0}
+      variant="outlined"
       sx={{
-        marginBottom: "1rem",
-        background: theme.palette.secondary.main,
-        borderRadius: "12px",
+        mb: 2,
+        borderRadius: 1,
         overflow: "hidden",
-        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+        transition: "box-shadow 0.2s ease-in-out",
+        "&:hover": {
+          boxShadow: theme.shadows[2],
+        },
+        backgroundColor: theme.palette.background.paper,
       }}
     >
       {/* Verification Alert */}
-      {bankroll?.visibility !== "Private" && getVerificationAlert(bet)}
+      {bankroll?.visibility !== "Private" && getVerificationAlert(bet, theme)}
 
       {/* Header Section */}
       <Box
-        onClick={!isViewMode && handleExpand}
+        onClick={!isViewMode ? handleExpand : undefined}
         sx={{
           position: "relative",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "0.5rem 1rem",
-          cursor: !isViewMode ? "pointer" : "",
+          p: 2,
+          cursor: !isViewMode ? "pointer" : "default",
           transition: "background-color 0.3s ease",
+          "&:hover": !isViewMode
+            ? {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.02)",
+              }
+            : {},
         }}
       >
         {/* Status Badge */}
-        <Box
+        <Chip
+          label={bet.status}
+          size="small"
           sx={{
             position: "absolute",
-            top: "0",
-            right: "0",
-            backgroundColor:
-              bet.status === "Won"
-                ? "#4CAF50" // Green for Won
-                : bet.status === "Loss"
-                ? "#FF5252" // Red for Loss
-                : bet.status === "Void"
-                ? "#9E9E9E" // Grey for Void
-                : bet.status === "Cashout"
-                ? "#FFB300" // Amber/Yellow for Cashout
-                : "#B0BEC5", // Light Grey for Pending (default)
-            padding: "0rem 0.3rem",
-            borderTopLeftRadius: "8px",
-            borderBottomLeftRadius: "8px",
-            writingMode: "vertical-rl",
-            textAlign: "center",
-            fontWeight: "500",
-            fontSize: "0.9rem",
-            height: "100%",
-            color: "white",
+            top: 12,
+            right: 16,
+            backgroundColor: getStatusColor(bet.status),
+            color: "#fff",
+            fontWeight: 500,
+            fontSize: "0.75rem",
           }}
-        >
-          {bet.status}
-        </Box>
+        />
+
         {/* Left Section */}
-        <Box sx={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           {!isViewMode && (
-            <IconButton onClick={handleExpand}>
-              {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExpand();
+              }}
+              size="small"
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.04)",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.08)",
+                },
+              }}
+            >
+              {expanded ? (
+                <ExpandLessIcon fontSize="small" />
+              ) : (
+                <ExpandMoreIcon fontSize="small" />
+              )}
             </IconButton>
           )}
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Typography variant="body2">
-              {new Date(bet.date).toLocaleString()}
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: "500" }}>
-              {bet.label}
-            </Typography>
+
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+              <CalendarTodayIcon
+                fontSize="small"
+                sx={{ mr: 0.75, color: theme.palette.text.secondary }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                {new Date(bet.date).toLocaleString()}
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <SportsSoccerIcon
+                fontSize="small"
+                sx={{ mr: 0.75, color: theme.palette.primary.main }}
+              />
+              <Typography variant="subtitle2" fontWeight={600}>
+                {bet.label}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
-        {/* Right Section */}
+        {/* Right Section - Desktop */}
         <Box
           sx={{
             display: {
@@ -135,66 +244,133 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
               md: "flex", // Show on medium and larger screens
             },
             alignItems: "center",
-            justifyContent: "space-around",
-            gap: "40px",
-            mr: "50px",
+            gap: 3,
+            mr: 8, // Space for status badge
           }}
         >
           {/* Odds */}
-          <Box textAlign="center">
-            <Typography
-              sx={{ fontWeight: "500", fontSize: { xs: "18px", md: "20px" } }}
+          <Box sx={{ textAlign: "center", minWidth: 60 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 0.5,
+              }}
             >
-              {bet.odds}
-            </Typography>
-            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              <SpeedIcon
+                fontSize="small"
+                sx={{ mr: 0.5, color: theme.palette.text.secondary }}
+              />
+              <Typography variant="body2" fontWeight={600}>
+                {bet.odds}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
               Odds
             </Typography>
           </Box>
 
           {/* Stake */}
-          <Box textAlign="center">
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "500", fontSize: { xs: "18px", md: "20px" } }}
+          <Box sx={{ textAlign: "center", minWidth: 60 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 0.5,
+              }}
             >
-              {bet.stake}€
-            </Typography>
-            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              <PaidIcon
+                fontSize="small"
+                sx={{ mr: 0.5, color: theme.palette.text.secondary }}
+              />
+              <Typography variant="body2" fontWeight={600}>
+                {bankroll?.currency?.symbol || "$"}
+                {bet.stake}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
               Stake
             </Typography>
           </Box>
 
           {/* Gain */}
-          <Box textAlign="center">
-            <Typography
-              variant="h6"
+          <Box sx={{ textAlign: "center", minWidth: 60 }}>
+            <Box
               sx={{
-                fontWeight: "500",
-                color: bet.gain >= 0 ? "#4CAF50" : "#FF5252",
-                fontSize: { xs: "18px", md: "20px" },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 0.5,
               }}
             >
-              {bet.gain}€
-            </Typography>
-            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              {bet.gain >= 0 ? (
+                <TrendingUpIcon
+                  fontSize="small"
+                  sx={{ mr: 0.5, color: theme.palette.success.main }}
+                />
+              ) : (
+                <TrendingDownIcon
+                  fontSize="small"
+                  sx={{ mr: 0.5, color: theme.palette.error.main }}
+                />
+              )}
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{
+                  color:
+                    bet.gain >= 0
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
+                }}
+              >
+                {bankroll?.currency?.symbol || "$"}
+                {Math.abs(bet.gain)}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
               Gain
             </Typography>
           </Box>
 
           {/* Profit */}
-          <Box textAlign="center">
-            <Typography
-              variant="h6"
+          <Box sx={{ textAlign: "center", minWidth: 60 }}>
+            <Box
               sx={{
-                fontWeight: "500",
-                color: bet.profit >= 0 ? "#4CAF50" : "#FF5252",
-                fontSize: { xs: "18px", md: "20px" },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 0.5,
               }}
             >
-              {bet.profit}€
-            </Typography>
-            <Typography variant="caption" sx={{ textTransform: "uppercase" }}>
+              {bet.profit >= 0 ? (
+                <TrendingUpIcon
+                  fontSize="small"
+                  sx={{ mr: 0.5, color: theme.palette.success.main }}
+                />
+              ) : (
+                <TrendingDownIcon
+                  fontSize="small"
+                  sx={{ mr: 0.5, color: theme.palette.error.main }}
+                />
+              )}
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{
+                  color:
+                    bet.profit >= 0
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
+                }}
+              >
+                {bankroll?.currency?.symbol || "$"}
+                {Math.abs(bet.profit)}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
               Profit
             </Typography>
           </Box>
@@ -202,116 +378,127 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
       </Box>
 
       {/* Details Section */}
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
+      <Collapse in={expanded} timeout="auto" unmountOnExit={true}>
+        <Divider />
         <Box
           sx={{
-            padding: "1rem",
-            background: theme.palette.secondary.main,
-            borderTop:
-              mode === "dark"
-                ? "1px solid rgba(255, 255, 255, 0.2)"
-                : `1px solid ${theme.palette.primary.main}`,
+            p: 2,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(0, 0, 0, 0.02)",
           }}
         >
           {/* Show additional data in details for small screens */}
-          <Box
-            sx={{
-              display: {
-                xs: "flex", // Show on small screens
-                md: "none", // Hide on medium and larger screens
-              },
-              justifyContent: "space-around",
-              gap: "1rem",
-              marginBottom: "1rem",
-            }}
-          >
-            <Box textAlign="center">
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: "500", color: "#ffffff" }}
-              >
-                {bet.odds}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-              >
-                Odds
-              </Typography>
-            </Box>
-            <Box textAlign="center">
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: "500", color: "#ffffff" }}
-              >
-                {bet.stake}€
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-              >
-                Stake
-              </Typography>
-            </Box>
-            <Box textAlign="center">
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: "500",
-                  color: bet.gain >= 0 ? "#4CAF50" : "#FF5252",
-                }}
-              >
-                {bet.gain}€
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-              >
-                Gain
-              </Typography>
-            </Box>
-            <Box textAlign="center">
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: "500",
-                  color: bet.profit >= 0 ? "#4CAF50" : "#FF5252",
-                }}
-              >
-                {bet.profit}€
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(255, 255, 255, 0.7)" }}
-              >
-                Profit
-              </Typography>
-            </Box>
-          </Box>
-
-          {!isViewMode && (
-            <Box sx={{ marginBottom: "1rem" }}>
-              {isPublicBankroll && isWithin24Hours && (
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={3}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  gutterBottom
+                  display="block"
+                >
+                  Odds
+                </Typography>
+                <Typography variant="body2" fontWeight={600}>
+                  {bet.odds}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={3}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  gutterBottom
+                  display="block"
+                >
+                  Stake
+                </Typography>
+                <Typography variant="body2" fontWeight={600}>
+                  {bankroll?.currency?.symbol || "$"}
+                  {bet.stake}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={3}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  gutterBottom
+                  display="block"
+                >
+                  Gain
+                </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: "#FF5252", fontStyle: "italic", mb: 1 }}
+                  fontWeight={600}
+                  sx={{
+                    color:
+                      bet.gain >= 0
+                        ? theme.palette.success.main
+                        : theme.palette.error.main,
+                  }}
                 >
-                  Cannot delete this bet within 24 hours of upload. Please
-                  contact support if needed.
+                  {bankroll?.currency?.symbol || "$"}
+                  {Math.abs(bet.gain)}
                 </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={3}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  gutterBottom
+                  display="block"
+                >
+                  Profit
+                </Typography>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{
+                    color:
+                      bet.profit >= 0
+                        ? theme.palette.success.main
+                        : theme.palette.error.main,
+                  }}
+                >
+                  {bankroll?.currency?.symbol || "$"}
+                  {Math.abs(bet.profit)}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {!isViewMode && (
+            <Box>
+              {isPublicBankroll && isWithin24Hours && (
+                <Alert
+                  severity="info"
+                  sx={{
+                    mb: 2,
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(33, 150, 243, 0.15)"
+                        : "rgba(33, 150, 243, 0.1)",
+                  }}
+                >
+                  <Typography variant="body2">
+                    Cannot delete this bet within 24 hours of upload. Please
+                    contact support if needed.
+                  </Typography>
+                </Alert>
               )}
 
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "1rem",
-                }}
-              >
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
                 <Tooltip
                   title={
                     isPublicBankroll && bet.verificationStatus === "Pending"
-                      ? "Cannot edit while verification is pending."
+                      ? "Cannot edit while verification is pending"
                       : "Edit this bet"
                   }
                 >
@@ -319,14 +506,27 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
                     <IconButton
                       onClick={() => canEdit && onEdit(bet)}
                       disabled={!canEdit}
+                      size="small"
                       sx={{
-                        color: canEdit ? "#1649ff" : "grey",
+                        color: canEdit
+                          ? theme.palette.primary.main
+                          : theme.palette.action.disabled,
+                        backgroundColor: canEdit
+                          ? theme.palette.mode === "dark"
+                            ? "rgba(25, 118, 210, 0.15)"
+                            : "rgba(25, 118, 210, 0.1)"
+                          : undefined,
                         "&:hover": canEdit
-                          ? { backgroundColor: "rgba(22, 73, 255, 0.1)" }
+                          ? {
+                              backgroundColor:
+                                theme.palette.mode === "dark"
+                                  ? "rgba(25, 118, 210, 0.25)"
+                                  : "rgba(25, 118, 210, 0.2)",
+                            }
                           : {},
                       }}
                     >
-                      <EditIcon />
+                      <EditIcon fontSize="small" />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -341,23 +541,36 @@ const BetCard = ({ bet, onEdit, onDelete, bankroll, mode, isViewMode }) => {
                     <IconButton
                       onClick={() => canDelete && onDelete(bet)}
                       disabled={!canDelete}
+                      size="small"
                       sx={{
-                        color: canDelete ? "#FF5252" : "grey",
+                        color: canDelete
+                          ? theme.palette.error.main
+                          : theme.palette.action.disabled,
+                        backgroundColor: canDelete
+                          ? theme.palette.mode === "dark"
+                            ? "rgba(211, 47, 47, 0.15)"
+                            : "rgba(211, 47, 47, 0.1)"
+                          : undefined,
                         "&:hover": canDelete
-                          ? { backgroundColor: "rgba(255, 82, 82, 0.1)" }
+                          ? {
+                              backgroundColor:
+                                theme.palette.mode === "dark"
+                                  ? "rgba(211, 47, 47, 0.25)"
+                                  : "rgba(211, 47, 47, 0.2)",
+                            }
                           : {},
                       }}
                     >
-                      <DeleteIcon />
+                      <DeleteIcon fontSize="small" />
                     </IconButton>
                   </span>
                 </Tooltip>
-              </Box>
+              </Stack>
             </Box>
           )}
         </Box>
       </Collapse>
-    </Box>
+    </Paper>
   );
 };
 

@@ -28,247 +28,276 @@
   border-left: 5px solid #ffc107 !important; /* Yellow border for warning */
 }
 
-/* Dark Mode Styles */
-.react-calendar.dark {
+/* Base Calendar Styles */
+.react-calendar {
   width: 100% !important;
-  background-color: #1e293b;
-  color: white;
   border: none;
   border-radius: 8px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+/* Dark Mode Styles */
+.react-calendar.dark {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+  box-shadow: none;
 }
 
 .react-calendar.dark .react-calendar__navigation {
-  background-color: #0f172a;
+  background-color: #1e1e1e;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.react-calendar.dark .react-calendar__tile--active {
-  background-color: transparent !important;
-}
-.react-calendar.light .react-calendar__tile--active {
-  background-color: transparent !important;
-}
-
 .react-calendar.dark .react-calendar__navigation button {
-  color: white;
+  color: #f5f5f5;
 }
 
 .react-calendar.dark .react-calendar__tile {
-  color: white;
+  color: #f5f5f5;
 }
 
 .react-calendar.dark .react-calendar__tile:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .react-calendar.dark .react-calendar__tile--now {
   background: transparent !important;
-  color: inherit !important;
+  color: #90caf9 !important;
   font-weight: bold;
-}
-
-.react-calendar.dark .profit-day {
-  /* background-color: rgba(76, 175, 80, 0.2); */
-  /* color: white; */
-}
-
-.react-calendar.dark .loss-day {
-  /* background-color: rgba(244, 67, 54, 0.2); */
-  /* color: #ff5252; */
-}
-
-.react-calendar__month-view .react-calendar__tile abbr {
-  display: none !important; /* Hides default date numbers only in month view */
-}
-
-.react-calendar__month-view .react-calendar__tile.custom-tile abbr {
-  display: none !important; /* Hide only inside styled tiles */
-}
-
-.react-calendar.dark .neutral-day:hover,
-.react-calendar.dark .neutral-day:focus,
-.react-calendar.dark .neutral-day:active {
-  background-color: #ffffff !important;
-  color: #000000 !important;
 }
 
 /* Light Mode Styles */
 .react-calendar.light {
-  width: 100% !important;
   background-color: #ffffff;
-  color: #000000;
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  color: #212121;
+  box-shadow: none;
 }
 
 .react-calendar.light .react-calendar__navigation button {
-  color: white;
+  color: #212121;
 }
 
 .react-calendar.light .react-calendar__tile {
-  color: #000000;
+  color: #212121;
 }
 
 .react-calendar.light .react-calendar__tile:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .react-calendar.light .react-calendar__tile--now {
   background: transparent !important;
-  color: inherit !important;
+  color: #1976d2 !important;
   font-weight: bold;
 }
 
-.react-calendar__tile--hasActive {
-  background: transparent;
+/* Fix for day boxes background when clicked */
+.react-calendar.dark .react-calendar__tile:focus,
+.react-calendar.dark .react-calendar__tile:active,
+.react-calendar.dark .react-calendar__tile--active {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f5f5f5 !important;
 }
 
-.react-calendar.light .profit-day {
-  /* background-color: rgba(76, 175, 80, 0.2); */
-  /* color: #000000; */
+.react-calendar.light .react-calendar__tile:focus,
+.react-calendar.light .react-calendar__tile:active,
+.react-calendar.light .react-calendar__tile--active {
+  background-color: rgba(25, 118, 210, 0.08) !important;
+  color: #212121 !important;
 }
 
-.react-calendar.light .loss-day {
-  /* background-color: rgba(244, 67, 54, 0.2); */
-  /* color: #ff5252; */
-}
-
-.react-calendar.light .neutral-day:hover,
-.react-calendar.light .neutral-day:focus,
-.react-calendar.light .neutral-day:active {
-  background-color: transparent;
-  /* color: #ffffff !important; */
-}
-.react-calendar.dark .neutral-day:hover,
-.react-calendar.dark .neutral-day:focus,
-.react-calendar.dark .neutral-day:active {
-  background-color: transparent !important;
-  color: #ffffff !important;
-}
-
-/* Dark Mode Header Styles */
-.react-calendar.dark .react-calendar__navigation {
-  background-color: #0f172a;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px 8px 0 0;
-  padding: 8px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Navigation button styles for dark mode */
-.react-calendar.dark .react-calendar__navigation button {
-  color: white;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  min-width: 44px;
-  height: 38px;
-  margin: 0 2px;
-  background-color: transparent;
-  border: none;
+/* Active Tile Styling - Fixed for both modes */
+.react-calendar.dark .react-calendar__tile--active {
   position: relative;
-  overflow: hidden;
 }
 
-.react-calendar.dark .react-calendar__navigation button:hover {
-  background-color: rgba(22, 73, 255, 0.3) !important;
+.react-calendar.dark .react-calendar__tile--active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #90caf9;
 }
 
+.react-calendar.light .react-calendar__tile--active {
+  position: relative;
+}
+
+.react-calendar.light .react-calendar__tile--active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #1976d2;
+}
+
+/* Navigation Button Active States */
 .react-calendar.dark .react-calendar__navigation button:focus,
 .react-calendar.dark .react-calendar__navigation button:active {
-  background-color: #1649ff !important;
-  color: white !important;
+  background-color: rgba(25, 118, 210, 0.2) !important;
+  color: #90caf9 !important;
   outline: none;
-}
-
-/* Style for the month label button in dark mode */
-.react-calendar.dark .react-calendar__navigation__label {
-  font-weight: bold;
-  font-size: 1.1em;
-  flex-grow: 1;
-}
-
-.react-calendar.dark .react-calendar__navigation__label:hover,
-.react-calendar.dark .react-calendar__navigation__label:focus,
-.react-calendar.dark .react-calendar__navigation__label:active {
-  background-color: #1649ff !important;
-}
-
-/* Light Mode Header Styles */
-.react-calendar.light .react-calendar__navigation {
-  background-color: #1649ff !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-  border-radius: 8px 8px 0 0;
-  padding: 8px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Navigation button styles for light mode */
-.react-calendar.light .react-calendar__navigation button {
-  color: white;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  min-width: 44px;
-  height: 38px;
-  margin: 0 2px;
-  background-color: transparent;
-  border: none;
-  position: relative;
-  overflow: hidden;
-}
-
-.react-calendar.light .react-calendar__navigation button:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .react-calendar.light .react-calendar__navigation button:focus,
 .react-calendar.light .react-calendar__navigation button:active {
-  background-color: rgba(255, 255, 255, 0.4) !important;
-  color: white !important;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+  background-color: rgba(25, 118, 210, 0.1) !important;
+  color: #1976d2 !important;
   outline: none;
 }
 
-/* Style for the month label button in light mode */
-.react-calendar.light .react-calendar__navigation__label {
-  font-weight: bold;
-  font-size: 1.1em;
+/* Common Styles */
+.react-calendar__month-view .react-calendar__tile abbr {
+  display: none !important; /* Hides default date numbers only in month view */
+}
+
+.react-calendar__tile--hasActive {
+  background: transparent !important;
+}
+
+/* Navigation Styles */
+.react-calendar__navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+
+.react-calendar__navigation button {
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  min-width: 44px;
+  height: 38px;
+  margin: 0 2px;
+  background-color: transparent;
+  border: none;
+  font-weight: 500;
+}
+
+.react-calendar.dark .react-calendar__navigation button:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.react-calendar.light .react-calendar__navigation button:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.react-calendar__navigation__label {
+  font-weight: 600;
+  font-size: 1rem;
   flex-grow: 1;
 }
 
-/* Disabled navigation button styles */
-.react-calendar .react-calendar__navigation button:disabled {
-  background-color: transparent !important;
-  opacity: 0.4;
-  cursor: not-allowed;
+/* Active Navigation Label */
+.react-calendar.dark .react-calendar__navigation__label:focus,
+.react-calendar.dark .react-calendar__navigation__label:active {
+  background-color: rgba(25, 118, 210, 0.2) !important;
+  color: #90caf9 !important;
 }
 
-/* Active navigation button animation */
-.react-calendar .react-calendar__navigation button:active {
-  transform: scale(0.95);
+.react-calendar.light .react-calendar__navigation__label:focus,
+.react-calendar.light .react-calendar__navigation__label:active {
+  background-color: rgba(25, 118, 210, 0.1) !important;
+  color: #1976d2 !important;
 }
 
-/* Button ripple effect */
-.react-calendar .react-calendar__navigation button::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
+/* Weekday Headers */
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 0.75rem;
 }
 
-.react-calendar .react-calendar__navigation button:active::after {
-  width: 100%;
-  height: 100%;
+.react-calendar.dark .react-calendar__month-view__weekdays {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.react-calendar.light .react-calendar__month-view__weekdays {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  padding: 8px;
+}
+
+/* Calendar Tiles */
+.react-calendar__tile {
+  padding: 10px 0;
   border-radius: 4px;
+  position: relative;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  border-radius: 4px;
+}
+
+/* Disabled button states */
+.react-calendar.dark .react-calendar__navigation button:disabled {
+  opacity: 0.4;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.react-calendar.light .react-calendar__navigation button:disabled {
+  opacity: 0.4;
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Fix for profit/loss days to maintain their styling when active */
+.react-calendar.dark .profit-day:focus,
+.react-calendar.dark .profit-day:active,
+.react-calendar.dark .profit-day.react-calendar__tile--active {
+  background-color: rgba(46, 125, 50, 0.2) !important;
+}
+
+.react-calendar.dark .loss-day:focus,
+.react-calendar.dark .loss-day:active,
+.react-calendar.dark .loss-day.react-calendar__tile--active {
+  background-color: rgba(211, 47, 47, 0.2) !important;
+}
+
+.react-calendar.light .profit-day:focus,
+.react-calendar.light .profit-day:active,
+.react-calendar.light .profit-day.react-calendar__tile--active {
+  background-color: rgba(46, 125, 50, 0.1) !important;
+}
+
+.react-calendar.light .loss-day:focus,
+.react-calendar.light .loss-day:active,
+.react-calendar.light .loss-day.react-calendar__tile--active {
+  background-color: rgba(211, 47, 47, 0.1) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .react-calendar__tile {
+    height: 60px;
+    padding: 5px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .react-calendar__tile {
+    height: 50px;
+    padding: 2px 0;
+  }
+
+  .react-calendar__navigation button {
+    min-width: 36px;
+    height: 36px;
+  }
 }

@@ -14,9 +14,12 @@ import {
   Chip,
   useTheme,
   Divider,
+  Avatar,
+  Badge,
+  Tooltip,
+  Paper,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuth } from "../context/AuthContext";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
@@ -44,12 +47,22 @@ const DashboardLayout = ({ toggleTheme, mode }) => {
     logOut();
   };
 
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
     <Box
       sx={{
         display: "flex",
         minHeight: "100vh",
-        color: mode === "dark" ? "white" : "black",
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
       }}
     >
       {/* Sidebar for Desktop */}
@@ -61,117 +74,239 @@ const DashboardLayout = ({ toggleTheme, mode }) => {
       {/* Navbar */}
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           width: { md: "calc(100% - 240px)" },
           ml: { md: "240px" },
           height: "64px",
-          background: theme.palette.primary.main,
-          boxShadow: "none",
-          borderBottom: mode !== "dark" && "1px solid #e0e0e0",
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
         <Toolbar
           sx={{
             display: "flex",
-            justifyContent: { xs: "space-between" },
+            justifyContent: "space-between",
+            height: "100%",
           }}
         >
-          {/* Menu Icon */}
+          {/* Menu Icon and Logo */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
               edge="start"
-              color="inherit"
               aria-label="menu"
               onClick={toggleDrawer}
-              sx={{ display: { md: "none" } }}
+              sx={{
+                display: { md: "none" },
+                color: theme.palette.text.primary,
+                mr: 1,
+              }}
             >
               <MenuIcon />
             </IconButton>
-            <img
-              src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
-              alt="Logo"
-              style={{
-                width: "150px",
-                height: "64px",
-                objectFit: "cover",
-              }}
-            />
+            <Box
+              sx={{ display: { xs: "flex", md: "none" }, alignItems: "center" }}
+            >
+              <img
+                src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
+                alt="Logo"
+                style={{
+                  width: "100px",
+                  height: "60px",
+                  objectFit: "cover",
+                }}
+              />
+            </Box>
           </Box>
 
-          {/* Profile Menu */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          {/* Right side controls */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* Subscription Badge */}
             {user?.subscription?.status === "active" && (
-              <Link to={"/payment"}>
-                <Chip
-                  label="Pro"
-                  sx={{
-                    background: "#FFD700",
-                    color: "#000",
-                    fontWeight: "bold",
-                    marginRight: "0.5rem",
-                  }}
-                />
-              </Link>
+              <Tooltip title="Pro Subscription Active">
+                <Link to="/payment" style={{ textDecoration: "none" }}>
+                  <Chip
+                    label="PRO"
+                    size="small"
+                    sx={{
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 215, 0, 0.15)"
+                          : "rgba(255, 215, 0, 0.2)",
+                      color: "#B8860B",
+                      fontWeight: 600,
+                      border: "1px solid #B8860B",
+                    }}
+                  />
+                </Link>
+              </Tooltip>
             )}
+
             {/* Theme Toggle */}
-            <IconButton onClick={toggleTheme} sx={{ marginRight: "1rem" }}>
-              {mode === "dark" ? (
-                <Brightness7Icon sx={{ color: "yellow" }} />
-              ) : (
-                <Brightness4Icon sx={{ color: "#333" }} />
-              )}
-            </IconButton>
-            <IconButton edge="end" color="inherit" onClick={openProfileMenu}>
-              <AccountCircleIcon />
-            </IconButton>
+            <Tooltip
+              title={`Switch to ${mode === "dark" ? "light" : "dark"} mode`}
+            >
+              <IconButton
+                onClick={toggleTheme}
+                size="small"
+                sx={{
+                  color: theme.palette.text.primary,
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.04)",
+                  "&:hover": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "rgba(0, 0, 0, 0.08)",
+                  },
+                }}
+              >
+                {mode === "dark" ? (
+                  <Brightness7Icon fontSize="small" />
+                ) : (
+                  <Brightness4Icon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
+
+            {/* Profile Menu */}
+            <Tooltip title="Account">
+              <IconButton
+                edge="end"
+                onClick={openProfileMenu}
+                sx={{
+                  ml: 0.5,
+                  color: theme.palette.text.primary,
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.04)",
+                  "&:hover": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "rgba(0, 0, 0, 0.08)",
+                  },
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {getInitials(user?.username)}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+
             <Menu
               anchorEl={profileMenuAnchor}
               open={Boolean(profileMenuAnchor)}
               onClose={closeProfileMenu}
-              sx={{ mt: "40px" }}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+              PaperProps={{
+                elevation: 2,
+                sx: {
+                  mt: 1.5,
+                  minWidth: 220,
+                  borderRadius: 1,
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.15))",
+                  "&:before": {
+                    content: '""',
+                    display: "block",
+                    position: "absolute",
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: theme.palette.background.paper,
+                    transform: "translateY(-50%) rotate(45deg)",
+                    zIndex: 0,
+                  },
+                },
+              }}
             >
-              <MenuItem>
-                <Typography variant="body2">
-                  <strong>Email:</strong> {user?.email}
+              <Box sx={{ px: 2, py: 1.5 }}>
+                <Typography variant="subtitle1" fontWeight={500}>
+                  {user?.username || "User"}
                 </Typography>
-              </MenuItem>
-              <MenuItem
-                sx={{
-                  borderBottom:
-                    mode === "dark"
-                      ? "1px solid rgba(255, 255, 255, 0.2)"
-                      : "1px solid #e0e0e0",
-                  mb: "1rem",
-                }}
-              >
-                <Typography
-                  component={Link}
-                  to={"/payment"}
-                  variant="body2"
-                  sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+                <Typography variant="body2" color="text.secondary">
+                  {user?.email}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box sx={{ px: 2, py: 1.5 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <strong>Plan:</strong>
+                  <Typography variant="body2" fontWeight={500}>
+                    Subscription
+                  </Typography>
                   <Chip
                     label={
                       user?.subscription?.status === "active" ? "Pro" : "Free"
                     }
+                    size="small"
                     sx={{
-                      background:
+                      backgroundColor:
                         user?.subscription?.status === "active"
-                          ? "#FFD700"
-                          : "#E0E0E0",
-                      color: "#000",
-                      fontWeight: "bold",
+                          ? "rgba(255, 215, 0, 0.15)"
+                          : theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.1)"
+                          : "rgba(0, 0, 0, 0.08)",
+                      color:
+                        user?.subscription?.status === "active"
+                          ? "#B8860B"
+                          : theme.palette.text.primary,
+                      fontWeight: 500,
+                      fontSize: "0.75rem",
                     }}
                   />
-                </Typography>
+                </Box>
+
+                {user?.subscription?.status !== "active" && (
+                  <Button
+                    component={Link}
+                    to="/payment"
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 1, textTransform: "none" }}
+                  >
+                    Upgrade to Pro
+                  </Button>
+                )}
+              </Box>
+
+              <Divider />
+
+              <MenuItem
+                component={Link}
+                to="/profile"
+                onClick={closeProfileMenu}
+                sx={{ py: 1.5 }}
+              >
+                <Typography variant="body2">My Profile</Typography>
               </MenuItem>
 
-              <MenuItem component={Link} to="/profile">
-                <Typography variant="body2">Profile</Typography>
-              </MenuItem>
-
-              <MenuItem onClick={handleLogout}>
+              <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                 <Typography variant="body2" color="error">
                   Logout
                 </Typography>
@@ -183,39 +318,62 @@ const DashboardLayout = ({ toggleTheme, mode }) => {
 
       {/* Main Content */}
       <Box
+        component="main"
         sx={{
-          flex: 1,
-          mt: { xs: "64px", md: "64px" },
-          padding: { xs: "1rem", md: "2rem" },
-          marginLeft: { md: "240px" },
-          background: theme.palette.tertiary.main,
-          width: "100%",
-          overflowY: "auto",
+          flexGrow: 1,
+          pt: "64px",
+          ml: { md: "240px" },
+          minHeight: "100vh",
+          backgroundColor: theme.palette.background.default,
+          transition: "margin-left 0.3s ease",
         }}
       >
-        {user?.subscription?.status !== "active" && (
-          <Box
-            sx={{
-              background: "#FEE2E2",
-              color: "#B91C1C",
-              padding: "1rem",
-              borderRadius: "8px",
-              marginBottom: "1rem",
-              textAlign: "center",
-            }}
-          >
-            Your subscription is inactive.{" "}
-            <Button
-              variant="contained"
-              color="error"
-              href="/payment"
-              sx={{ marginLeft: "1rem" }}
+        <Box sx={{ p: { xs: 2, sm: 3 } }}>
+          {user?.subscription?.status !== "active" && (
+            <Paper
+              elevation={0}
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(239, 68, 68, 0.15)"
+                    : "#FEF2F2",
+                color: theme.palette.error.main,
+                p: 2,
+                borderRadius: 1,
+                mb: 3,
+                border: `1px solid ${theme.palette.error.main}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 2,
+              }}
             >
-              Subscribe Now
-            </Button>
-          </Box>
-        )}
-        <Outlet />
+              <Typography variant="body2" fontWeight={500}>
+                Your account is on the free plan. Upgrade to access all premium
+                features.
+              </Typography>
+              <Button
+                variant="contained"
+                color="error"
+                component={Link}
+                to="/payment"
+                size="small"
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 500,
+                  boxShadow: "none",
+                  "&:hover": {
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                Upgrade Now
+              </Button>
+            </Paper>
+          )}
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

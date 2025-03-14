@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 import {
   Dialog,
   DialogTitle,
@@ -8,13 +8,22 @@ import {
   Typography,
 } from "@mui/material";
 
-const PaymentSuccessModal = ({ open }) => {
+const PaymentSuccessModal = ({ open, onClose }) => {
   const handleReload = () => {
     window.location.href = "/"; // Reload the current route
   };
 
   return (
-    <Dialog open={open} maxWidth="xs" fullWidth>
+    <Dialog
+      open={open}
+      maxWidth="xs"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 1,
+        },
+      }}
+    >
       <DialogTitle>Payment Successful!</DialogTitle>
       <DialogContent>
         <Typography>

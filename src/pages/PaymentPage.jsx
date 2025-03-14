@@ -1,81 +1,25 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import {
   Box,
   Typography,
   Button,
-  Card,
-  CardContent,
+  Paper,
   List,
   ListItem,
   CircularProgress,
   Alert,
   useTheme,
+  Divider,
 } from "@mui/material";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import PaymentSuccessModal from "../components/PaymentSuccessModal";
 import { useNavigate } from "react-router-dom";
-
-const SubscriptionCard = ({ title, description, children, mode }) => {
-  const theme = useTheme();
-  return (
-    <Card
-      sx={{
-        maxWidth: "500px",
-        width: "100%",
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        background: theme.palette.secondary.main,
-        padding: { sm: "0.5", lg: "1.5rem" },
-      }}
-    >
-      <CardContent>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <img
-            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
-            alt="Logo"
-            style={{
-              width: "50%",
-              height: "50px",
-              objectFit: "cover",
-              marginBottom: "1rem",
-            }}
-          />
-        </Box>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          textAlign="center"
-          gutterBottom
-        >
-          {title}
-        </Typography>
-        {description && (
-          <Typography variant="body2" textAlign="center" gutterBottom>
-            {description}
-          </Typography>
-        )}
-        {children}
-      </CardContent>
-    </Card>
-  );
-};
-
-const LoadingScreen = () => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-      padding: "2rem",
-    }}
-  >
-    <CircularProgress />
-  </Box>
-);
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 const PaymentPage = ({ mode }) => {
   const stripe = useStripe();
@@ -150,28 +94,42 @@ const PaymentPage = ({ mode }) => {
     style: {
       base: {
         fontSize: "16px",
-        fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
+        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
         fontWeight: "400",
-        color: mode === "dark" ? "#E0E0E0" : "#424770", // Light grey for dark, dark blue-grey for light
+        color: theme.palette.mode === "dark" ? "#E0E0E0" : "#424770",
         "::placeholder": {
-          color: mode === "dark" ? "#757575" : "#aab7c4", // Medium grey for dark, light grey for light
+          color: theme.palette.mode === "dark" ? "#757575" : "#aab7c4",
         },
         lineHeight: "1.5",
-        padding: "4px", // Slight padding for breathing room
       },
       invalid: {
-        color: mode === "dark" ? "#FF6B6B" : "#9e2146", // Soft red for dark, darker red for light
-        iconColor: mode === "dark" ? "#FF6B6B" : "#9e2146", // Match icon to text
-      },
-      complete: {
-        color: mode === "dark" ? "#66BB6A" : "#2E7D32", // Soft green for dark, darker green for light
-        iconColor: mode === "dark" ? "#66BB6A" : "#2E7D32", // Match icon to text
+        color: theme.palette.error.main,
+        iconColor: theme.palette.error.main,
       },
     },
-    hidePostalCode: true, // Optional: hide postal code if not needed
+    hidePostalCode: true,
   };
 
-  if (isAuthentication) return <LoadingScreen />;
+  if (isAuthentication) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          backgroundColor: theme.palette.background.default,
+          backgroundImage:
+            mode === "dark"
+              ? "linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px)"
+              : "linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (user?.subscription?.status === "active") {
     return (
@@ -181,42 +139,113 @@ const PaymentPage = ({ mode }) => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          padding: "2rem",
+          padding: { xs: "1rem", sm: "2rem" },
+          backgroundColor: theme.palette.background.default,
+          backgroundImage:
+            mode === "dark"
+              ? "linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px)"
+              : "linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
         }}
       >
-        <SubscriptionCard
-          mode={mode}
-          title="You are a Pro User!"
-          description={`Your subscription is active until ${new Date(
-            user.subscription.currentPeriodEnd
-          ).toLocaleDateString()}`}
+        <Paper
+          elevation={4}
+          sx={{
+            maxWidth: "450px",
+            width: "100%",
+            overflow: "hidden",
+            borderRadius: "8px",
+            backgroundColor: theme.palette.background.paper,
+            transition: "transform 0.3s ease-in-out",
+            "&:hover": {
+              transform: "translateY(-5px)",
+            },
+          }}
         >
-          <Button
-            variant="contained"
-            color="error"
-            fullWidth
-            sx={{ marginTop: "1rem", fontWeight: "bold" }}
-            onClick={handleCancelSubscription}
-            disabled={cancelDisabled}
-          >
-            {cancelDisabled ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Cancel Subscription"
-            )}
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            fullWidth
+          <Box
             sx={{
-              marginTop: "1rem",
+              padding: "2rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
             }}
-            onClick={() => navigate("/")}
           >
-            Go to Home
-          </Button>
-        </SubscriptionCard>
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+              <img
+                src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
+                alt="Logo"
+                style={{
+                  width: "180px",
+                  height: "54px",
+                  objectFit: "cover",
+                }}
+              />
+            </Box>
+
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="h5" fontWeight={500} gutterBottom>
+                Pro Subscription
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Your subscription is active until{" "}
+                <strong>
+                  {new Date(
+                    user.subscription.currentPeriodEnd
+                  ).toLocaleDateString()}
+                </strong>
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+                mb: 1,
+              }}
+            >
+              <CheckCircleOutlineIcon color="success" />
+              <Typography variant="body1" fontWeight={500}>
+                All Premium Features Unlocked
+              </Typography>
+            </Box>
+
+            <Button
+              variant="contained"
+              color="error"
+              fullWidth
+              sx={{ mt: 1, py: 1.5, fontWeight: 500 }}
+              onClick={handleCancelSubscription}
+              disabled={cancelDisabled}
+            >
+              {cancelDisabled ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Cancel Subscription"
+              )}
+            </Button>
+
+            <Divider sx={{ my: 1 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: theme.palette.text.secondary }}
+              >
+                OR
+              </Typography>
+            </Divider>
+
+            <Button
+              variant="outlined"
+              color="primary"
+              fullWidth
+              sx={{ py: 1.5, fontWeight: 500 }}
+              onClick={() => navigate("/")}
+            >
+              Return to Dashboard
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     );
   }
@@ -228,89 +257,159 @@ const PaymentPage = ({ mode }) => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        padding: "2rem",
+        padding: { xs: "1rem", sm: "2rem" },
+        backgroundColor: theme.palette.background.default,
+        backgroundImage:
+          mode === "dark"
+            ? "linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px)"
+            : "linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
       }}
     >
-      <SubscriptionCard
-        mode={mode}
-        title="Subscribe to Pro Plan"
-        description="Unlock premium features!"
+      <Paper
+        elevation={4}
+        sx={{
+          maxWidth: "450px",
+          width: "100%",
+          overflow: "hidden",
+          borderRadius: "8px",
+          backgroundColor: theme.palette.background.paper,
+          transition: "transform 0.3s ease-in-out",
+          "&:hover": {
+            transform: "translateY(-5px)",
+          },
+        }}
       >
-        <List>
-          <ListItem>✔ Unlimited bankroll management</ListItem>
-          <ListItem>✔ Unlimited bet management</ListItem>
-          <ListItem>✔ Advanced analytics</ListItem>
-        </List>
-        <Typography
-          variant="h6"
-          textAlign="center"
-          fontWeight="bold"
-          sx={{ margin: "1rem 0" }}
+        <Box
+          sx={{
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
         >
-          $19.99/month
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Box
-            sx={{
-              border:
-                mode === "dark"
-                  ? "1px solid rgba(255, 255, 255, 0.2)"
-                  : "1px solid #ccc", // Light grey border for light, subtle white for dark
-              borderRadius: "8px",
-              padding: "0.75rem", // Slightly more padding for comfort
-              marginBottom: "1rem",
-              backgroundColor:
-                mode === "dark"
-                  ? "" // Dark grey for dark mode
-                  : "#f9f9f9", // Light grey for light mode
-              boxShadow:
-                mode === "dark"
-                  ? "0 2px 4px rgba(0, 0, 0, 0.3)"
-                  : "0 2px 4px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
-              "&:hover": {
-                borderColor:
-                  mode === "dark" ? "rgba(255, 255, 255, 0.4)" : "#aaa", // Slightly brighter on hover
-              },
-              transition: "border-color 0.2s ease-in-out", // Smooth transition for hover
-            }}
-          >
-            <CardElement
-              options={stripeElementStyle}
-              onChange={handleInputChange}
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+            <img
+              src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
+              alt="Logo"
+              style={{
+                width: "180px",
+                height: "54px",
+                objectFit: "cover",
+              }}
             />
           </Box>
-          {inputError && (
-            <Alert severity="error" sx={{ marginBottom: "1rem" }}>
-              {inputError}
-            </Alert>
-          )}
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ padding: "0.75rem", fontWeight: "bold" }}
-            disabled={loading}
+
+          <Box sx={{ textAlign: "center" }}>
+            <Typography variant="h5" fontWeight={500} gutterBottom>
+              Subscribe to Pro Plan
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Unlock premium features and enhance your experience
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: "8px",
+              padding: "1rem",
+            }}
           >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Pay $19.99"
+            <List disablePadding>
+              <ListItem sx={{ py: 0.75 }}>
+                <Typography variant="body2">
+                  ✓ Unlimited bankroll management
+                </Typography>
+              </ListItem>
+              <ListItem sx={{ py: 0.75 }}>
+                <Typography variant="body2">
+                  ✓ Unlimited bet management
+                </Typography>
+              </ListItem>
+              <ListItem sx={{ py: 0.75 }}>
+                <Typography variant="body2">✓ Advanced analytics</Typography>
+              </ListItem>
+            </List>
+          </Box>
+
+          <Typography
+            variant="h6"
+            textAlign="center"
+            fontWeight="bold"
+            sx={{ margin: "0.5rem 0" }}
+          >
+            $19.99/month
+          </Typography>
+
+          <form onSubmit={handleSubmit}>
+            <Box
+              sx={{
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "8px",
+                padding: "0.75rem",
+                marginBottom: "1rem",
+                "&:focus-within": {
+                  borderColor: theme.palette.primary.main,
+                },
+              }}
+            >
+              <CardElement
+                options={stripeElementStyle}
+                onChange={handleInputChange}
+              />
+            </Box>
+            {inputError && (
+              <Alert severity="error" sx={{ marginBottom: "1rem" }}>
+                {inputError}
+              </Alert>
             )}
-          </Button>
-        </form>
-        <Button
-          variant="contained"
-          color="secondary"
-          fullWidth
-          sx={{
-            marginTop: "1rem",
-          }}
-          onClick={() => navigate("/ranking")}
-        >
-          Continue with Current Plan
-        </Button>
-      </SubscriptionCard>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ py: 1.5, fontWeight: 500 }}
+              disabled={loading}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Subscribe Now"
+              )}
+            </Button>
+          </form>
+
+          <Divider sx={{ my: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              OR
+            </Typography>
+          </Divider>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              Not ready to upgrade?{" "}
+              <Button
+                variant="text"
+                color="primary"
+                onClick={() => navigate("/ranking")}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 500,
+                  p: 0,
+                  minWidth: "auto",
+                  verticalAlign: "baseline",
+                }}
+              >
+                Continue with Free Plan
+              </Button>
+            </Typography>
+          </Box>
+        </Box>
+      </Paper>
       <PaymentSuccessModal
         open={successModalOpen}
         onClose={() => setSuccessModalOpen(false)}

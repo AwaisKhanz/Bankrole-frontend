@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   TextField,
@@ -7,6 +9,16 @@ import {
   Box,
   useTheme,
   CircularProgress,
+  Paper,
+  Grid,
+  Divider,
+  Alert,
+  Card,
+  CardContent,
+  Stack,
+  IconButton,
+  InputAdornment,
+  Chip,
 } from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +26,15 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import api from "../services/api";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { Card, CardContent, Alert } from "@mui/material";
-import { Divider } from "@mui/material"; // Add Divider for separation
+import {
+  Visibility,
+  VisibilityOff,
+  Person,
+  Email,
+  Lock,
+  CreditCard,
+  Badge,
+} from "@mui/icons-material";
 
 // Schema for profile update
 const profileSchema = z.object({
@@ -35,6 +54,7 @@ export default function Profile({ mode }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
+  const [showPassword, setShowPassword] = useState(false);
 
   const stripe = useStripe();
   const elements = useElements();
@@ -87,14 +107,14 @@ export default function Profile({ mode }) {
         updateData.password = data.password;
       }
 
-      const response = await api.put("/auth/profile", updateData);
-      toast.success("Profile updated successful!");
-      setLoading(false);
+      await api.put("/auth/profile", updateData);
+      toast.success("Profile updated successfully!");
       reset({ ...data, password: "" });
     } catch (error) {
-      setLoading(false);
-      toast.error(error || "Please fix input errors before submitting.");
+      toast.error(error?.response?.data?.message || "Failed to update profile");
       console.error("Error updating profile:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +150,10 @@ export default function Profile({ mode }) {
     }
   };
 
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   if (!stripe || !elements) {
     return (
       <Box
@@ -137,7 +161,8 @@ export default function Profile({ mode }) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100vh",
+          height: "100%",
+          minHeight: "200px",
         }}
       >
         <CircularProgress />
@@ -145,242 +170,374 @@ export default function Profile({ mode }) {
     );
   }
 
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-        minHeight: "100%",
-        padding: "1rem",
-        color: mode === "dark" ? "white" : "black",
-      }}
-    >
-      <Box
-        sx={{
-          maxWidth: "550px",
-          width: "100%",
-          padding: "2rem",
-          borderRadius: "12px",
-          backgroundColor: theme.palette.tertiary.main,
-          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          textAlign="center"
-          gutterBottom
-        >
-          Update Profile
-        </Typography>
-        <Typography
-          variant="body2"
-          textAlign="center"
-          gutterBottom
-          sx={{ marginBottom: "1rem" }}
-        >
-          Modify your account details below.
-        </Typography>
+  const formatExpiryDate = (month, year) => {
+    return `${month.toString().padStart(2, "0")}/${year.toString().slice(-2)}`;
+  };
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
-          style={{ marginTop: "2rem" }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            textAlign="center"
-            sx={{ marginBottom: "1rem" }}
-          >
-            Account Details
-          </Typography>
-          <TextField
-            {...register("username")}
-            label="Username"
-            variant="outlined"
-            fullWidth
-            error={!!errors.username}
-            helperText={errors.username?.message}
-          />
-          <TextField
-            {...register("email")}
-            label="Email"
-            variant="outlined"
-            fullWidth
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
-          <TextField
-            {...register("password")}
-            label="New Password (optional)"
-            type="password"
-            variant="outlined"
-            fullWidth
-            error={!!errors.password}
-            helperText={
-              errors.password?.message || "Leave blank to keep current password"
-            }
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="secondary"
-            fullWidth
-            disabled={loading}
+  const getCardBrandIcon = (brand) => {
+    // You could replace this with actual card brand icons
+    return <CreditCard />;
+  };
+
+  return (
+    <Box>
+      <Typography variant="h4" fontWeight={600} gutterBottom>
+        My Profile
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        Manage your account settings and payment information
+      </Typography>
+
+      <Grid container spacing={3}>
+        {/* Account Details Section */}
+        <Grid item xs={12} md={6}>
+          <Paper
+            elevation={0}
             sx={{
-              marginTop: "1rem",
-              padding: "0.75rem",
-              fontWeight: "bold",
-              fontSize: "1rem",
+              p: 3,
+              height: "100%",
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Update Account"
-            )}
-          </Button>
-        </form>
-
-        <Box className="flex flex-col gap-4" sx={{ marginTop: "2rem" }}>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            textAlign="center"
-            sx={{ marginBottom: "1rem" }}
-          >
-            Membership Details
-          </Typography>
-          {user?.subscription?.status ? (
-            <Box>
-              <Typography>
-                Status:{" "}
-                <span style={{ textTransform: "capitalize" }}>
-                  {user.subscription.status}
-                </span>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+              <Badge sx={{ color: theme.palette.primary.main, mr: 1.5 }} />
+              <Typography variant="h6" fontWeight={600}>
+                Account Details
               </Typography>
-              {user.subscription.currentPeriodEnd && (
-                <Typography>
-                  Expires:{" "}
-                  {new Date(
-                    user.subscription.currentPeriodEnd
-                  ).toLocaleDateString()}
-                </Typography>
-              )}
             </Box>
-          ) : (
-            <Typography>No active membership.</Typography>
-          )}
-        </Box>
 
-        <Box className="flex flex-col gap-4" sx={{ marginTop: "2rem" }}>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            textAlign="center"
-            sx={{ marginBottom: "1rem" }}
-          >
-            Payment Card
-          </Typography>
-          {paymentMethod ? (
-            <Card
+            <Divider sx={{ mb: 3 }} />
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack spacing={2.5}>
+                <TextField
+                  {...register("username")}
+                  label="Username"
+                  variant="outlined"
+                  fullWidth
+                  error={!!errors.username}
+                  helperText={errors.username?.message}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person fontSize="small" color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  {...register("email")}
+                  label="Email"
+                  variant="outlined"
+                  fullWidth
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email fontSize="small" color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  {...register("password")}
+                  label="New Password (optional)"
+                  type={showPassword ? "text" : "password"}
+                  variant="outlined"
+                  fullWidth
+                  error={!!errors.password}
+                  helperText={
+                    errors.password?.message ||
+                    "Leave blank to keep current password"
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock fontSize="small" color="action" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          edge="end"
+                          size="small"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  disabled={loading}
+                  sx={{
+                    mt: 1,
+                    py: 1.25,
+                    fontWeight: 500,
+                  }}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Update Account"
+                  )}
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+        </Grid>
+
+        {/* Membership and Payment Section */}
+        <Grid item xs={12} md={6}>
+          <Stack spacing={3} sx={{ height: "100%" }}>
+            {/* Membership Details */}
+            <Paper
+              elevation={0}
               sx={{
-                marginBottom: "1rem",
-                backgroundColor: theme.palette.secondary.main,
+                p: 3,
+                borderRadius: 1,
+                border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              <CardContent>
-                <Typography>
-                  Current Card: {paymentMethod.brand.toUpperCase()} ending in{" "}
-                  {paymentMethod.last4}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                <CreditCard
+                  sx={{ color: theme.palette.primary.main, mr: 1.5 }}
+                />
+                <Typography variant="h6" fontWeight={600}>
+                  Membership Details
                 </Typography>
-                <Typography>
-                  Expires: {paymentMethod.expMonth}/{paymentMethod.expYear}
-                </Typography>
-              </CardContent>
-            </Card>
-          ) : (
-            <Typography>No payment card on file.</Typography>
-          )}
-          <Box
-            sx={{
-              border:
-                mode === "dark"
-                  ? "1px solid rgba(255, 255, 255, 0.2)"
-                  : "1px solid #ccc", // Light grey border for light, subtle white for dark
-              borderRadius: "8px",
-              padding: "0.75rem", // Slightly more padding for comfort
-              marginBottom: "1rem",
-              backgroundColor:
-                mode === "dark"
-                  ? "" // Dark grey for dark mode
-                  : "#f9f9f9", // Light grey for light mode
-              boxShadow:
-                mode === "dark"
-                  ? "0 2px 4px rgba(0, 0, 0, 0.3)"
-                  : "0 2px 4px rgba(0, 0, 0, 0.05)", // Subtle shadow for depth
-              "&:hover": {
-                borderColor:
-                  mode === "dark" ? "rgba(255, 255, 255, 0.4)" : "#aaa", // Slightly brighter on hover
-              },
-              transition: "border-color 0.2s ease-in-out", // Smooth transition for hover
-            }}
-          >
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: "16px",
-                    fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
-                    fontWeight: "400",
-                    color: mode === "dark" ? "#E0E0E0" : "#424770", // Light grey for dark, dark blue-grey for light
-                    "::placeholder": {
-                      color: mode === "dark" ? "#757575" : "#aab7c4", // Medium grey for dark, light grey for light
-                    },
-                    lineHeight: "1.5",
-                    padding: "4px", // Slight padding for breathing room
-                  },
-                  invalid: {
-                    color: mode === "dark" ? "#FF6B6B" : "#9e2146", // Soft red for dark, darker red for light
-                    iconColor: mode === "dark" ? "#FF6B6B" : "#9e2146", // Match icon to text
-                  },
-                  complete: {
-                    color: mode === "dark" ? "#66BB6A" : "#2E7D32", // Soft green for dark, darker green for light
-                    iconColor: mode === "dark" ? "#66BB6A" : "#2E7D32", // Match icon to text
-                  },
-                },
-                hidePostalCode: true, // Optional: hide postal code if not needed
+              </Box>
+
+              <Divider sx={{ mb: 3 }} />
+
+              <Box sx={{ mb: 2 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="text.secondary">
+                      Status
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Chip
+                      label={
+                        user?.subscription?.status === "active"
+                          ? "Active"
+                          : "Inactive"
+                      }
+                      size="small"
+                      color={
+                        user?.subscription?.status === "active"
+                          ? "success"
+                          : "default"
+                      }
+                      sx={{
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={4}>
+                    <Typography variant="body2" color="text.secondary">
+                      Plan
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography variant="body2" fontWeight={500}>
+                      {user?.subscription?.status === "active"
+                        ? "Pro Plan"
+                        : "Free Plan"}
+                    </Typography>
+                  </Grid>
+
+                  {user?.subscription?.currentPeriodEnd && (
+                    <>
+                      <Grid item xs={4}>
+                        <Typography variant="body2" color="text.secondary">
+                          Renewal Date
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant="body2" fontWeight={500}>
+                          {new Date(
+                            user.subscription.currentPeriodEnd
+                          ).toLocaleDateString()}
+                        </Typography>
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </Box>
+
+              {user?.subscription?.status !== "active" && (
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  href="/payment"
+                  sx={{
+                    mt: 2,
+                    py: 1.25,
+                    fontWeight: 500,
+                    textTransform: "none",
+                  }}
+                >
+                  Upgrade to Pro
+                </Button>
+              )}
+            </Paper>
+
+            {/* Payment Card */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 1,
+                border: `1px solid ${theme.palette.divider}`,
+                flexGrow: 1,
               }}
-              onChange={(event) =>
-                setCardInputError(event.error ? event.error.message : "")
-              }
-            />
-          </Box>
-          {cardInputError && (
-            <Alert severity="error" sx={{ marginBottom: "1rem" }}>
-              {cardInputError}
-            </Alert>
-          )}
-          <Button
-            variant="contained"
-            color="secondary"
-            fullWidth
-            sx={{ padding: "0.75rem", fontWeight: "bold" }}
-            onClick={handleCardUpdate}
-            disabled={cardUpdateLoading || !stripe || !elements}
-          >
-            {cardUpdateLoading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              "Update Card"
-            )}
-          </Button>
-        </Box>
-      </Box>
+            >
+              <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                <CreditCard
+                  sx={{ color: theme.palette.primary.main, mr: 1.5 }}
+                />
+                <Typography variant="h6" fontWeight={600}>
+                  Payment Method
+                </Typography>
+              </Box>
+
+              <Divider sx={{ mb: 3 }} />
+
+              {paymentMethod ? (
+                <Card
+                  variant="outlined"
+                  sx={{
+                    mb: 3,
+                    borderRadius: 1,
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.05)"
+                        : "rgba(0, 0, 0, 0.02)",
+                  }}
+                >
+                  <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      {getCardBrandIcon(paymentMethod.brand)}
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={600}
+                        sx={{ ml: 1, textTransform: "capitalize" }}
+                      >
+                        {paymentMethod.brand} •••• {paymentMethod.last4}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      Expires:{" "}
+                      {formatExpiryDate(
+                        paymentMethod.expMonth,
+                        paymentMethod.expYear
+                      )}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  No payment card on file
+                </Alert>
+              )}
+
+              <Typography variant="subtitle2" fontWeight={500} gutterBottom>
+                Update Payment Card
+              </Typography>
+
+              <Box
+                sx={{
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: 1,
+                  p: 2,
+                  mb: 2,
+                  backgroundColor: theme.palette.background.paper,
+                  transition: "border-color 0.2s ease-in-out",
+                  "&:hover": {
+                    borderColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.3)"
+                        : "rgba(0, 0, 0, 0.3)",
+                  },
+                  "&:focus-within": {
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: `0 0 0 2px ${theme.palette.primary.main}25`,
+                  },
+                }}
+              >
+                <CardElement
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: "16px",
+                        fontFamily: "Roboto, Open Sans, Segoe UI, sans-serif",
+                        fontWeight: "400",
+                        color: theme.palette.text.primary,
+                        "::placeholder": {
+                          color: theme.palette.text.secondary,
+                        },
+                        lineHeight: "1.5",
+                      },
+                      invalid: {
+                        color: theme.palette.error.main,
+                        iconColor: theme.palette.error.main,
+                      },
+                      complete: {
+                        color: theme.palette.success.main,
+                        iconColor: theme.palette.success.main,
+                      },
+                    },
+                    hidePostalCode: true,
+                  }}
+                  onChange={(event) =>
+                    setCardInputError(event.error ? event.error.message : "")
+                  }
+                />
+              </Box>
+
+              {cardInputError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {cardInputError}
+                </Alert>
+              )}
+
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handleCardUpdate}
+                disabled={cardUpdateLoading || !stripe || !elements}
+                sx={{
+                  py: 1.25,
+                  fontWeight: 500,
+                }}
+              >
+                {cardUpdateLoading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Update Card"
+                )}
+              </Button>
+            </Paper>
+          </Stack>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

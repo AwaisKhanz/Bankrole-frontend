@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import {
@@ -9,22 +11,36 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Paper,
+  Button,
+  Stack,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import api from "../services/api";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import FilterListIcon from "@mui/icons-material/FilterList";
 
 const CalendarPage = ({ mode }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [dailyData, setDailyData] = useState({});
   const [filter, setFilter] = useState("all"); // Default filter: all bankrolls
   const [bankrolls, setBankrolls] = useState([]); // Store raw bankroll data
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const theme = useTheme();
 
   const fetchBankrollData = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const response = await api.get("/bankrolls");
       setBankrolls(response.data); // Store all bankrolls
     } catch (error) {
       console.error("Failed to fetch bankroll data:", error);
+      setError("Failed to fetch bankroll data. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,7 +56,7 @@ const CalendarPage = ({ mode }) => {
     });
 
     const dailyProfits = filteredBankrolls.reduce((acc, bankroll) => {
-      bankroll.bets.forEach((bet) => {
+      bankroll.bets?.forEach((bet) => {
         const date = new Date(bet.date);
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
           .toString()
@@ -56,7 +72,7 @@ const CalendarPage = ({ mode }) => {
         if (!acc[formattedDate]) {
           acc[formattedDate] = {
             profit: 0,
-            symbol: bankroll.currency.symbol,
+            symbol: bankroll.currency?.symbol || "$",
           };
         }
         acc[formattedDate].profit += profit;
@@ -75,132 +91,187 @@ const CalendarPage = ({ mode }) => {
     const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-    return dailyData[formattedDate] || { profit: 0, symbol: "" };
+    return dailyData[formattedDate] || { profit: 0, symbol: "$" };
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+
+    if (error) {
+      return (
+        <Alert
+          severity="error"
+          sx={{ mt: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={fetchBankrollData}>
+              Retry
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
+      );
+    }
+
+    return (
+      <Calendar
+        value={currentDate}
+        onClickDay={null} // Disable date selection
+        onActiveStartDateChange={({ activeStartDate }) =>
+          setCurrentDate(activeStartDate)
+        }
+        tileContent={({ date, view }) => {
+          const dailyProfit = getDailyProfit(date);
+
+          if (view === "month" && dailyProfit.profit !== 0) {
+            return (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  backgroundColor:
+                    dailyProfit.profit > 0
+                      ? theme.palette.mode === "dark"
+                        ? "rgba(46, 125, 50, 0.2)"
+                        : "rgba(46, 125, 50, 0.1)"
+                      : theme.palette.mode === "dark"
+                      ? "rgba(211, 47, 47, 0.2)"
+                      : "rgba(211, 47, 47, 0.1)",
+                  borderRadius: "4px",
+                  padding: { xs: "4px", md: "8px" },
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                  }}
+                >
+                  {date.getDate()}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.65rem",
+                    mb: 0.5,
+                  }}
+                >
+                  {date.toLocaleDateString("en-US", { weekday: "short" })}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 600,
+                    color:
+                      dailyProfit.profit > 0
+                        ? theme.palette.success.main
+                        : theme.palette.error.main,
+                  }}
+                >
+                  {dailyProfit.symbol}
+                  {Math.abs(dailyProfit.profit).toFixed(2)}
+                </Typography>
+              </Box>
+            );
+          }
+          return view === "month" ? (
+            <Typography
+              sx={{
+                padding: { xs: "4px", md: "8px" },
+                fontWeight: 500,
+              }}
+            >
+              {date.getDate()}
+            </Typography>
+          ) : null;
+        }}
+        tileClassName={({ date }) => {
+          const { profit } = getDailyProfit(date);
+          if (profit > 0) return "profit-day";
+          if (profit < 0) return "loss-day";
+          return "neutral-day";
+        }}
+        className={`react-calendar ${mode === "dark" ? "dark" : "light"}`}
+      />
+    );
   };
 
   return (
-    <Box
-      sx={{
-        padding: "1rem",
-        background: mode === "dark" ? "#1e293b" : "#ffffff",
-        color: mode === "dark" ? "#ffffff" : "#000000",
-      }}
-    >
-      <Typography
-        variant="h4"
+    <Box>
+      <Paper
+        elevation={0}
         sx={{
-          marginBottom: "1.5rem",
-          fontWeight: "bold",
-          textAlign: "center",
+          p: 3,
+          mb: 3,
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
-        Calendar
-      </Typography>
-
-      {/* Filter Dropdown */}
-      <FormControl sx={{ mb: 4, minWidth: 200, maxWidth: 300, mx: "auto" }}>
-        <InputLabel>Filter Bankrolls</InputLabel>
-        <Select
-          value={filter}
-          onChange={handleFilterChange}
-          label="Filter Bankrolls"
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={2}
         >
-          <MenuItem value="all">All Bankrolls</MenuItem>
-          <MenuItem value="public">Public Bankroll</MenuItem>
-          <MenuItem value="private">Private Bankroll</MenuItem>
-        </Select>
-      </FormControl>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <CalendarMonthIcon
+              sx={{
+                color: theme.palette.primary.main,
+                mr: 1.5,
+                fontSize: "1.75rem",
+              }}
+            />
+            <Box>
+              <Typography variant="h4" fontWeight={600} gutterBottom>
+                Betting Calendar
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Track your daily betting performance across all bankrolls
+              </Typography>
+            </Box>
+          </Box>
 
-      <Box
+          <Box sx={{ display: "flex", alignItems: "center", minWidth: 200 }}>
+            <FilterListIcon
+              sx={{ mr: 1, color: theme.palette.text.secondary }}
+            />
+            <FormControl fullWidth size="small">
+              <InputLabel>Filter Bankrolls</InputLabel>
+              <Select
+                value={filter}
+                onChange={handleFilterChange}
+                label="Filter Bankrolls"
+              >
+                <MenuItem value="all">All Bankrolls</MenuItem>
+                <MenuItem value="public">Public Bankrolls</MenuItem>
+                <MenuItem value="private">Private Bankrolls</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Stack>
+      </Paper>
+
+      <Paper
+        elevation={0}
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "8px",
-          width: "100%",
-          margin: "0 auto",
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
         }}
       >
-        <Calendar
-          value={currentDate}
-          onClickDay={null} // Disable date selection
-          onActiveStartDateChange={({ activeStartDate }) =>
-            setCurrentDate(activeStartDate)
-          }
-          tileContent={({ date, view }) => {
-            const dailyProfit = getDailyProfit(date);
-
-            if (view === "month" && dailyProfit.profit !== 0) {
-              return (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    backgroundColor:
-                      dailyProfit.profit > 0
-                        ? "rgba(76, 175, 80, 0.2)"
-                        : "rgba(244, 67, 54, 0.2)",
-                    borderRadius: "8px",
-                    boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    padding: { xs: "4px", md: "10px" },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: "bold",
-                      color: mode === "dark" ? "white" : "#0A50A0",
-                    }}
-                  >
-                    {date.getDate()}{" "}
-                    {date.toLocaleString("default", { month: "short" })}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#777", marginBottom: "4px" }}
-                  >
-                    {date.toLocaleDateString("en-US", { weekday: "long" })}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontWeight: "bold",
-                      color:
-                        dailyProfit.profit > 0
-                          ? mode === "dark"
-                            ? "white"
-                            : "#0A50A0"
-                          : "#FF5252",
-                    }}
-                  >
-                    {dailyProfit.symbol}
-                    {dailyProfit.profit.toFixed(2)}
-                  </Typography>
-                </Box>
-              );
-            }
-            return view === "month" ? (
-              <Typography
-                sx={{
-                  padding: { xs: "4px", md: "10px" },
-                }}
-              >
-                {date.getDate()}
-              </Typography>
-            ) : null;
-          }}
-          tileClassName={({ date }) => {
-            const { profit } = getDailyProfit(date);
-            if (profit > 0) return "profit-day";
-            if (profit < 0) return "loss-day";
-            return "neutral-day";
-          }}
-          className={`react-calendar ${mode === "dark" ? "dark" : "light"}`}
-        />
-      </Box>
+        {renderContent()}
+      </Paper>
     </Box>
   );
 };

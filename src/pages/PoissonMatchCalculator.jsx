@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   TextField,
@@ -8,17 +10,35 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   useTheme,
+  Paper,
+  Divider,
+  Alert,
+  InputAdornment,
+  IconButton,
+  Tooltip,
+  Grid,
+  Chip,
 } from "@mui/material";
 import Chart from "chart.js/auto";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 
+// Poisson probability calculation function
 function poissonProbability(lambda, x) {
   const logP = -lambda + x * Math.log(lambda) - logFactorial(x);
   return Math.exp(logP);
 }
 
+// Helper function for factorial calculation
 function logFactorial(n) {
   if (n === 0 || n === 1) return 0;
   let sum = 0;
@@ -28,17 +48,18 @@ function logFactorial(n) {
   return sum;
 }
 
+// Calculate match probabilities based on expected goals
 function calculateMatchProbabilities(lambdaTeamA, lambdaTeamB) {
   const maxGoals = 5;
-  let probabilitiesA = [];
-  let probabilitiesB = [];
+  const probabilitiesA = [];
+  const probabilitiesB = [];
 
   for (let i = 0; i <= maxGoals; i++) {
     probabilitiesA[i] = poissonProbability(lambdaTeamA, i);
     probabilitiesB[i] = poissonProbability(lambdaTeamB, i);
   }
 
-  let resultMatrix = Array(maxGoals + 1)
+  const resultMatrix = Array(maxGoals + 1)
     .fill()
     .map(() => Array(maxGoals + 1).fill(0));
 
@@ -67,36 +88,59 @@ function calculateMatchProbabilities(lambdaTeamA, lambdaTeamB) {
     winB = (winB / total) * 100;
   }
 
+  // Calculate most likely scorelines
+  const scorelines = [];
+  for (let i = 0; i <= maxGoals; i++) {
+    for (let j = 0; j <= maxGoals; j++) {
+      scorelines.push({
+        scoreA: i,
+        scoreB: j,
+        probability: resultMatrix[i][j] * 100,
+      });
+    }
+  }
+
+  // Sort by probability (descending)
+  scorelines.sort((a, b) => b.probability - a.probability);
+
+  // Take top 3 most likely scorelines
+  const topScorelines = scorelines.slice(0, 3);
+
   return {
     winA: winA.toFixed(2),
     draw: draw.toFixed(2),
     winB: winB.toFixed(2),
     probabilitiesA,
     probabilitiesB,
+    topScorelines,
   };
 }
 
 const PoissonCalculator = ({ mode }) => {
   const [lambdaA, setLambdaA] = useState("");
   const [lambdaB, setLambdaB] = useState("");
+  const [teamAName, setTeamAName] = useState("Team A");
+  const [teamBName, setTeamBName] = useState("Team B");
   const [results, setResults] = useState(null);
+  const [error, setError] = useState("");
   const theme = useTheme();
-  const chartRef = React.useRef(null);
-  const chartInstanceRef = React.useRef(null);
+
+  const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
 
   // Chart configuration object
   const chartConfig = {
     light: {
-      textColor: "#333333",
-      gridColor: "rgba(0, 0, 0, 0.15)",
-      lineColors: ["#1976D2", "#D32F2F"],
-      backgroundColor: "#ffffff",
+      textColor: theme.palette.text.primary,
+      gridColor: theme.palette.divider,
+      lineColors: [theme.palette.primary.main, theme.palette.error.main],
+      backgroundColor: theme.palette.background.paper,
     },
     dark: {
-      textColor: "#ffffff",
-      gridColor: "rgba(255, 255, 255, 0.15)",
-      lineColors: ["#42A5F5", "#EF5350"],
-      backgroundColor: "#1e293b",
+      textColor: theme.palette.text.primary,
+      gridColor: theme.palette.divider,
+      lineColors: [theme.palette.primary.light, theme.palette.error.light],
+      backgroundColor: theme.palette.background.paper,
     },
   };
 
@@ -105,6 +149,8 @@ const PoissonCalculator = ({ mode }) => {
     if (savedState) {
       setLambdaA(savedState.lambdaA || "");
       setLambdaB(savedState.lambdaB || "");
+      setTeamAName(savedState.teamAName || "Team A");
+      setTeamBName(savedState.teamBName || "Team B");
       setResults(savedState.results || null);
     }
   }, []);
@@ -113,34 +159,37 @@ const PoissonCalculator = ({ mode }) => {
     const stateToSave = {
       lambdaA,
       lambdaB,
+      teamAName,
+      teamBName,
       results,
     };
     localStorage.setItem("poissonState", JSON.stringify(stateToSave));
 
-    if (results && !results.error && chartRef.current) {
+    if (results && !error && chartRef.current) {
       updateChart(results.probabilitiesA, results.probabilitiesB);
     }
-  }, [lambdaA, lambdaB, results, mode]); // Added 'mode' to dependencies
+  }, [lambdaA, lambdaB, teamAName, teamBName, results, error, mode]);
 
   const calculateProbabilities = () => {
-    const lambdaAValue = parseFloat(lambdaA);
-    const lambdaBValue = parseFloat(lambdaB);
+    setError("");
+    const lambdaAValue = Number.parseFloat(lambdaA);
+    const lambdaBValue = Number.parseFloat(lambdaB);
 
-    if (
-      isNaN(lambdaAValue) ||
-      isNaN(lambdaBValue) ||
-      lambdaAValue <= 0 ||
-      lambdaBValue <= 0
-    ) {
-      setResults({ error: "Please enter valid lambda values greater than 0!" });
+    if (isNaN(lambdaAValue) || isNaN(lambdaBValue)) {
+      setError("Please enter valid expected goals values");
+      setResults(null);
       return;
     }
 
-    if (lambdaAValue > 1000 || lambdaBValue > 1000) {
-      setResults({
-        error:
-          "Lambda values above 1000 are not practical for this calculator!",
-      });
+    if (lambdaAValue <= 0 || lambdaBValue <= 0) {
+      setError("Expected goals must be greater than 0");
+      setResults(null);
+      return;
+    }
+
+    if (lambdaAValue > 10 || lambdaBValue > 10) {
+      setError("Expected goals above 10 are not practical for this calculator");
+      setResults(null);
       return;
     }
 
@@ -154,11 +203,16 @@ const PoissonCalculator = ({ mode }) => {
   const clearFields = () => {
     setLambdaA("");
     setLambdaB("");
+    setTeamAName("Team A");
+    setTeamBName("Team B");
     setResults(null);
+    setError("");
+
     if (chartInstanceRef.current) {
       chartInstanceRef.current.destroy();
       chartInstanceRef.current = null;
     }
+
     localStorage.removeItem("poissonState");
   };
 
@@ -169,7 +223,7 @@ const PoissonCalculator = ({ mode }) => {
       chartInstanceRef.current.destroy();
     }
 
-    const isDarkMode = mode === "dark";
+    const isDarkMode = theme.palette.mode === "dark";
     const config = isDarkMode ? chartConfig.dark : chartConfig.light;
 
     chartInstanceRef.current = new Chart(ctx, {
@@ -178,22 +232,26 @@ const PoissonCalculator = ({ mode }) => {
         labels: [0, 1, 2, 3, 4, 5],
         datasets: [
           {
-            label: "Team A",
+            label: teamAName,
             data: probA.map((p) => (p * 100).toFixed(2)),
             borderColor: config.lineColors[0],
+            backgroundColor: `${config.lineColors[0]}20`,
             borderWidth: 2,
-            fill: false,
+            fill: true,
             pointBackgroundColor: config.lineColors[0],
-            pointRadius: 3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
           },
           {
-            label: "Team B",
+            label: teamBName,
             data: probB.map((p) => (p * 100).toFixed(2)),
             borderColor: config.lineColors[1],
+            backgroundColor: `${config.lineColors[1]}20`,
             borderWidth: 2,
-            fill: false,
+            fill: true,
             pointBackgroundColor: config.lineColors[1],
-            pointRadius: 3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
           },
         ],
       },
@@ -239,7 +297,22 @@ const PoissonCalculator = ({ mode }) => {
           legend: {
             labels: {
               color: config.textColor,
-              font: { size: 12 },
+              font: { size: 12, weight: "bold" },
+              usePointStyle: true,
+              pointStyle: "circle",
+            },
+            position: "top",
+          },
+          tooltip: {
+            backgroundColor: isDarkMode ? "#424242" : "#ffffff",
+            titleColor: isDarkMode ? "#ffffff" : "#212121",
+            bodyColor: isDarkMode ? "#ffffff" : "#212121",
+            borderColor: config.gridColor,
+            borderWidth: 1,
+            padding: 10,
+            displayColors: true,
+            callbacks: {
+              label: (context) => `${context.dataset.label}: ${context.raw}%`,
             },
           },
         },
@@ -250,152 +323,400 @@ const PoissonCalculator = ({ mode }) => {
         },
       },
     });
-
-    ctx.canvas.style.backgroundColor = config.backgroundColor;
   };
 
-  const backgroundColor = mode === "dark" ? "#1e293b" : "#ffffff";
-  const textColor = mode === "dark" ? "#ffffff" : "#000000";
-  const boxShadow =
-    mode === "dark"
-      ? "0px 4px 12px rgba(0, 0, 0, 0.2)"
-      : "0px 4px 12px rgba(0, 0, 0, 0.1)";
+  const getOddsFromProbability = (probability) => {
+    const prob = Number.parseFloat(probability) / 100;
+    if (prob <= 0 || prob >= 1) return "-";
+    const odds = (1 / prob).toFixed(2);
+    return odds;
+  };
 
   return (
-    <Box
-      sx={{
-        maxWidth: "700px",
-        margin: "50px auto",
-        padding: "30px",
-        backgroundColor: backgroundColor,
-        borderRadius: "12px",
-        boxShadow: boxShadow,
-        color: textColor,
-      }}
-    >
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        textAlign="center"
-        mb={3}
-        color={textColor}
+    <Box>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          mb: 3,
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+        }}
       >
-        Poisson Match Calculator
-      </Typography>
-
-      <TextField
-        label="Team A Expected Goals (λA)"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="number"
-        value={lambdaA}
-        onChange={(e) => setLambdaA(e.target.value)}
-        placeholder="e.g., 2.25"
-        inputProps={{ step: "0.01", min: "0", max: "1000" }}
-      />
-      <TextField
-        label="Team B Expected Goals (λB)"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="number"
-        value={lambdaB}
-        onChange={(e) => setLambdaB(e.target.value)}
-        placeholder="e.g., 2.16"
-        inputProps={{ step: "0.01", min: "0", max: "1000" }}
-      />
-
-      <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-        <Button
-          variant="contained"
-          color="secondary"
-          fullWidth
-          onClick={calculateProbabilities}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={2}
         >
-          Calculate
-        </Button>
-        <Button
-          variant="outlined"
-          color="error"
-          fullWidth
-          onClick={clearFields}
-          sx={{
-            borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
-            color: mode === "dark" ? "#FF5252" : "#FF5252",
-            "&:hover": {
-              borderColor: mode === "dark" ? "#FF5252" : "#FF5252",
-              backgroundColor:
-                mode === "dark"
-                  ? "rgba(255, 82, 82, 0.1)"
-                  : "rgba(255, 82, 82, 0.1)",
-            },
-          }}
-        >
-          Clear
-        </Button>
-      </Stack>
-
-      {results && (
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" fontWeight="bold" textAlign="center" mb={2}>
-            📊 Match Probabilities
-          </Typography>
-          {results.error ? (
-            <Typography color="error" textAlign="center">
-              {results.error}
-            </Typography>
-          ) : (
-            <>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ color: textColor }}>Outcome</TableCell>
-                    <TableCell sx={{ color: textColor }}>
-                      Probability (%)
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ color: textColor }}>Team A Wins</TableCell>
-                    <TableCell sx={{ color: textColor }}>
-                      {results.winA}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ color: textColor }}>Draw</TableCell>
-                    <TableCell sx={{ color: textColor }}>
-                      {results.draw}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ color: textColor }}>Team B Wins</TableCell>
-                    <TableCell sx={{ color: textColor }}>
-                      {results.winB}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                textAlign="center"
-                mt={4}
-                mb={2}
-              >
-                📈 Goal Distribution
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <CalculateIcon
+              sx={{
+                color: theme.palette.primary.main,
+                mr: 1.5,
+                fontSize: "1.75rem",
+              }}
+            />
+            <Box>
+              <Typography variant="h4" fontWeight={600} gutterBottom>
+                Poisson Match Calculator
               </Typography>
-              <Box
-                sx={{ maxWidth: "100%", overflowX: "auto", height: "250px" }}
-              >
-                <canvas ref={chartRef} width="400" height="200"></canvas>
+              <Typography variant="body2" color="text.secondary">
+                Calculate match outcome probabilities based on expected goals
+              </Typography>
+            </Box>
+          </Box>
+        </Stack>
+      </Paper>
+
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+          overflow: "hidden",
+          mb: 3,
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                  <Typography variant="subtitle2" fontWeight={500}>
+                    {teamAName} Details
+                  </Typography>
+                  <Tooltip title="Enter the team name and their expected goals (xG)">
+                    <IconButton size="small" sx={{ ml: 0.5 }}>
+                      <InfoOutlinedIcon fontSize="small" color="action" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+
+                <TextField
+                  label="Team Name"
+                  variant="outlined"
+                  fullWidth
+                  value={teamAName}
+                  onChange={(e) => setTeamAName(e.target.value)}
+                  placeholder="Home Team"
+                  sx={{ mb: 2 }}
+                />
+
+                <TextField
+                  label="Expected Goals (xG)"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  value={lambdaA}
+                  onChange={(e) => setLambdaA(e.target.value)}
+                  placeholder="e.g., 1.75"
+                  inputProps={{ step: "0.01", min: "0", max: "10" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <SportsSoccerIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Box>
-            </>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                  <Typography variant="subtitle2" fontWeight={500}>
+                    {teamBName} Details
+                  </Typography>
+                  <Tooltip title="Enter the team name and their expected goals (xG)">
+                    <IconButton size="small" sx={{ ml: 0.5 }}>
+                      <InfoOutlinedIcon fontSize="small" color="action" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+
+                <TextField
+                  label="Team Name"
+                  variant="outlined"
+                  fullWidth
+                  value={teamBName}
+                  onChange={(e) => setTeamBName(e.target.value)}
+                  placeholder="Away Team"
+                  sx={{ mb: 2 }}
+                />
+
+                <TextField
+                  label="Expected Goals (xG)"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  value={lambdaB}
+                  onChange={(e) => setLambdaB(e.target.value)}
+                  placeholder="e.g., 1.25"
+                  inputProps={{ step: "0.01", min: "0", max: "10" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <SportsSoccerIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+              {error}
+            </Alert>
           )}
+
+          <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={calculateProbabilities}
+              sx={{
+                py: 1.25,
+                fontWeight: 500,
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": {
+                  boxShadow: "none",
+                },
+              }}
+            >
+              Calculate Probabilities
+            </Button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              onClick={clearFields}
+              startIcon={<DeleteOutlineIcon />}
+              sx={{
+                py: 1.25,
+                fontWeight: 500,
+                textTransform: "none",
+              }}
+            >
+              Clear
+            </Button>
+          </Stack>
         </Box>
-      )}
+
+        {results && !error && (
+          <>
+            <Divider />
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Match Outcome Probabilities
+              </Typography>
+
+              <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12} md={7}>
+                  <TableContainer
+                    component={Paper}
+                    variant="outlined"
+                    sx={{ borderRadius: 1 }}
+                  >
+                    <Table>
+                      <TableHead>
+                        <TableRow
+                          sx={{
+                            backgroundColor:
+                              theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.05)"
+                                : "rgba(0, 0, 0, 0.02)",
+                          }}
+                        >
+                          <TableCell>Outcome</TableCell>
+                          <TableCell align="center">Probability (%)</TableCell>
+                          <TableCell align="center">Implied Odds</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell
+                            sx={{ display: "flex", alignItems: "center" }}
+                          >
+                            <EmojiEventsIcon
+                              sx={{ color: theme.palette.primary.main, mr: 1 }}
+                            />
+                            {teamAName} Wins
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={`${results.winA}%`}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                backgroundColor: theme.palette.primary.main,
+                                color: "#fff",
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            {getOddsFromProbability(results.winA)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell
+                            sx={{ display: "flex", alignItems: "center" }}
+                          >
+                            <HandshakeIcon
+                              sx={{ color: theme.palette.warning.main, mr: 1 }}
+                            />
+                            Draw
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={`${results.draw}%`}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                backgroundColor: theme.palette.warning.main,
+                                color: "#fff",
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            {getOddsFromProbability(results.draw)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell
+                            sx={{ display: "flex", alignItems: "center" }}
+                          >
+                            <EmojiEventsIcon
+                              sx={{ color: theme.palette.error.main, mr: 1 }}
+                            />
+                            {teamBName} Wins
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={`${results.winB}%`}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                backgroundColor: theme.palette.error.main,
+                                color: "#fff",
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            {getOddsFromProbability(results.winB)}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+
+                <Grid item xs={12} md={5}>
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      height: "100%",
+                      borderRadius: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight={600}
+                      gutterBottom
+                    >
+                      Most Likely Scorelines
+                    </Typography>
+
+                    <Stack spacing={1.5} sx={{ mt: 1 }}>
+                      {results.topScorelines.map((score, index) => (
+                        <Box
+                          key={index}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            p: 1,
+                            borderRadius: 1,
+                            backgroundColor:
+                              index === 0
+                                ? `${theme.palette.primary.main}15`
+                                : theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.05)"
+                                : "rgba(0, 0, 0, 0.02)",
+                          }}
+                        >
+                          <Typography variant="body1" fontWeight={600}>
+                            {score.scoreA} - {score.scoreB}
+                          </Typography>
+                          <Chip
+                            label={`${score.probability.toFixed(2)}%`}
+                            size="small"
+                            sx={{
+                              fontWeight: 500,
+                              backgroundColor:
+                                index === 0
+                                  ? theme.palette.primary.main
+                                  : theme.palette.mode === "dark"
+                                  ? "rgba(255, 255, 255, 0.1)"
+                                  : "rgba(0, 0, 0, 0.08)",
+                              color:
+                                index === 0
+                                  ? "#fff"
+                                  : theme.palette.text.primary,
+                            }}
+                          />
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+              <Box sx={{ mt: 4 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <ShowChartIcon
+                    sx={{ color: theme.palette.primary.main, mr: 1.5 }}
+                  />
+                  <Typography variant="h6" fontWeight={600}>
+                    Goal Distribution
+                  </Typography>
+                </Box>
+
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    borderRadius: 1,
+                    backgroundColor: theme.palette.background.paper,
+                  }}
+                >
+                  <Box sx={{ height: "300px", position: "relative" }}>
+                    <canvas ref={chartRef}></canvas>
+                  </Box>
+                </Paper>
+
+                <Alert severity="info" sx={{ mt: 3 }}>
+                  <Typography variant="body2">
+                    The Poisson distribution is used to model the number of
+                    goals each team will score in a match. This calculator uses
+                    expected goals (xG) as the lambda parameter for the Poisson
+                    distribution.
+                  </Typography>
+                </Alert>
+              </Box>
+            </Box>
+          </>
+        )}
+      </Paper>
     </Box>
   );
 };

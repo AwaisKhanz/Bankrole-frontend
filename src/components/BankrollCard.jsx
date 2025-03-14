@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Card,
@@ -7,208 +9,264 @@ import {
   IconButton,
   Chip,
   useTheme,
+  Menu,
+  MenuItem,
+  Divider,
+  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 
 const BankrollCard = ({ bankroll, onEdit, onDelete, mode }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
 
-  const handleDelete = async () => {
-    if (onDelete) onDelete(bankroll._id);
+  const handleClick = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEdit = (event) => {
+    event.stopPropagation();
+    onEdit(bankroll);
+    handleClose();
+  };
+
+  const handleDelete = (event) => {
+    event.stopPropagation();
+    onDelete(bankroll._id);
+    handleClose();
+  };
+
+  const handleCardClick = () => {
+    navigate(`/bankroll/${bankroll._id}`);
   };
 
   return (
-    <Box
-      onClick={() => navigate(`/bankroll/${bankroll._id}`)}
+    <Card
+      elevation={0}
+      onClick={handleCardClick}
       sx={{
-        borderRadius: "8px",
-        overflow: "hidden",
         height: "100%",
-        transform: "scale(1)",
-        transition: "transform 0.3s ease",
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 1,
+        border: `1px solid ${theme.palette.divider}`,
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
         cursor: "pointer",
         "&:hover": {
-          transform: "scale(1.02)",
+          transform: "translateY(-4px)",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 6px 12px rgba(0,0,0,0.3)"
+              : "0 6px 12px rgba(0,0,0,0.1)",
         },
+        backgroundColor: theme.palette.background.paper,
       }}
     >
-      <Card
-        sx={{
-          borderRadius: "12px",
-          height: "100%",
-          boxShadow: "none",
-          bgcolor: mode === "dark" ? theme.palette.secondary.main : "#eeeeee",
-          position: "relative",
-        }}
-      >
-        <CardContent>
-          {/* Header */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography variant="h6" fontWeight="bold">
-                {bankroll.name}
-              </Typography>
-              {/* ✅ Blue Verified Tick */}
-              {bankroll.stats.isVerified && (
+      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 }, flexGrow: 1 }}>
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 2,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography variant="subtitle1" fontWeight={600} noWrap>
+              {bankroll.name}
+            </Typography>
+            {bankroll.stats.isVerified && (
+              <Tooltip title="Verified Bankroll">
                 <VerifiedIcon
                   sx={{
-                    color: "#4CAF50",
-                    fontSize: "1.2rem",
-                    marginLeft: "6px",
+                    color: theme.palette.success.main,
+                    fontSize: "1rem",
+                    ml: 0.5,
                   }}
-                  titleAccess="Verified Bankroll"
                 />
-              )}
-            </Box>
-
-            <Box>
-              <Chip
-                label={bankroll.visibility}
-                sx={{
-                  backgroundColor:
-                    bankroll.visibility === "Public" ? "#4CAF50" : "#1649FF",
-                  color: "#fff",
-                  fontSize: "0.75rem",
-                  fontWeight: "bold",
-                  marginRight: "8px",
-                  textTransform: "uppercase",
-                }}
-              />
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the card click
-                  onEdit(bankroll);
-                }}
-                sx={{ marginRight: "8px" }}
-              >
-                <EditIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the card click
-                  handleDelete();
-                }}
-                sx={{ color: "#FF5252" }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Box>
+              </Tooltip>
+            )}
           </Box>
 
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Chip
+              label={bankroll.visibility}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: "0.7rem",
+                fontWeight: 500,
+                mr: 1,
+                backgroundColor:
+                  bankroll.visibility === "Public"
+                    ? theme.palette.success.main
+                    : theme.palette.primary.main,
+                color: "#fff",
+              }}
+            />
+
+            <IconButton
+              size="small"
+              onClick={handleClick}
+              aria-controls={open ? "bankroll-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              sx={{
+                color: theme.palette.text.secondary,
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.04)",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.08)",
+                },
+              }}
+            >
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
+
+            <Menu
+              id="bankroll-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              onClick={(e) => e.stopPropagation()}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+              PaperProps={{
+                elevation: 2,
+                sx: {
+                  minWidth: 120,
+                  borderRadius: 1,
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.15))",
+                  mt: 1,
+                },
+              }}
+            >
+              <MenuItem onClick={handleEdit} dense>
+                <EditIcon fontSize="small" sx={{ mr: 1.5 }} />
+                Edit
+              </MenuItem>
+              <Divider sx={{ my: 0.5 }} />
+              <MenuItem
+                onClick={handleDelete}
+                dense
+                sx={{ color: theme.palette.error.main }}
+              >
+                <DeleteIcon fontSize="small" sx={{ mr: 1.5 }} />
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Box>
+
+        {/* Stats */}
+        <Box sx={{ p: 2 }}>
           <Box
             sx={{
-              marginTop: "1rem",
-              paddingTop: "1rem", // Add padding above the top border
-              borderTop:
-                mode === "dark"
-                  ? "1px solid rgba(255, 255, 255, 0.2)" // Dark mode border
-                  : "1px solid rgba(0, 0, 0, 0.1)", // Light mode border
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
-              position: "relative",
+              mb: 2,
             }}
           >
             <Box sx={{ textAlign: "center", flex: 1 }}>
               <Typography
                 variant="h5"
+                fontWeight={600}
                 sx={{
                   color:
                     bankroll?.stats.roi >= 0
-                      ? mode === "dark"
-                        ? "white"
-                        : "black"
-                      : "#FF5252",
-                  fontWeight: "bold",
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
                 }}
               >
                 {bankroll?.stats.roi}%
               </Typography>
               <Typography
                 variant="caption"
+                color="text.secondary"
                 sx={{
-                  color: mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "black",
                   textTransform: "uppercase",
-                  marginTop: "4px",
+                  fontWeight: 500,
                   display: "block",
                 }}
               >
                 ROI
               </Typography>
             </Box>
-            <Box
-              sx={{
-                width: "1px",
-                height: "50px",
-                backgroundColor:
-                  mode === "dark"
-                    ? "rgba(255, 255, 255, 0.2)"
-                    : `${theme.palette.grey[300]}`,
-                alignSelf: "stretch",
-              }}
-            ></Box>
+
+            <Divider orientation="vertical" flexItem />
+
             <Box sx={{ textAlign: "center", flex: 1 }}>
               <Typography
                 variant="h5"
+                fontWeight={600}
                 sx={{
                   color:
                     bankroll?.stats.progression >= 0
-                      ? mode === "dark"
-                        ? "white"
-                        : "black"
-                      : "#FF5252",
-                  fontWeight: "bold",
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
                 }}
               >
                 {bankroll.stats?.progression}%
               </Typography>
               <Typography
                 variant="caption"
+                color="text.secondary"
                 sx={{
-                  color: mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "black",
                   textTransform: "uppercase",
-                  marginTop: "4px",
+                  fontWeight: 500,
                   display: "block",
                 }}
               >
-                PROGRESSION
+                Progression
               </Typography>
             </Box>
           </Box>
 
           {/* Pending Bets */}
-
           <Box
             sx={{
-              marginTop: "1rem",
+              mt: 2,
+              p: 1.5,
+              borderRadius: 1,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.03)",
               textAlign: "center",
-              bgcolor: theme.palette.primary.main,
-              color: mode === "dark" ? "white" : "black",
-              padding: "8px",
-              borderRadius: "4px",
             }}
           >
-            <Typography variant="body2">
+            <Typography variant="body2" fontWeight={500}>
               {bankroll?.visibility === "Public"
-                ? `${bankroll.stats.pendingBetsCount} pending bet(s)`
-                : `${bankroll.bets?.length} bet(s)`}
+                ? `${bankroll.stats.pendingBetsCount} pending bet${
+                    bankroll.stats.pendingBetsCount !== 1 ? "s" : ""
+                  }`
+                : `${bankroll.bets?.length} bet${
+                    bankroll.bets?.length !== 1 ? "s" : ""
+                  }`}
             </Typography>
           </Box>
-        </CardContent>
-      </Card>
-    </Box>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

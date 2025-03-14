@@ -1,13 +1,40 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Box, Typography, TextField, Chip, Button, Stack } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Chip,
+  Stack,
+  useTheme,
+  Paper,
+  InputAdornment,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Avatar,
+  Button,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import RemoveIcon from "@mui/icons-material/Remove";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import LooksTwoIcon from "@mui/icons-material/LooksTwo";
+import Looks3Icon from "@mui/icons-material/Looks3";
 import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import BetDetailsModal from "../components/BetDetailsModal";
-import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 
-const BettingManagement = () => {
+const BettingManagement = ({ mode }) => {
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -15,6 +42,7 @@ const BettingManagement = () => {
   const [selectedBet, setSelectedBet] = useState(null);
   const [betDetailsOpen, setBetDetailsOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("Pending");
+  const theme = useTheme();
 
   useEffect(() => {
     if (
@@ -100,143 +128,133 @@ const BettingManagement = () => {
     }));
   };
 
-  const handleApprove = async (id) => {
-    try {
-      const { data } = await api.put(`/bets/admin/approve/${id}`);
-      toast.success(data.message);
-      setBetDetailsOpen(false);
-      fetchBets();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to approve bet.");
-    }
-  };
-
-  const handleReject = async (id) => {
-    try {
-      const { data } = await api.put(`/bets/admin/reject/${id}`);
-      toast.success(data.message);
-      fetchBets();
-      setBetDetailsOpen(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to reject bet.");
-    }
-  };
-
   const handleBetRowClick = (bet) => {
     setSelectedBet(bet);
     setBetDetailsOpen(true);
   };
 
-  const columns = [
-    {
-      field: "userId",
-      headerName: "User",
-      flex: 1,
-      minWidth: 200,
-      renderCell: (params) => (
-        <Box>
-          <Typography variant="body2">
-            <strong>{params.row.userId?.username}</strong>
-          </Typography>
-          <Typography variant="caption">{params.row.userId?.email}</Typography>
-        </Box>
-      ),
-    },
-    {
-      field: "sport",
-      headerName: "Sport",
-      flex: 0.5,
-      minWidth: 150,
-    },
-    { field: "stake", headerName: "Stake", flex: 0.5, minWidth: 100 },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 0.5,
-      minWidth: 120,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          sx={{
-            backgroundColor:
-              params.value === "Won"
-                ? "#4CAF50"
-                : params.value === "Loss"
-                ? "#F44336"
-                : "#B0BEC5",
-            color: "#fff",
-          }}
-        />
-      ),
-    },
-    {
-      field: "verificationStatus",
-      headerName: "Verification Status",
-      flex: 0.5,
-      minWidth: 150,
-      renderCell: (params) => {
-        let backgroundColor = "#FFC107"; // Default: Pending
-        let label = "Pending";
-
-        if (params.row.verificationStatus === "Accepted") {
-          backgroundColor = "#4CAF50";
-          label = "Accepted";
-        } else if (params.row.verificationStatus === "Rejected") {
-          backgroundColor = "#F44336";
-          label = "Rejected";
-        }
-
+  const getRankIcon = (rank) => {
+    switch (rank) {
+      case 1:
         return (
-          <Chip
-            label={label}
+          <Avatar
             sx={{
-              backgroundColor,
+              bgcolor: "gold",
+              width: 36,
+              height: 36,
+              boxShadow: 2,
+              color: "#000",
+            }}
+          >
+            <EmojiEventsIcon />
+          </Avatar>
+        );
+      case 2:
+        return (
+          <Avatar
+            sx={{
+              bgcolor: "silver",
+              width: 36,
+              height: 36,
+              boxShadow: 1,
+              color: "#000",
+            }}
+          >
+            <LooksTwoIcon />
+          </Avatar>
+        );
+      case 3:
+        return (
+          <Avatar
+            sx={{
+              bgcolor: "#cd7f32",
+              width: 36,
+              height: 36,
+              boxShadow: 1,
               color: "#fff",
             }}
-          />
+          >
+            <Looks3Icon />
+          </Avatar>
         );
-      },
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      sortable: false,
-      flex: 1,
-      minWidth: 200,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => handleApprove(params.row._id)}
+      default:
+        return (
+          <Avatar
+            sx={{
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.08)",
+              color: theme.palette.text.primary,
+              width: 36,
+              height: 36,
+            }}
           >
-            Approve
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => handleReject(params.row._id)}
-          >
-            Reject
-          </Button>
-        </Stack>
-      ),
-    },
-  ];
+            {rank}
+          </Avatar>
+        );
+    }
+  };
+
+  const getMovementIcon = (movement) => {
+    if (movement > 0) {
+      return (
+        <ArrowUpwardIcon
+          fontSize="small"
+          sx={{ color: theme.palette.success.main }}
+        />
+      );
+    } else if (movement < 0) {
+      return (
+        <ArrowDownwardIcon
+          fontSize="small"
+          sx={{ color: theme.palette.error.main }}
+        />
+      );
+    }
+    return (
+      <RemoveIcon
+        fontSize="small"
+        sx={{ color: theme.palette.text.secondary }}
+      />
+    );
+  };
 
   return (
-    <Box>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Betting Management
-      </Typography>
+    <Box sx={{ width: "100%" }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 2, md: 3 },
+          mb: 3,
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={2}
+        >
+          <Box>
+            <Typography variant="h4" fontWeight={600} gutterBottom>
+              Betting Management
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Review and manage bet verification requests
+            </Typography>
+          </Box>
+        </Stack>
+      </Paper>
 
       <Box
         sx={{
           display: "flex",
-          alignItems: { xs: "", md: "center" },
           flexDirection: { xs: "column", md: "row" },
-          gap: "0.5rem",
-          marginBottom: "1rem",
+          gap: 2,
+          marginBottom: 3,
+          width: "100%",
         }}
       >
         <TextField
@@ -247,10 +265,18 @@ const BettingManagement = () => {
             setSearch(e.target.value);
             handleSearch(e.target.value);
           }}
+          fullWidth
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+          }}
           sx={{ flex: 1 }}
         />
-        {/** ✅ Verification Status Filter */}
-        <FormControl>
+
+        <FormControl sx={{ width: { xs: "100%", md: 200 } }}>
           <InputLabel>Verification Status</InputLabel>
           <Select
             value={statusFilter}
@@ -258,7 +284,11 @@ const BettingManagement = () => {
             onChange={(e) => {
               setStatusFilter(e.target.value);
             }}
-            defaultValue=""
+            startAdornment={
+              <InputAdornment position="start">
+                <FilterListIcon color="action" />
+              </InputAdornment>
+            }
           >
             <MenuItem value="">All</MenuItem>
             <MenuItem value="Pending">Pending</MenuItem>
@@ -268,42 +298,285 @@ const BettingManagement = () => {
         </FormControl>
       </Box>
 
-      <Box
+      <Paper
+        elevation={0}
         sx={{
           width: "100%",
-          overflowX: "auto",
+          overflow: "hidden",
+          borderRadius: 1,
+          border: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <DataGrid
-          rows={bets}
-          columns={columns}
-          pagination
-          pageSize={pagination.pageSize}
-          getRowId={(row) => row._id}
-          pageSizeOptions={[10, 50, 100]}
-          rowCount={pagination.total}
-          page={pagination.page}
-          loading={loading}
-          paginationMode="server"
-          paginationModel={{
-            page: pagination.page,
-            pageSize: pagination.pageSize,
-          }}
-          getRowSpacing={(params) => ({
-            top: 10,
-            bottom: 10,
-          })}
-          onPaginationModelChange={handlePaginationModelChange}
-          disableSelectionOnClick
-          onRowClick={(params) => handleBetRowClick(params.row)}
-        />
-      </Box>
+        {bets.map((bet, index) => (
+          <Box
+            key={bet._id}
+            onClick={() => handleBetRowClick(bet)}
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "flex-start", sm: "center" },
+              p: { xs: 2, md: 3 },
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.02)",
+              },
+              backgroundColor:
+                selectedBet?._id === bet._id
+                  ? theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.1)"
+                    : "rgba(0, 0, 0, 0.04)"
+                  : "transparent",
+            }}
+          >
+            {/* Mobile view - Top section with Rank and Sport */}
+            <Box
+              sx={{
+                display: { xs: "flex", sm: "none" },
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1.5,
+              }}
+            >
+              {/* Rank and movement */}
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                {getRankIcon(index + 1)}
+                <Box sx={{ ml: 1 }}>{getMovementIcon(bet.rankChange)}</Box>
+              </Box>
+
+              {/* Sport chip - visible only on mobile */}
+              <Chip
+                label={bet.sport}
+                size="small"
+                icon={<SportsSoccerIcon />}
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  color: "#fff",
+                  "& .MuiChip-icon": {
+                    color: "#fff",
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Desktop view - Rank on left */}
+            <Box
+              sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center" }}
+            >
+              {getRankIcon(index + 1)}
+              <Box sx={{ ml: 1 }}>{getMovementIcon(bet.rankChange)}</Box>
+            </Box>
+
+            {/* Middle section - User info and bet details */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "flex-start", sm: "center" },
+                width: "100%",
+                gap: { xs: 1.5, sm: 2 },
+                ml: { sm: 2 },
+                flex: 1,
+              }}
+            >
+              {/* Sport chip - visible only on desktop */}
+              <Box
+                sx={{
+                  display: { xs: "none", sm: "flex" },
+                  alignItems: "center",
+                  mr: 2,
+                }}
+              >
+                <Chip
+                  label={bet.sport}
+                  size="small"
+                  icon={<SportsSoccerIcon />}
+                  sx={{
+                    backgroundColor: theme.palette.primary.main,
+                    color: "#fff",
+                    "& .MuiChip-icon": {
+                      color: "#fff",
+                    },
+                  }}
+                />
+              </Box>
+
+              {/* User info */}
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  {bet.userId?.username}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {bet.userId?.email}
+                </Typography>
+              </Box>
+
+              {/* Bet details */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  alignItems: { xs: "flex-start", sm: "center" },
+                  gap: { xs: 1, sm: 2 },
+                  ml: { sm: "auto" },
+                  width: { xs: "100%", sm: "auto" },
+                }}
+              >
+                <Typography variant="body2" fontWeight={500}>
+                  €{bet.stake}
+                </Typography>
+
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    flexWrap: "wrap",
+                    gap: 1,
+                  }}
+                >
+                  <Chip
+                    label={bet.status}
+                    size="small"
+                    sx={{
+                      backgroundColor:
+                        bet.status === "Won"
+                          ? theme.palette.success.main
+                          : bet.status === "Loss"
+                          ? theme.palette.error.main
+                          : theme.palette.grey[500],
+                      color: "#fff",
+                    }}
+                  />
+
+                  <Chip
+                    label={bet.verificationStatus}
+                    size="small"
+                    icon={
+                      bet.verificationStatus === "Accepted" ? (
+                        <CheckCircleIcon fontSize="small" />
+                      ) : bet.verificationStatus === "Rejected" ? (
+                        <CancelIcon fontSize="small" />
+                      ) : null
+                    }
+                    sx={{
+                      backgroundColor:
+                        bet.verificationStatus === "Accepted"
+                          ? theme.palette.success.main
+                          : bet.verificationStatus === "Rejected"
+                          ? theme.palette.error.main
+                          : theme.palette.warning.main,
+                      color: "#fff",
+                      "& .MuiChip-icon": {
+                        color: "#fff",
+                      },
+                    }}
+                  />
+                </Stack>
+              </Box>
+            </Box>
+          </Box>
+        ))}
+
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress />
+          </Box>
+        )}
+
+        {!loading && bets.length === 0 && (
+          <Box sx={{ textAlign: "center", py: 4 }}>
+            <Typography variant="body2" color="text.secondary">
+              No bets found
+            </Typography>
+          </Box>
+        )}
+
+        {/* Pagination Controls */}
+        {!loading && bets.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+              borderTop: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Showing {bets.length} of {pagination.total} bets
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={pagination.page === 0}
+                onClick={() =>
+                  handlePaginationModelChange({
+                    page: pagination.page - 1,
+                    pageSize: pagination.pageSize,
+                  })
+                }
+                sx={{ minWidth: 100, textTransform: "none" }}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={
+                  (pagination.page + 1) * pagination.pageSize >=
+                  pagination.total
+                }
+                onClick={() =>
+                  handlePaginationModelChange({
+                    page: pagination.page + 1,
+                    pageSize: pagination.pageSize,
+                  })
+                }
+                sx={{ minWidth: 100, textTransform: "none" }}
+              >
+                Next
+              </Button>
+            </Box>
+          </Box>
+        )}
+      </Paper>
+
       <BetDetailsModal
         open={betDetailsOpen}
         onClose={() => setBetDetailsOpen(false)}
         bet={selectedBet}
-        onApprove={handleApprove}
-        onReject={handleReject}
+        onApprove={(id) => {
+          try {
+            api.put(`/bets/admin/approve/${id}`).then(({ data }) => {
+              toast.success(data.message);
+              setBetDetailsOpen(false);
+              fetchBets();
+            });
+          } catch (error) {
+            toast.error(
+              error.response?.data?.message || "Failed to approve bet."
+            );
+          }
+        }}
+        onReject={(id) => {
+          try {
+            api.put(`/bets/admin/reject/${id}`).then(({ data }) => {
+              toast.success(data.message);
+              setBetDetailsOpen(false);
+              fetchBets();
+            });
+          } catch (error) {
+            toast.error(
+              error.response?.data?.message || "Failed to reject bet."
+            );
+          }
+        }}
       />
     </Box>
   );

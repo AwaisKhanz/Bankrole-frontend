@@ -1,10 +1,24 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { TextField, Button, Typography, Box, useTheme } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  useTheme,
+  Paper,
+  InputAdornment,
+  IconButton,
+  Divider,
+  CircularProgress,
+} from "@mui/material";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 
 const loginSchema = z.object({
   email: z
@@ -19,6 +33,7 @@ const loginSchema = z.object({
 
 const Login = ({ mode }) => {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -27,6 +42,7 @@ const Login = ({ mode }) => {
     resolver: zodResolver(loginSchema),
   });
   const { loginAction } = useAuth();
+  const theme = useTheme();
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -34,7 +50,9 @@ const Login = ({ mode }) => {
     setLoading(false);
   };
 
-  const theme = useTheme();
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <Box
@@ -42,113 +60,184 @@ const Login = ({ mode }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
         minHeight: "100vh",
-        padding: "1rem",
-        background: theme.palette.primary.main,
-        color: mode === "dark" ? "white" : "black",
+        padding: { xs: "1rem", sm: "2rem" },
+        backgroundColor: theme.palette.background.default,
+        backgroundImage:
+          mode === "dark"
+            ? "linear-gradient(rgba(0, 0, 0, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.2) 1px, transparent 1px)"
+            : "linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
       }}
     >
-      <Box
+      <Paper
+        elevation={4}
         sx={{
-          maxWidth: "550px",
+          maxWidth: "450px",
           width: "100%",
-          padding: "2rem",
-          borderRadius: "12px",
-          backgroundColor: theme.palette.tertiary.main,
-          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-          backdropFilter: "blur(8px)",
+          overflow: "hidden",
+          borderRadius: "8px",
+          backgroundColor: theme.palette.background.paper,
+          transition: "transform 0.3s ease-in-out",
+          "&:hover": {
+            transform: "translateY(-5px)",
+          },
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-          <img
-            src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
-            style={{
-              width: "200px",
-              height: "60px",
-              objectFit: "cover",
-            }}
-          />
-        </Box>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          textAlign="center"
-          gutterBottom
-        >
-          Login
-        </Typography>
-        <Typography
-          variant="body2"
-          textAlign="center"
-          gutterBottom
-          sx={{ marginBottom: "1rem" }}
-        >
-          Login to manage your bankroll and track your bets.
-        </Typography>
-
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
-          style={{ marginTop: "2rem" }}
-        >
-          <TextField
-            {...register("email")}
-            label="Email"
-            variant="outlined"
-            fullWidth
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
-          <TextField
-            {...register("password")}
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
-          <Typography variant="body2" className=" flex justify-end">
-            <Link
-              to="/forgot-password"
-              className="hover:text-blue-600 hover:underline"
-            >
-              Forgot your password?
-            </Link>
-          </Typography>
-          <Button
-            type="submit"
-            variant="contained"
-            color="secondary"
-            fullWidth
-            disabled={loading}
-            sx={{
-              marginTop: "1rem",
-              padding: "0.75rem",
-              fontWeight: "bold",
-              fontSize: "1rem",
-            }}
-          >
-            {loading ? "Loading" : "Login"}
-          </Button>
-        </form>
-
-        {/* Add Link to Sign Up */}
         <Box
           sx={{
-            marginTop: "1rem",
-            textAlign: "center",
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
           }}
         >
-          <Typography variant="body2">
-            Don’t have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:underline">
-              Sign up
-            </Link>
-          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+            <img
+              src={mode === "dark" ? "/logo_black.png" : "/logo_white.png"}
+              alt="Logo"
+              style={{
+                width: "180px",
+                height: "54px",
+                objectFit: "cover",
+              }}
+            />
+          </Box>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Typography
+              variant="h5"
+              fontWeight={500}
+              gutterBottom
+              sx={{ color: theme.palette.text.primary }}
+            >
+              Welcome Back
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              Login to manage your bankroll and track your bets
+            </Typography>
+          </Box>
+
+          <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              <TextField
+                {...register("email")}
+                label="Email"
+                variant="outlined"
+                fullWidth
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                {...register("password")}
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                variant="outlined"
+                fullWidth
+                error={!!errors.password}
+                helperText={errors.password?.message}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock fontSize="small" color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Link
+                  to="/forgot-password"
+                  style={{
+                    color: theme.palette.primary.main,
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                    "&:hover": {
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  Forgot your password?
+                </Link>
+              </Box>
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={loading}
+                sx={{
+                  mt: 1,
+                  py: 1.5,
+                  fontWeight: 500,
+                  position: "relative",
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </Box>
+          </form>
+
+          <Divider sx={{ my: 1 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              OR
+            </Typography>
+          </Divider>
+
+          <Box sx={{ textAlign: "center" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                style={{
+                  color: theme.palette.primary.main,
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                Sign up
+              </Link>
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      </Paper>
     </Box>
   );
 };
