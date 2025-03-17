@@ -310,28 +310,42 @@ const Ranking = ({ mode }) => {
       renderCell: (params) => {
         const progressionValue = Number.parseFloat(params.value);
         return (
+          <Chip
+            label={`${progressionValue}%`}
+            sx={{
+              backgroundColor:
+                progressionValue >= 0
+                  ? theme.palette.success.main
+                  : theme.palette.error.main,
+              color: "#fff",
+              fontWeight: 600,
+              "& .MuiChip-label": {
+                padding: "0 10px",
+              },
+            }}
+          />
+        );
+      },
+    },
+    {
+      field: "Details",
+      headerName: "Details",
+      flex: 0.7,
+      minWidth: 120,
+      align: "right",
+      headerAlign: "right",
+      valueGetter: (value, row) => row?.stats?.roi || "0",
+      renderCell: (params) => {
+        const progressionValue = Number.parseFloat(params.value);
+        return (
           <Box>
-            <Chip
-              label={`${progressionValue}%`}
-              sx={{
-                backgroundColor:
-                  progressionValue >= 0
-                    ? theme.palette.success.main
-                    : theme.palette.error.main,
-                color: "#fff",
-                fontWeight: 600,
-                "& .MuiChip-label": {
-                  padding: "0 10px",
-                },
-              }}
-            />
             <IconButton
               size="small"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent row click
                 setSelectedRow(params.row); // Assuming setSelectedRow is available in scope
               }}
-              sx={{ color: theme.palette.primary.main, ml: 2 }}
+              sx={{ color: theme.palette.primary.main }}
             >
               <VisibilityIcon fontSize="small" />
             </IconButton>
