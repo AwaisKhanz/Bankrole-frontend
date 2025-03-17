@@ -956,7 +956,11 @@ const BankrollView = ({ mode, isViewMode }) => {
                               alignItems: "center",
                             }}
                           >
-                            <Typography variant="subtitle2" fontWeight={500}>
+                            <Typography
+                              variant="subtitle2"
+                              fontWeight={800}
+                              sx={{ color: theme.palette.primary.main }}
+                            >
                               {monthData.month}
                             </Typography>
 

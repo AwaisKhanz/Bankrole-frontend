@@ -587,7 +587,7 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                                   </Typography>
                                 </Grid>
 
-                                {/* <Grid item xs={6}>
+                                <Grid item xs={6}>
                                   <Typography
                                     variant="body2"
                                     color="text.secondary"
@@ -609,7 +609,7 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                                   >
                                     {bankroll.stats?.roi || "0"}%
                                   </Typography>
-                                </Grid> */}
+                                </Grid>
                               </Grid>
                             </Box>
                           </CardContent>
@@ -691,7 +691,7 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                               height: "100%",
                             }}
                           >
-                            {getStatusChip(bet.verificationStatus)}
+                            {/* {getStatusChip(bet.verificationStatus)} */}
                           </Box>
                         }
                       >

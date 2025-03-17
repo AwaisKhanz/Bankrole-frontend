@@ -563,7 +563,9 @@ const UserManagement = ({ mode }) => {
                     </Typography>
                     <Typography variant="subtitle2" fontWeight={600}>
                       {user.bettings?.filter(
-                        (bet) => bet.verificationStatus === "Pending"
+                        (bet) =>
+                          bet.verificationStatus === "Pending" &&
+                          bet.bankrollVisibility === "Public"
                       )?.length || 0}
                     </Typography>
                   </Box>
@@ -634,7 +636,9 @@ const UserManagement = ({ mode }) => {
                       </Typography>
                       <Typography variant="subtitle2" fontWeight={600}>
                         {user.bettings?.filter(
-                          (bet) => bet.verificationStatus === "Pending"
+                          (bet) =>
+                            bet.verificationStatus === "Pending" &&
+                            bet.bankrollVisibility === "Public"
                         )?.length || 0}
                       </Typography>
                     </Box>

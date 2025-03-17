@@ -184,10 +184,10 @@ const Ranking = ({ mode }) => {
         return (
           <Avatar
             sx={{
-              bgcolor: "gold",
+              bgcolor: "#FFD700", // Gold
               width: 36,
               height: 36,
-              boxShadow: 2,
+              boxShadow: "0px 0px 8px rgba(255, 215, 0, 0.6)", // Gold glow
               color: "#000",
             }}
           >
@@ -198,28 +198,28 @@ const Ranking = ({ mode }) => {
         return (
           <Avatar
             sx={{
-              bgcolor: "silver",
+              bgcolor: "#C0C0C0", // Silver
               width: 36,
               height: 36,
-              boxShadow: 1,
+              boxShadow: "0px 0px 8px rgba(192, 192, 192, 0.5)", // Silver glow
               color: "#000",
             }}
           >
-            <LooksTwoIcon />
+            <EmojiEventsIcon />
           </Avatar>
         );
       case 3:
         return (
           <Avatar
             sx={{
-              bgcolor: "#cd7f32",
+              bgcolor: "#CD7F32", // Bronze
               width: 36,
               height: 36,
-              boxShadow: 1,
+              boxShadow: "0px 0px 8px rgba(205, 127, 50, 0.5)", // Bronze glow
               color: "#fff",
             }}
           >
-            <Looks3Icon />
+            <EmojiEventsIcon />
           </Avatar>
         );
       default:
@@ -299,34 +299,34 @@ const Ranking = ({ mode }) => {
         </Tooltip>
       ),
     },
-    {
-      field: "profitPercentage",
-      headerName: "Profit %",
-      flex: 0.7,
-      minWidth: 120,
-      align: "right",
-      headerAlign: "right",
-      valueGetter: (value, row) => row?.stats?.profitPercentage || "0",
-      renderCell: (params) => {
-        const progressionValue = Number.parseFloat(params.value);
-        return (
-          <Chip
-            label={`${progressionValue}%`}
-            sx={{
-              backgroundColor:
-                progressionValue >= 0
-                  ? theme.palette.success.main
-                  : theme.palette.error.main,
-              color: "#fff",
-              fontWeight: 600,
-              "& .MuiChip-label": {
-                padding: "0 10px",
-              },
-            }}
-          />
-        );
-      },
-    },
+    // {
+    //   field: "profitPercentage",
+    //   headerName: "Profit %",
+    //   flex: 0.7,
+    //   minWidth: 120,
+    //   align: "right",
+    //   headerAlign: "right",
+    //   valueGetter: (value, row) => row?.stats?.profitPercentage || "0",
+    //   renderCell: (params) => {
+    //     const progressionValue = Number.parseFloat(params.value);
+    //     return (
+    //       <Chip
+    //         label={`${progressionValue}%`}
+    //         sx={{
+    //           backgroundColor:
+    //             progressionValue >= 0
+    //               ? theme.palette.success.main
+    //               : theme.palette.error.main,
+    //           color: "#fff",
+    //           fontWeight: 600,
+    //           "& .MuiChip-label": {
+    //             padding: "0 10px",
+    //           },
+    //         }}
+    //       />
+    //     );
+    //   },
+    // },
   ];
 
   useEffect(() => {
@@ -476,6 +476,7 @@ const Ranking = ({ mode }) => {
                 }}
                 autoHeight
                 onPaginationModelChange={handlePaginationModelChange}
+                rowSelection={false}
                 getRowSpacing={() => ({
                   top: 4,
                   bottom: 4,
@@ -526,6 +527,18 @@ const Ranking = ({ mode }) => {
                       {
                         fontSize: { xs: "0.75rem", sm: "0.875rem" },
                       },
+                  },
+                  "& .MuiDataGrid-cell:focus": {
+                    outline: "none", // Remove focus outline
+                  },
+                  "& .MuiDataGrid-cell:focus-within": {
+                    outline: "none", // Remove focus outline when clicking inside
+                  },
+                  "& .MuiDataGrid-columnHeader:focus": {
+                    outline: "none", // Remove focus outline for headers
+                  },
+                  "& .MuiDataGrid-columnHeader:focus-within": {
+                    outline: "none", // Remove focus outline for headers when clicking
                   },
                 }}
                 components={{

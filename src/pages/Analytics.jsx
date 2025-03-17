@@ -855,46 +855,6 @@ const Analytics = ({ mode }) => {
               {safeSubtitle}
             </Typography>
           )}
-
-          {trend && (
-            <Box sx={{ mt: 2, display: "flex", alignItems: "center" }}>
-              <Chip
-                icon={
-                  trend === "up" ? (
-                    <TrendingUpIcon />
-                  ) : (
-                    <TrendingUpIcon sx={{ transform: "rotate(180deg)" }} />
-                  )
-                }
-                label={`${trend === "up" ? "+" : ""}${safeTrendValue}%`}
-                size="small"
-                sx={{
-                  backgroundColor:
-                    trend === "up"
-                      ? alpha(theme.palette.success.main, 0.1)
-                      : alpha(theme.palette.error.main, 0.1),
-                  color:
-                    trend === "up"
-                      ? theme.palette.success.main
-                      : theme.palette.error.main,
-                  fontWeight: 600,
-                  "& .MuiChip-icon": {
-                    color:
-                      trend === "up"
-                        ? theme.palette.success.main
-                        : theme.palette.error.main,
-                  },
-                }}
-              />
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ ml: 1 }}
-              >
-                vs. last period
-              </Typography>
-            </Box>
-          )}
         </Box>
       </Paper>
     );
@@ -1053,7 +1013,7 @@ const Analytics = ({ mode }) => {
 
       {/* Key Metrics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={4} md={4}>
           <StatCard
             title="Win Rate"
             value={`${getSafeAnalyticsData("winRate", 0).toFixed(2)}%`}
@@ -1063,7 +1023,7 @@ const Analytics = ({ mode }) => {
             trendValue={Math.abs((Math.random() * 10).toFixed(2))}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={4} md={4}>
           <StatCard
             title="Stake Consistency"
             value={`${getSafeAnalyticsData(
@@ -1080,7 +1040,7 @@ const Analytics = ({ mode }) => {
             trendValue={(Math.random() * 5).toFixed(2)}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={4} md={4}>
           <StatCard
             title="Total Played Staked"
             value={`€${getSafeAnalyticsData("totalPlayedStaked", 0).toFixed(
@@ -1090,16 +1050,6 @@ const Analytics = ({ mode }) => {
             icon={<PaidIcon fontSize="large" />}
             trend="up"
             trendValue={(Math.random() * 15).toFixed(2)}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="ROI"
-            value={`${(Math.random() * 20 - 5).toFixed(2)}%`}
-            color={theme.palette.secondary.main}
-            icon={<ShowChartIcon fontSize="large" />}
-            trend={Math.random() > 0.5 ? "up" : "down"}
-            trendValue={(Math.random() * 8).toFixed(2)}
           />
         </Grid>
       </Grid>
