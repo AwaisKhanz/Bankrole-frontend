@@ -16,6 +16,7 @@ import {
   Stack,
   CircularProgress,
   Alert,
+  alpha,
 } from "@mui/material";
 import api from "../services/api";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -216,6 +217,9 @@ const CalendarPage = ({ mode }) => {
           mb: 3,
           borderRadius: 1,
           border: `1px solid ${theme.palette.divider}`,
+          background: `linear-gradient(135deg, ${
+            theme.palette.background.paper
+          } 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
         }}
       >
         <Stack
@@ -225,15 +229,21 @@ const CalendarPage = ({ mode }) => {
           spacing={2}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <CalendarMonthIcon
-              sx={{
-                color: theme.palette.primary.main,
-                mr: 1.5,
-                fontSize: "1.75rem",
-              }}
-            />
             <Box>
-              <Typography variant="h4" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h4"
+                fontWeight={600}
+                gutterBottom
+                sx={{
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: `0 2px 4px ${alpha(
+                    theme.palette.primary.main,
+                    0.2
+                  )}`,
+                }}
+              >
                 Betting Calendar
               </Typography>
               <Typography variant="body2" color="text.secondary">

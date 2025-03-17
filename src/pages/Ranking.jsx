@@ -32,8 +32,7 @@ import {
 } from "chart.js";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import CloseIcon from "@mui/icons-material/Close";
-import LooksTwoIcon from "@mui/icons-material/LooksTwo";
-import Looks3Icon from "@mui/icons-material/Looks3";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PercentIcon from "@mui/icons-material/Percent";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
@@ -299,34 +298,46 @@ const Ranking = ({ mode }) => {
         </Tooltip>
       ),
     },
-    // {
-    //   field: "profitPercentage",
-    //   headerName: "Profit %",
-    //   flex: 0.7,
-    //   minWidth: 120,
-    //   align: "right",
-    //   headerAlign: "right",
-    //   valueGetter: (value, row) => row?.stats?.profitPercentage || "0",
-    //   renderCell: (params) => {
-    //     const progressionValue = Number.parseFloat(params.value);
-    //     return (
-    //       <Chip
-    //         label={`${progressionValue}%`}
-    //         sx={{
-    //           backgroundColor:
-    //             progressionValue >= 0
-    //               ? theme.palette.success.main
-    //               : theme.palette.error.main,
-    //           color: "#fff",
-    //           fontWeight: 600,
-    //           "& .MuiChip-label": {
-    //             padding: "0 10px",
-    //           },
-    //         }}
-    //       />
-    //     );
-    //   },
-    // },
+    {
+      field: "roi",
+      headerName: "ROI %",
+      flex: 0.7,
+      minWidth: 120,
+      align: "CENTER",
+      headerAlign: "",
+      valueGetter: (value, row) => row?.stats?.roi || "0",
+      renderCell: (params) => {
+        const progressionValue = Number.parseFloat(params.value);
+        return (
+          <Box>
+            <Chip
+              label={`${progressionValue}%`}
+              sx={{
+                backgroundColor:
+                  progressionValue >= 0
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+                color: "#fff",
+                fontWeight: 600,
+                "& .MuiChip-label": {
+                  padding: "0 10px",
+                },
+              }}
+            />
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent row click
+                setSelectedRow(params.row); // Assuming setSelectedRow is available in scope
+              }}
+              sx={{ color: theme.palette.primary.main, ml: 2 }}
+            >
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        );
+      },
+    },
   ];
 
   useEffect(() => {
@@ -470,11 +481,16 @@ const Ranking = ({ mode }) => {
                 page={pagination.page}
                 loading={loading}
                 paginationMode="server"
+                f
                 paginationModel={{
                   page: pagination.page,
                   pageSize: pagination.pageSize,
                 }}
                 autoHeight
+                disableColumnMenu
+                disableColumnFilter
+                sortingMode="server"
+                disableColumnResize
                 onPaginationModelChange={handlePaginationModelChange}
                 rowSelection={false}
                 getRowSpacing={() => ({
@@ -539,6 +555,17 @@ const Ranking = ({ mode }) => {
                   },
                   "& .MuiDataGrid-columnHeader:focus-within": {
                     outline: "none", // Remove focus outline for headers when clicking
+                  },
+                  "& .MuiDataGrid-columnHeader": {
+                    "& .MuiDataGrid-sortIcon": {
+                      display: "none", // Hide sort icon completely
+                    },
+                    "&:hover .MuiDataGrid-sortIcon": {
+                      display: "none", // Explicitly hide sort icon on hover
+                    },
+                    "& .MuiDataGrid-columnHeaderTitle": {
+                      fontWeight: 700, // Make header text bold
+                    },
                   },
                 }}
                 components={{

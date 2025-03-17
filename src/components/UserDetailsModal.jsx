@@ -691,7 +691,8 @@ const UserDetailsModal = ({ open, onClose, user }) => {
                               height: "100%",
                             }}
                           >
-                            {/* {getStatusChip(bet.verificationStatus)} */}
+                            {bet?.bankrollVisibility === "Public" &&
+                              getStatusChip(bet.verificationStatus)}
                           </Box>
                         }
                       >
