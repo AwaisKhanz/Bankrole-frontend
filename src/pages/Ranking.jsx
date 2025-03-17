@@ -19,6 +19,7 @@ import {
   Alert,
   Stack,
   Divider,
+  alpha,
 } from "@mui/material";
 import api from "../services/api"; // Replace with your actual API service
 import { useSearchParams } from "react-router-dom";
@@ -303,8 +304,8 @@ const Ranking = ({ mode }) => {
       headerName: "ROI %",
       flex: 0.7,
       minWidth: 120,
-      align: "CENTER",
-      headerAlign: "",
+      align: "right",
+      headerAlign: "right",
       valueGetter: (value, row) => row?.stats?.roi || "0",
       renderCell: (params) => {
         const progressionValue = Number.parseFloat(params.value);
@@ -383,6 +384,9 @@ const Ranking = ({ mode }) => {
           mb: 3,
           borderRadius: 1,
           border: `1px solid ${theme.palette.divider}`,
+          background: `linear-gradient(135deg, ${
+            theme.palette.background.paper
+          } 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
         }}
       >
         <Stack
@@ -400,7 +404,20 @@ const Ranking = ({ mode }) => {
               }}
             />
             <Box>
-              <Typography variant="h4" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h4"
+                fontWeight={600}
+                gutterBottom
+                sx={{
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: `0 2px 4px ${alpha(
+                    theme.palette.primary.main,
+                    0.2
+                  )}`,
+                }}
+              >
                 Bankroll Rankings
               </Typography>
               <Typography variant="body2" color="text.secondary">

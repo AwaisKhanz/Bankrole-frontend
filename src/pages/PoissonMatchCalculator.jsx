@@ -22,6 +22,7 @@ import {
   Tooltip,
   Grid,
   Chip,
+  alpha,
 } from "@mui/material";
 import Chart from "chart.js/auto";
 import CalculateIcon from "@mui/icons-material/Calculate";
@@ -341,6 +342,9 @@ const PoissonCalculator = ({ mode }) => {
           mb: 3,
           borderRadius: 1,
           border: `1px solid ${theme.palette.divider}`,
+          background: `linear-gradient(135deg, ${
+            theme.palette.background.paper
+          } 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
         }}
       >
         <Stack
@@ -358,7 +362,20 @@ const PoissonCalculator = ({ mode }) => {
               }}
             />
             <Box>
-              <Typography variant="h4" fontWeight={600} gutterBottom>
+              <Typography
+                variant="h4"
+                fontWeight={600}
+                gutterBottom
+                sx={{
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: `0 2px 4px ${alpha(
+                    theme.palette.primary.main,
+                    0.2
+                  )}`,
+                }}
+              >
                 Poisson Match Calculator
               </Typography>
               <Typography variant="body2" color="text.secondary">
