@@ -145,9 +145,11 @@ const App = ({ toggleTheme, mode }) => {
         <Route
           path="/payment"
           element={
-            <Elements stripe={stripePromise}>
-              <PaymentPage mode={mode} />
-            </Elements>
+            <ProtectedRoute>
+              <Elements stripe={stripePromise}>
+                <PaymentPage mode={mode} />
+              </Elements>
+            </ProtectedRoute>
           }
         />
       </Routes>

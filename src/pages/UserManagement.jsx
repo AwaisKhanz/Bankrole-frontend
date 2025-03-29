@@ -41,6 +41,8 @@ import { useSearchParams } from "react-router-dom";
 import api from "../services/api"; // Axios instance
 import { toast } from "react-toastify";
 import UserDetailsModal from "../components/UserDetailsModal";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 
 const UserManagement = ({ mode }) => {
   const [users, setUsers] = useState([]);
@@ -54,6 +56,17 @@ const UserManagement = ({ mode }) => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [roleFilter, setRoleFilter] = useState("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState("all");
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "user",
+  });
+
+  const [roleChangeModalOpen, setRoleChangeModalOpen] = useState(false);
+  const [userToChangeRole, setUserToChangeRole] = useState(null);
+  const [newRole, setNewRole] = useState("");
 
   const showDetailsModal = (user) => {
     setSelectedUser(user);
@@ -123,6 +136,37 @@ const UserManagement = ({ mode }) => {
       clearTimeout(timer);
       timer = setTimeout(() => func(...args), delay);
     };
+  };
+
+  const handleAddUser = async () => {
+    try {
+      const response = await api.post("/auth/admin/register", newUser);
+      toast.success("User added successfully!");
+      setAddUserModalOpen(false);
+      setNewUser({ username: "", email: "", password: "", role: "user" });
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add user.");
+    }
+  };
+
+  // Add handleRoleChange function
+  const handleRoleChange = async () => {
+    if (!userToChangeRole || !newRole) return;
+    try {
+      await api.put(`/auth/users/${userToChangeRole._id}/role`, {
+        role: newRole,
+      });
+      toast.success("User role updated successfully!");
+      setRoleChangeModalOpen(false);
+      setUserToChangeRole(null);
+      setNewRole("");
+      fetchUsers(); // Refresh user list
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update user role."
+      );
+    }
   };
 
   // Handle search
@@ -299,11 +343,11 @@ const UserManagement = ({ mode }) => {
               View and manage all users on the platform
             </Typography>
           </Box>
-
           <Button
             variant="contained"
             color="primary"
             startIcon={<PersonAddIcon />}
+            onClick={() => setAddUserModalOpen(true)} // Add onClick handler
             sx={{
               px: 2,
               py: 1,
@@ -320,7 +364,6 @@ const UserManagement = ({ mode }) => {
           </Button>
         </Stack>
       </Paper>
-
       {/* Search and Filter Bar */}
       <Box
         sx={{
@@ -397,7 +440,6 @@ const UserManagement = ({ mode }) => {
           </FormControl>
         </Box>
       </Box>
-
       {/* User List */}
       <Paper
         elevation={0}
@@ -599,6 +641,24 @@ const UserManagement = ({ mode }) => {
                 >
                   View Details
                 </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUserToChangeRole(user);
+                    setNewRole(user.role); // Pre-fill with current role
+                    setRoleChangeModalOpen(true);
+                  }}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 500,
+                    flex: 1,
+                  }}
+                >
+                  Change Role
+                </Button>
               </Box>
 
               {/* Desktop layout - Stats and Actions */}
@@ -666,6 +726,23 @@ const UserManagement = ({ mode }) => {
                       }}
                     >
                       Details
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUserToChangeRole(user);
+                        setNewRole(user.role); // Pre-fill with current role
+                        setRoleChangeModalOpen(true);
+                      }}
+                      sx={{
+                        textTransform: "none",
+                        fontWeight: 500,
+                      }}
+                    >
+                      Change Role
                     </Button>
                     <IconButton
                       size="small"
@@ -748,14 +825,12 @@ const UserManagement = ({ mode }) => {
           </Box>
         )}
       </Paper>
-
       {/* User Details Modal */}
       <UserDetailsModal
         open={detailsModalOpen}
         onClose={() => setDetailsModalOpen(false)}
         user={selectedUser}
       />
-
       {/* Confirm Delete Dialog */}
       <Dialog
         open={confirmDeleteOpen}
@@ -814,6 +889,184 @@ const UserManagement = ({ mode }) => {
             }}
           >
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      // Add Add User Modal
+      <Dialog
+        open={addUserModalOpen}
+        onClose={() => setAddUserModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 1,
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            p: 3,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" fontWeight={600}>
+            Add New User
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => setAddUserModalOpen(false)}
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, pt: 0 }}>
+          <Stack spacing={2}>
+            <TextField
+              label="Username"
+              value={newUser.username}
+              onChange={(e) =>
+                setNewUser({ ...newUser, username: e.target.value })
+              }
+              fullWidth
+              variant="outlined"
+              required
+            />
+            <TextField
+              label="Email"
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
+              fullWidth
+              variant="outlined"
+              type="email"
+              required
+            />
+            <TextField
+              label="Password"
+              value={newUser.password}
+              onChange={(e) =>
+                setNewUser({ ...newUser, password: e.target.value })
+              }
+              fullWidth
+              variant="outlined"
+              type="password"
+              required
+            />
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={newUser.role}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, role: e.target.value })
+                }
+                label="Role"
+              >
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button
+            onClick={() => setAddUserModalOpen(false)}
+            variant="outlined"
+            sx={{ fontWeight: 500, textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddUser}
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            disabled={!newUser.username || !newUser.email || !newUser.password}
+            sx={{
+              fontWeight: 500,
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { boxShadow: "none" },
+            }}
+          >
+            Add User
+          </Button>
+        </DialogActions>
+      </Dialog>
+      // Add Role Change Modal after Add User Modal
+      <Dialog
+        open={roleChangeModalOpen}
+        onClose={() => setRoleChangeModalOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 1,
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            p: 3,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" fontWeight={600}>
+            Change User Role
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => setRoleChangeModalOpen(false)}
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, pt: 0 }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Changing role for <strong>{userToChangeRole?.username}</strong>
+          </Typography>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel>Role</InputLabel>
+            <Select
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value)}
+              label="Role"
+            >
+              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button
+            onClick={() => setRoleChangeModalOpen(false)}
+            variant="outlined"
+            sx={{ fontWeight: 500, textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleRoleChange}
+            variant="contained"
+            color="primary"
+            disabled={!newRole || newRole === userToChangeRole?.role}
+            sx={{
+              fontWeight: 500,
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": { boxShadow: "none" },
+            }}
+          >
+            Update Role
           </Button>
         </DialogActions>
       </Dialog>
